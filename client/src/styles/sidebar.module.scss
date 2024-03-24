@@ -1,0 +1,86 @@
+@import "./variables.scss";
+
+.wrapper {
+    background-color: $sidebar-bg-color;
+    height: 100vh;
+    padding: 16px 8px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .itemContainer {
+        width: 100%;
+        
+        .item {
+            position: relative;
+            
+            &:hover .link {
+                background-color: $sidebar-item-bg-hover-color;
+            }
+
+
+            &.selected .link {
+                background-color: $sidebar-item-bg-hover-color;
+            }
+
+            .btnContainer {
+                position: absolute;
+                top: 50%;
+                right: 0;
+                transform: translateY(-50%);
+                visibility: hidden;
+                background-color: $sidebar-item-bg-hover-color;
+                padding: 8px;
+                border-radius: 0 12px 12px 0;
+                box-shadow: -20px 0px 6px 0px rgba(31,30,30,0.8);
+
+                .btn {
+                    color: $sidebar-text-color;
+                    font-size: 16px;
+                    cursor: pointer;
+
+                    &:hover {
+                        opacity: 0.7;
+                    }
+                }
+
+                
+            }
+
+            &:hover .btnContainer {
+                visibility: visible;
+                
+            }
+
+            &.btnNewChat {
+                margin-bottom: 16px;
+            }
+
+            &.btnNewChat .btnContainer {
+                visibility: visible;
+                background-color: transparent;
+                box-shadow: none;
+            }
+
+            &.btnNewChat .link {
+                font-weight: 500;
+            }
+        }    
+    }
+}
+
+.btnMoreWrapper {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid $usermenu-border-color;
+    border-radius: 8px;
+    background-color: $usermenu-bg-color;
+    padding: 4px;
+
+    .btn {
+        display: block;
+        width: 200px;
+        text-align: left;
+    }
+}

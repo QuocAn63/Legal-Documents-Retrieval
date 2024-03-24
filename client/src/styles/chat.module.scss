@@ -1,0 +1,40 @@
+@import "./variables";
+
+.wrapper {
+    width: 100%;
+    height: calc(100vh - 20px);
+    padding: 0 -20px;
+
+    .contentGroup {
+        width: 40vw;
+        height: calc(100vh - 20px);
+    }
+
+    .messageContainer {flex-grow: 1;
+        overflow-y: scroll;
+    }
+
+    .textBox {
+        background-color: transparent;
+        border: 1px solid $sidebar-item-bg-selected-color;
+        width: 50vw;
+        outline: none;
+        color: $text-default-color;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: none;
+        width: 100%;
+        font-size: 16px;
+        
+        &:focus {
+            border-color: $usermenu-hover-color;
+            outline: none;
+            box-shadow: none;
+        }
+
+        &::placeholder {
+            color: $sidebar-item-title-color;
+            font-size: 16px;
+        }
+    }
+}

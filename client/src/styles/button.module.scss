@@ -1,0 +1,55 @@
+@import './_variables.scss';
+
+.wrapper {
+    background-color: transparent;
+    height: 40px;
+    outline: none;
+    border: none;
+    color: $text-default-color !important;
+    min-width: 80px;
+    box-shadow: none;
+
+    &.selected {
+        background-color: $usermenu-hover-color;
+    }
+    
+    &.outlined {
+        border: 1px solid $usermenu-border-color;
+    }
+
+    &.important {
+        color: $error-color !important;
+        border-color: $error-color !important;
+    }
+    
+    &.important.background {
+        color: $text-default-color !important;
+        background-color: $important-color !important;
+        border-color: $important-color !important;
+    }
+
+    &.important.background {
+        color: $text-default-color !important;
+        background-color: $important-color !important;
+        border-color: $important-color !important;
+    }
+
+    &.primary.background {
+        color: $text-default-color !important;
+        background-color: $primary-color !important;
+        border-color: $primary-color !important;
+    }
+    
+    &:hover {
+        background-color: $usermenu-hover-color;
+        box-shadow: none;  
+        &.outlined {
+            border-color: $usermenu-border-color !important;
+        }
+
+        &.important.background {
+            background: $important-hover-color !important;
+            border-color: $important-hover-color !important;
+        }
+    }
+}

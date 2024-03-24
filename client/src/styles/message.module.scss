@@ -1,0 +1,88 @@
+@import "./variables";
+
+.wrapper {
+}
+
+.messageItem {
+    width: 100%;
+    position: relative;
+
+    .avatarHolder {
+        border: 1px solid $sidebar-item-bg-selected-color;
+        width: 28px;
+        height: 28px;
+        border-radius: 100%;
+    }
+
+    .pane {
+        width: 100%;
+        margin-bottom: 44px;
+
+        .username {
+            color: $text-default-color;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .content {
+            color: $text-default-color;
+            font-size: 15px;
+            line-height: 28px;
+        }
+    }
+
+    .btnContainer {
+        position: absolute;
+        bottom: 8px;
+        left: 36px;
+        visibility: hidden;
+        
+        .btn {
+            color: $sidebar-item-title-color;
+    
+            &:hover {
+                color: $text-default-color !important;
+            }
+
+            &.disabled {
+                user-select: none;
+                cursor: default;
+            }
+        }
+    }
+
+    &:hover .btnContainer {
+        visibility: visible;
+    }
+}
+
+.reportModal {
+    .title {
+      color: $text-default-color;  
+    }
+    
+    .btnClose {
+        color: $text-default-color;  
+    }
+
+    .reasonsSection {
+        padding: 16px 0;
+    }
+
+    .textBox {
+        margin-top: 12px;
+        background-color: transparent;
+        border-color: $usermenu-border-color;
+        height: 40px;
+        outline: none;
+        color: $text-default-color;
+        
+        &::placeholder {
+            color: $sidebar-item-title-color;
+        }
+
+        &:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    }
+}

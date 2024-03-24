@@ -1,0 +1,21 @@
+@import './_variables.scss';
+
+.wrapper {
+    display: block;
+    padding: 12px;
+    color: $sidebar-text-color;
+    text-decoration: none;
+    border-radius: 12px;
+    // text-overflow
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:hover {
+        color: $sidebar-text-color;
+    }
+
+    &:hover {
+        background-color: $sidebar-item-bg-hover-color;
+    }
+}

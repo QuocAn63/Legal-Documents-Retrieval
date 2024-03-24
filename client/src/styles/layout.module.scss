@@ -1,0 +1,7 @@
+@import "./variables";
+
+.wrapper {
+    background-color: $sidebar-item-bg-hover-color;
+    padding: 20px;
+    height: 100vh;
+}

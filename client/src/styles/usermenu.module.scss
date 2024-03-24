@@ -1,0 +1,84 @@
+@import './variables';
+
+.wrapper {
+    padding: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+
+    .avatarHolder {
+        border-radius: 100%;
+    }
+
+    .username {
+        color: $text-default-color;
+        font-weight: 500;
+    }
+
+    &:hover {
+        background-color: $sidebar-item-bg-hover-color;
+    }
+
+}
+
+.selectionsContainer {
+    background-color: $usermenu-bg-color;
+    border: 1px solid $sidebar-item-bg-hover-color;
+    border-radius: 8px;
+    padding: 8px;
+    width: 200px;
+
+    .btn {
+        text-align: left;
+    }
+}
+
+.modalWrapper {
+    padding: 16px 0;
+    
+    & > .title {
+        color: $text-default-color;
+        padding-bottom: 12px;
+    }
+
+    .btnContainer {
+        padding-left: 40px;
+        .settingItem {
+            width: 100%;
+
+            .title {
+                color: $text-default-color;
+            }
+    
+            .btn {
+                color: $text-default-color;
+                background-color: transparent;
+                border-color: $usermenu-border-color;
+            
+                &:hover {
+                    background-color: $usermenu-hover-color;
+                    color: $text-default-color;
+                    border-color: $usermenu-border-color;
+                }
+
+                &.danger {
+                    background-color: $error-color;
+                    border-color: $error-color;
+                }
+            }
+        }
+
+    }
+
+}
+
+.horizontal {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background-color: #444444;
+    margin: 8px 0;
+}
+
+.btnClose {
+    color: $text-default-color !important;
+}
