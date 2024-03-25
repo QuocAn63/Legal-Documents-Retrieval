@@ -6,6 +6,8 @@ import ForgotPassword from "../pages/forgotPwd";
 import Chat from "../pages/chat";
 import ResetPassword from "../pages/resetPws";
 
+// puiblic (login/register)
+// private routes
 const router = createBrowserRouter([
   {
     path: "",
