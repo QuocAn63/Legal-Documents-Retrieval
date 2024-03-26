@@ -1,4 +1,4 @@
-import { IConversation, IConversationWithMessages } from "./chat";
+import { IConversation, IConversation1 } from "./chat";
 
 export interface ISharedConversation {
   sharedID: string;
@@ -21,5 +21,5 @@ export interface ISharedConversation2 {
   sharedCode: string;
   userID: string;
   createdAt: string;
-  conversation: IConversationWithMessages;
+  conversation: IConversation1;
 }

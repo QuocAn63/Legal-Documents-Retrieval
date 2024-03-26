@@ -9,31 +9,29 @@ GO
 
 -- sp_users
 
-ALTER PROCEDURE stpr_users
+ALTER PROCEDURE sp_users
 	(
-		@Activity VARCHAR(20),
-		@ReturnMsg NVARCHAR(1000) = NULL OUT,
-		@userID INT = NULL,
-		@username VARCHAR(25) = NULL,
-		@password VARCHAR(100) = NULL,
-		@email VARCHAR(50) = NULL,
-		@googleID VARCHAR(50) = NULL,
-		@facebookID VARCHAR(50) = NULL,
-		@Order NVARCHAR(100) = NULL,
-		@Where NVARCHAR(1000) = NULL
+		@Activity		VARCHAR(20),
+		@ReturnMsg		NVARCHAR(1000) = NULL OUT,
+		@userID			VARCHAR(20) = NULL,
+		@username		VARCHAR(25) = NULL,
+		@password		VARCHAR(100) = NULL,
+		@email			VARCHAR(50) = NULL,
+		@googleID		VARCHAR(50) = NULL,
+		@isBOT			BIT = NULL,
+		@isADMIN		BIT = NULL
 	)
 	AS
-		DECLARE @sql NVARCHAR(1000) = '';
-
 		IF @Activity = 'GetDataAll'
 			BEGIN
-				SET @sql = 'SELECT userID, username, email, FORMAT(createdAt, ''dd/mm/yyy hh:mm'') createdAt
-				,FORMAT(updatedAt, ''dd/mm/yyy hh:mm'') updatedAt
-				,FORMAT(deletedAt, ''dd/mm/yyy hh:mm'') deletedAt
+				SELECT userID, username, email, googleID, isBOT, isADMIN
 				FROM tbl_users
-				WHERE 1=1 ' + ISNULL(@Where, '') + ' ORDER BY createdAt DESC'
-
-				EXECUTE(@sql)
+				WHERE 1 = 1 
+				AND (@userID IS NULL OR @userID = '' OR userID = @userID)
+				AND (@username IS NULL OR @username = '' OR username = @username)
+				AND (@email IS NULL OR @email = '' OR email = @email)
+				AND (@isBOT IS NULL OR @isBOT = '' OR isBOT = @isBOT)
+				AND (@isADMIN IS NULL OR @isADMIN = '' OR isADMIN = @isADMIN)
 			END
 		ELSE  
 		IF @Activity = 'GetDataByID'
@@ -60,14 +58,14 @@ ALTER PROCEDURE stpr_users
 					END
 
 				INSERT INTO tbl_users
-				(username, [password], email)
+				(userID, username, [password], email, googleID, isBOT, isADMIN)
 				VALUES
-				(@username, @password, @email)
+				(@userID, @username, @password, @email, @googleID, @isBOT, @isADMIN)
 			END
 		ELSE
 		IF @Activity = 'Update'
 			BEGIN
-				IF EXISTS (SELECT TOP 1 1 FROM tbl_users WHERE email = @email)
+				IF EXISTS (SELECT TOP 1 1 FROM tbl_users WHERE email = @email AND username <> @username)
 					BEGIN
 						SET @ReturnMsg = dbo.getSysMsg('USR_EML_CFL')
 						RETURN @ReturnMsg;

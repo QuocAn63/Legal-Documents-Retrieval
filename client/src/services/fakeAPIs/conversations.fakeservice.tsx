@@ -1,10 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { IResponseData } from "../../interfaces/request";
-import {
-  IMessage,
-  IConversation,
-  IConversationWithMessages,
-} from "../../interfaces/chat";
+import { IMessage, IConversation, IConversation1 } from "../../interfaces/chat";
 
 const conversationsData: IConversation[] = [
   {
@@ -106,7 +102,7 @@ export const messageData: IMessage = {
   isBOT: faker.number.int({ min: 0, max: 1 }),
 };
 
-export const conversationData: IConversationWithMessages[] = [
+export const conversationData: IConversation1[] = [
   {
     conversationID: faker.string.uuid(),
     title: faker.lorem.paragraph(),

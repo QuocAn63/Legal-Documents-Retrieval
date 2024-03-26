@@ -1,3 +1,9 @@
+BEGIN
+CREATE DATABASE [chatbot];
+END
+
+GO
+
 USE [chatbot];
 
 GO
@@ -5,49 +11,50 @@ GO
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_users')
 	BEGIN
 		CREATE TABLE tbl_users (
-			userID INT not null IDENTITY (1,1),
-			username VARCHAR(25) not null,
-			[password] VARCHAR(100) not null,
-			email VARCHAR(50),
-			googleID VARCHAR(50),
-			facebookID VARCHAR(50),
-			createdAt DATETIME DEFAULT GETDATE(),
-			updatedAt DATETIME,
-			deletedAt DATETIME
+			userID			VARCHAR(20) NOT NULL,
+			username		VARCHAR(25) NOT NULL,
+			[password]		VARCHAR(100) NOT NULL,
+			email			VARCHAR(50),
+			googleID		VARCHAR(50),
+			createdAt		DATETIME DEFAULT GETDATE(),
+			updatedAt		DATETIME,
+			deletedAt		DATETIME,
+			isBOT			BIT,
+			isADMIN			BIT
 		);
 
 		ALTER TABLE tbl_users
 		ADD CONSTRAINT users_pk PRIMARY KEY(userID);
 	END;
-
+		
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_conversations')
 	BEGIN
 	CREATE TABLE tbl_conversations (
-		conversationID INT IDENTITY (1,1),
-		userID INT NOT NULL,
-		title NVARCHAR(50),
-		createdAt DATETIME DEFAULT GETDATE(),
-		updatedAt DATETIME,
-		isArchived BIT DEFAULT 0
+		conversationID		VARCHAR(20) NOT NULL,
+		userID				VARCHAR(20) NOT NULL,
+		title				NVARCHAR(50),
+		createdAt			DATETIME DEFAULT GETDATE(),
+		updatedAt			DATETIME,
+		isArchived			BIT DEFAULT 0
 	);
-
+		
 	ALTER TABLE tbl_conversations
 	ADD CONSTRAINT conversations_pk PRIMARY KEY(conversationID);
 
 	ALTER TABLE tbl_conversations
-	ADD CONSTRAINT conversations_userID_fk FOREIGN KEY(conversationID) REFERENCES tbl_users(userID);
+	ADD CONSTRAINT conversations_userID_fk FOREIGN KEY(userID) REFERENCES tbl_users(userID);
 	END;
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_messages')
 	BEGIN
 	CREATE TABLE tbl_messages(
-		messageID INT IDENTITY (1,1),
-		userID INT NOT NULL,
-		conversationID INT NOT NULL,
-		content NVARCHAR,
-		createdAt DATETIME DEFAULT GETDATE(),
-		updatedAt DATETIME,
-		isBOT bit
+		messageID			VARCHAR(20) NOT NULL,
+		userID				VARCHAR(20) NOT NULL,
+		conversationID		VARCHAR(20) NOT NULL,
+		content				NVARCHAR(MAX),
+		createdAt			DATETIME DEFAULT GETDATE(),
+		updatedAt			DATETIME,
+		isBOT				BIT
 	)
 
 	ALTER TABLE tbl_messages
@@ -58,15 +65,17 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_m
 
 	ALTER TABLE tbl_messages
 	ADD CONSTRAINT messages_conversationID FOREIGN KEY(conversationID) REFERENCES tbl_conversations(conversationID)
-	END;
+	END
 
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_sharedConversations')
 	BEGIN
 	CREATE TABLE tbl_sharedConversations(
-		sharedConversationID INT IDENTITY (1,1),
-		userID INT NOT NULL,
-		conversationID INT NOT NULL,
-		createdAt DATETIME DEFAULT GETDATE()
+		sharedConversationID	VARCHAR(20) NOT NULL,
+		userID					VARCHAR(20) NOT NULL,
+		conversationID			VARCHAR(20) NOT NULL,
+		sharedCode				VARCHAR(20),
+		createdAt DATETIME DEFAULT GETDATE(),
+		updatedAt DATETIME
 	)
 
 	ALTER TABLE tbl_sharedConversations
@@ -83,10 +92,7 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_s
 	BEGIN
 		CREATE TABLE tbl_systemMessages(
 			sysMsgID VARCHAR(20) NOT NULL,
-			content NVARCHAR(100) NOT NULL,
-			createdAt DATETIME DEFAULT GETDATE(),
-			updatedAt DATETIME,
-			deletedAt DATETIME,
+			content NVARCHAR(100) NOT NULL	
 		);
 
 		ALTER TABLE tbl_systemMessages
@@ -96,26 +102,44 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_s
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_botConfigs')
 	BEGIN
 		CREATE TABLE tbl_botConfigs(
-			userID INT NOT NULL,
-			promptContent NVARCHAR(500) NOT NULL,
-			createdAt DATETIME DEFAULT GETDATE(),
-			updatedAt DATETIME
+			configID		VARCHAR(20) NOT NULL,
+			userID			VARCHAR(20) NOT NULL,
+			promptContent	NVARCHAR(MAX) NOT NULL,
+			createdAt		DATETIME DEFAULT GETDATE(),
+			updatedAt		DATETIME
 		);
 
 		ALTER TABLE tbl_botConfigs
-		ADD CONSTRAINT botConfigs_pk PRIMARY KEY(userID)
+		ADD CONSTRAINT botConfigs_pk PRIMARY KEY(configID)
 	END
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_documents')
 	BEGIN
 		CREATE TABLE tbl_documents(
-			documentID INT NOT NULL,
-			[label] NVARCHAR(500) NOT NULL,
-			[path] VARCHAR(200) NOT NULL,
+			documentID		VARCHAR(20) NOT NULL,
+			[label]			NVARCHAR(500) NOT NULL,
+			[path]			VARCHAR(200) NOT NULL,
 			createdAt DATETIME DEFAULT GETDATE(),
 			updatedAt DATETIME
 		);
 
 		ALTER TABLE tbl_documents
 		ADD CONSTRAINT documents_pk PRIMARY KEY(documentID)
+	END
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_documents_config')
+	BEGIN
+		CREATE TABLE tbl_documents_config(
+			documentID		VARCHAR(20) NOT NULL,
+			configID		VARCHAR(20) NOT NULL
+		);
+
+		ALTER TABLE tbl_documents_config
+		ADD CONSTRAINT documents_config_pk PRIMARY KEY(documentID, configID)
+		
+		ALTER TABLE tbl_documents_config
+		ADD CONSTRAINT documents_config_documentID_fk FOREIGN KEY(documentID) REFERENCES tbl_documents(documentID)
+		
+		ALTER TABLE tbl_documents_config
+		ADD CONSTRAINT documents_config_configID_fk FOREIGN KEY(configID) REFERENCES tbl_botConfigs(configID)
 	END

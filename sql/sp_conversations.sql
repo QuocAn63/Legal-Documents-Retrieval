@@ -7,37 +7,35 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
--- sp_users
+-- sp_conversations
 
-CREATE PROCEDURE stpr_conversations
+CREATE PROCEDURE sp_conversations
 	(
-		@Activity VARCHAR(20),
-		@ReturnMsg NVARCHAR(1000) = NULL OUT,
-		@conversationID INT = NULL,
-		@userID INT = NULL,
-		@title NVARCHAR(50) = NULL,
-		@isArchived BIT = 0,
-		@Where NVARCHAR(1000) = NULL
+		@Activity		VARCHAR(20),
+		@ReturnMsg		NVARCHAR(1000) = NULL OUT,
+		@conversationID VARCHAR(20) = NULL,
+		@userID			VARCHAR(20) = NULL,
+		@title			NVARCHAR(50) = NULL,
+		@isArchived		BIT = NULL,
+		@Where			NVARCHAR(1000) = NULL
 	)
 	AS
-		DECLARE @sql NVARCHAR(1000) = '';
-
 		IF @Activity = 'GetDataAll'
 			BEGIN
-				SET @sql = 'SELECT conversationID, userID, title, isArchived, FORMAT(createdAt, ''dd/mm/yyy hh:mm'') createdAt
-				,FORMAT(updatedAt, ''dd/mm/yyy hh:mm'') updatedAt
-				,FORMAT(deletedAt, ''dd/mm/yyy hh:mm'') deletedAt
+				SELECT conversationID, userID, title, FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
+					,FORMAT(updatedAt, 'dd/mm/yyy hh:mm') updatedAt, isArchived
 				FROM tbl_conversations
-				WHERE 1=1 ' + ISNULL(@Where, '') + ' ORDER BY createdAt DESC'
-
-				EXECUTE(@sql)
+				WHERE 1 = 1 
+				AND (@conversationID IS NULL OR @conversationID = '' OR conversationID = @conversationID)
+				AND (@userID IS NULL OR @userID = '' OR userID = @userID)
+				AND (@title IS NULL OR @title = '' OR title LIKE N'''%' + @title +'%''')
+				AND (@isArchived IS NULL OR @isArchived = '' OR isArchived = @isArchived)
 			END
 		ELSE  
 		IF @Activity = 'GetDataByID'
 			BEGIN
 					SELECT conversationID, userID, title, isArchived, FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
 					,FORMAT(updatedAt, 'dd/mm/yyy hh:mm') updatedAt
-					,FORMAT(deletedAt, 'dd/mm/yyy hh:mm') deletedAt 
 					FROM tbl_conversations
 					WHERE conversationID = @conversationID;
 			END
@@ -45,15 +43,16 @@ CREATE PROCEDURE stpr_conversations
 		IF @Activity = 'Save'
 			BEGIN
 				INSERT INTO tbl_conversations
-				(userID, title, isArchived)
+				(conversationID, userID, title, isArchived)
 				VALUES
-				(@userID, @title, 0)
+				(@conversationID, @userID, @title, @isArchived)
 			END
 		ELSE
 		IF @Activity = 'Update'
 			BEGIN
 				UPDATE tbl_conversations
 				SET 
+					title = @title,
 					isArchived = @isArchived
 				WHERE
 					conversationID = @conversationID

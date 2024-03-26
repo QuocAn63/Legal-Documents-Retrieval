@@ -15,6 +15,6 @@ export interface IMessage {
   isBOT: number;
 }
 
-export interface IConversationWithMessages extends IConversation {
+export interface IConversation1 extends IConversation {
   messages: IMessage[];
 }
