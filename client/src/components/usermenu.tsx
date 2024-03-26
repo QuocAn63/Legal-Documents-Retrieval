@@ -91,7 +91,7 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
 
   return (
     <div className={cx("selectionsContainer")}>
-      <Space direction="vertical" size={0} style={{ width: "100%" }}>
+      <Space direction="vertical" size={0}>
         <CustomButton
           block
           icon={<SettingOutlined />}
