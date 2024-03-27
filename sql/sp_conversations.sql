@@ -9,7 +9,7 @@ GO
 
 -- sp_conversations
 
-ALTER PROCEDURE sp_conversations
+CREATE OR ALTER PROCEDURE sp_conversations
 	(
 		@Activity		VARCHAR(20),
 		@ReturnMsg		NVARCHAR(1000) = NULL OUT,

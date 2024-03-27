@@ -9,7 +9,7 @@ GO
 
 -- sp_users
 
-ALTER PROCEDURE sp_messages
+CREATE OR ALTER PROCEDURE sp_messages
 	(
 		@Activity VARCHAR(20),
 		@ReturnMsg NVARCHAR(1000) = NULL OUT,
@@ -26,7 +26,7 @@ ALTER PROCEDURE sp_messages
 	AS
 		IF @Activity = 'GetDataAll'
 			BEGIN
-				SELECT messageID, conversationID, userID, content, replyToUserID, replyToMessageID, FORMAT(createdAt, 'dd/MM/yyyy hh:mm') AS createdAt
+				SELECT messageID, conversationID, userID, content, replyToMessageID, FORMAT(createdAt, 'dd/MM/yyyy hh:mm') AS createdAt
 				, FORMAT(updatedAt, 'dd/MM/yyyy hh:mm') AS updatedAt
 				, isBOT
 				FROM tbl_messages
@@ -43,7 +43,7 @@ ALTER PROCEDURE sp_messages
 		ELSE  
 		IF @Activity = 'GetDataByID'
 			BEGIN
-					SELECT messageID, conversationID, userID, content,replyToUserID, replyToMessageID, FORMAT(createdAt, 'dd/MM/yyyy hh:mm') AS createdAt
+					SELECT messageID, conversationID, userID, content, replyToMessageID, FORMAT(createdAt, 'dd/MM/yyyy hh:mm') AS createdAt
 					, FORMAT(updatedAt, 'dd/MM/yyyy hh:mm') AS updatedAt
 					, isBOT
 					FROM tbl_messages
