@@ -1,4 +1,6 @@
-﻿INSERT INTO tbl_users(userID, username, [password], isBOT, isADMIN)
+﻿use [chatbot]
+
+INSERT INTO tbl_users(userID, username, [password], isBOT, isADMIN)
 VALUES
 ('8df4d737-869b-44a7-8b3c-cd0cddfed815', 'admin', '$2y$10$1aKaJNmfkSZmxgp9uGiHDe9r.9dBocl5PcJWH8Hz9suvJ0TOnuLKy', 0,1);
 
