@@ -19,7 +19,11 @@ ALTER PROCEDURE sp_users
 		@email			VARCHAR(50) = NULL,
 		@googleID		VARCHAR(50) = NULL,
 		@isBOT			BIT = 0,
-		@isADMIN		BIT = 0
+		@isADMIN		BIT = 0,
+		@fromDate		VARCHAR(20) = NULL,
+		@toDate			VARCHAR(20) = NULL,
+		@pageIndex		INT = 1,
+		@pageSize		INT = 20
 	)
 	AS
 		IF @Activity = 'GetDataAll'
@@ -32,6 +36,10 @@ ALTER PROCEDURE sp_users
 				AND (@email IS NULL OR @email = '' OR email = @email)
 				AND (@isBOT IS NULL OR @isBOT = '' OR isBOT = @isBOT)
 				AND (@isADMIN IS NULL OR @isADMIN = '' OR isADMIN = @isADMIN)
+				AND (@fromDate IS NULL OR @fromDate = '' OR createdAt >= @fromDate)
+				AND (@toDate IS NULL OR @toDate = '' OR createdAt <= @toDate)
+				ORDER BY createdAt DESC
+				OFFSET @pageSize*(@pageIndex - 1) ROWS FETCH NEXT @pageSize ROWS ONLY
 			END
 		ELSE  
 		IF @Activity = 'GetDataByID'

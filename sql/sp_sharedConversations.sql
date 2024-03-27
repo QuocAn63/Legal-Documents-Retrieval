@@ -9,34 +9,42 @@ GO
 
 -- sp_users
 
-CREATE PROCEDURE stpr_messages
+CREATE PROCEDURE sp_sharedConversations
 	(
-		@Activity VARCHAR(20),
-		@ReturnMsg NVARCHAR(1000) = NULL OUT,
-		@sharedConversationID NVARCHAR(100) = NULL,
-		@conversationID NVARCHAR(100) = NULL,
-		@userID NVARCHAR(100) = NULL,
-		@Where NVARCHAR(1000) = NULL
+		@Activity					VARCHAR(20),
+		@ReturnMsg					NVARCHAR(1000) = NULL OUT,
+		@sharedConversationID		VARCHAR(40) = NULL,
+		@conversationID				VARCHAR(40) = NULL,
+		@userID						VARCHAR(40) = NULL,
+		@sharedCode					VARCHAR(40) = NULL,
+		@fromDate					VARCHAR(20) = NULL,
+		@toDate						VARCHAR(20) = NULL,
+		@pageIndex					INT = 1,
+		@pageSize					INT = 20
 	)
 	AS
-		DECLARE @sql NVARCHAR(1000) = '';
-
 		IF @Activity = 'GetDataAll'
 			BEGIN
-				SET @sql = 'SELECT sharedConversationID, conversationID, userID, FORMAT(createdAt, ''dd/mm/yyy hh:mm'') createdAt
-				,FORMAT(updatedAt, ''dd/mm/yyy hh:mm'') updatedAt
-				,FORMAT(deletedAt, ''dd/mm/yyy hh:mm'') deletedAt
+				SELECT sharedConversationID, sharedCode, conversationID, userID
+				, FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
+				,FORMAT(updatedAt, 'dd/mm/yyy hh:mm') updatedAt
 				FROM tbl_sharedConversations
-				WHERE 1=1 ' + ISNULL(@Where, '') + ' ORDER BY createdAt DESC'
-
-				EXECUTE(@sql)
+				WHERE 1 = 1
+				AND (@sharedConversationID IS NULL OR @sharedConversationID = '' OR sharedConversationID = @sharedConversationID)
+				AND (@sharedCode IS NULL OR @sharedCode = '' OR sharedCode = @sharedCode)
+				AND (@userID IS NULL OR @userID = '' OR userID = @userID)
+				AND (@conversationID IS NULL OR @conversationID = '' OR conversationID = @conversationID)
+				AND (@fromDate IS NULL OR @fromDate = '' OR createdAt >= @fromDate)
+				AND (@toDate IS NULL OR @toDate = '' OR createdAt <= @toDate)
+				ORDER BY createdAt DESC
+				OFFSET @pageSize*(@pageIndex - 1) ROWS FETCH NEXT @pageSize ROWS ONLY
 			END
 		ELSE  
 		IF @Activity = 'GetDataByID'
 			BEGIN
-					SELECT sharedConversationID, conversationID, userID, FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
+					SELECT sharedConversationID, sharedCode, conversationID, userID
+					, FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
 					,FORMAT(updatedAt, 'dd/mm/yyy hh:mm') updatedAt
-					,FORMAT(deletedAt, 'dd/mm/yyy hh:mm') deletedAt
 					FROM tbl_sharedConversations
 					WHERE sharedConversationID = @sharedConversationID;
 			END
@@ -44,9 +52,9 @@ CREATE PROCEDURE stpr_messages
 		IF @Activity = 'Save'
 			BEGIN
 				INSERT INTO tbl_sharedConversations
-				(userID, conversationID)
+				(sharedConversationID, userID, conversationID, sharedCode, createdAt)
 				VALUES
-				(@userID, @conversationID)
+				(@sharedConversationID, @userID, @conversationID, @sharedCode, GETDATE())
 			END
 		ELSE
 		IF @Activity = 'Update'
