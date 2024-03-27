@@ -13,13 +13,13 @@ ALTER PROCEDURE sp_users
 	(
 		@Activity		VARCHAR(20),
 		@ReturnMsg		NVARCHAR(1000) = NULL OUT,
-		@userID			VARCHAR(20) = NULL,
+		@userID			VARCHAR(40) = NULL,
 		@username		VARCHAR(25) = NULL,
 		@password		VARCHAR(100) = NULL,
 		@email			VARCHAR(50) = NULL,
 		@googleID		VARCHAR(50) = NULL,
-		@isBOT			BIT = NULL,
-		@isADMIN		BIT = NULL
+		@isBOT			BIT = 0,
+		@isADMIN		BIT = 0
 	)
 	AS
 		IF @Activity = 'GetDataAll'
@@ -80,12 +80,14 @@ ALTER PROCEDURE sp_users
 				UPDATE tbl_users
 				SET 
 					email = @email,
-					[password] = @password
+					[password] = @password,
+					isBOT = @isBOT,
+					isADMIN = @isADMIN
 				WHERE
 					userID = @userID
 			END
 		ELSE
 		IF @Activity = 'Delete'
 			BEGIN
-				DELETE FROM tbl_users WHERE userID = @userID AND isBOT = 0
+				DELETE FROM tbl_users WHERE userID = @userID AND isBOT = 0 -- Can not delete ADMIN account
 			END

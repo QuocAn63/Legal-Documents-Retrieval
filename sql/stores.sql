@@ -1,0 +1,5 @@
+--EXEC [sp_users] @Activity='GetDataAll'
+--EXEC [sp_users] @Activity='GetDataByID', @userID = '8df4d737-869b-44a7-8b3c-cd0cddfed815' 
+--EXEC [sp_users] @Activity='Save', @userID = '8df4d737-869b-44a7-8b3c-cd0cddfed816', @username = 'user001', @password='testpassword', @isADMIN = '0'
+--EXEC [sp_users] @Activity='Update', @userID = '8df4d737-869b-44a7-8b3c-cd0cddfed815', @isADMIN = '1'
+--EXEC [sp_users] @Activity='Delete', @userID = '8df4d737-869b-44a7-8b3c-cd0cddfed816'

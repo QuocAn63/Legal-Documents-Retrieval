@@ -22,8 +22,8 @@ CREATE PROCEDURE sp_conversations
 	AS
 		IF @Activity = 'GetDataAll'
 			BEGIN
-				SELECT conversationID, userID, title, FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
-					,FORMAT(updatedAt, 'dd/mm/yyy hh:mm') updatedAt, isArchived
+				SELECT conversationID, userID, title, FORMAT(createdAt, 'dd/mm/yyyy hh:mm') createdAt
+					,FORMAT(updatedAt, 'dd/mm/yyyy hh:mm') updatedAt, isArchived
 				FROM tbl_conversations
 				WHERE 1 = 1 
 				AND (@conversationID IS NULL OR @conversationID = '' OR conversationID = @conversationID)
