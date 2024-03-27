@@ -16,6 +16,15 @@ export const loginValidateObjects = {
     .max(25, "Mật khẩu nhập lại phải nhỏ hơn 25 ký tự"),
 };
 
-export const chatContentValidate = z.string();
+export const chatContentValidate = {
+  content: z.string({
+    required_error: "Bạn chưa nhập gì cả!",
+  }),
+};
 
-export const conversationTitleValidate = z.string().min(1).max(100);
+export const conversationTitleValidate = z
+  .string({
+    required_error: "Tiêu đề không được bỏ trống",
+  })
+  .min(1)
+  .max(100);

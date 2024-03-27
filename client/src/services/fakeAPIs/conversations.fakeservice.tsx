@@ -99,7 +99,8 @@ export const messageData: IMessage = {
   content: faker.lorem.paragraphs(2),
   createdAt: faker.date.recent().toISOString(),
   updatedAt: faker.date.recent().toISOString(),
-  isBOT: faker.number.int({ min: 0, max: 1 }),
+  // isBOT: faker.number.int({ min: 0, max: 1 }),
+  isBOT: 1,
 };
 
 export const conversationData: IConversation1[] = [
@@ -127,6 +128,15 @@ export class FakeConversationsAPI {
       setTimeout(() => {
         console.log(`Get message from [conversationID]: ${conversationID}`);
         resolve({ status: 200, data: conversationData[0].messages });
+      }, 2000);
+    });
+  }
+
+  static save_Messages(data: any): Promise<IResponseData<string>> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log(`Save: ${data}`);
+        resolve({ status: 201, data: "1" });
       }, 2000);
     });
   }
@@ -189,6 +199,15 @@ export class FakeConversationsAPI {
       setTimeout(() => {
         console.log(`Unarchive: ${conversationID}`);
         resolve({ status: 200, data: "1" });
+      }, 2000);
+    });
+  }
+
+  static getReply_Messages(conversationID: string): Promise<IResponseData> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log(`Get message from [conversationID]: ${conversationID}`);
+        resolve({ status: 200, data: conversationData[0].messages[0] });
       }, 2000);
     });
   }

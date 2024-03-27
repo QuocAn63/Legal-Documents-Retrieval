@@ -37,4 +37,16 @@
             font-size: 16px;
         }
     }
+
+    .error{
+        border-color: $error-color;
+    }
+
+    .spin i{
+        background-color:  $text-default-color;
+    }
+   
+    .wrapSpin{
+        margin-bottom: 20px;
+    }
 }

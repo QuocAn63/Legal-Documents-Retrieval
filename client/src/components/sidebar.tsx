@@ -13,7 +13,14 @@ import {
 } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import UserMenu from "./usermenu";
-import { useEffect, useRef, useState } from "react";
+import React, {
+  FC,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { ChatService } from "../services/chat.service";
 import { IConversation } from "../interfaces/chat.tsx";
 import ShareModal from "./modals/share.tsx";
@@ -22,6 +29,14 @@ import { z } from "zod";
 import { conversationTitleValidate } from "../helpers/validates.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormItem } from "react-hook-form-antd";
+
+// Import Redux
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store.tsx";
+import {
+  getConversationRedux,
+  renameTitleRedux,
+} from "../redux/conversations.tsx";
 
 const cx = classNames.bind(styles);
 
@@ -127,6 +142,10 @@ const SidebarItem = ({
     useForm<IChangeConversationTitleInput>({
       resolver: zodResolver(schema),
     });
+
+  // get Conversation from redux
+  const dispatch = useDispatch();
+
   const [state, setState] = useState<SidebarItemStateProps>({
     edit: { isEditing: false, value: "" },
   });
@@ -135,30 +154,48 @@ const SidebarItem = ({
   const onSubmit: SubmitHandler<IChangeConversationTitleInput> = async (
     data
   ) => {
-    console.log(data);
+    // Handle rename
+
+    const payload = {
+      conversationID: conversationID,
+      title: data.title,
+    };
+
+    // sửa lại rename = useState
+
+    // const renameConversation = await ChatService.update_Conversations(payload);
+    // if (renameConversation.status === 200) {
+    //   renameTitle((prev) => ({
+    //     ...prev,
+    //     conversations: prev.conversations.map((item) => {
+    //       if (item.conversationID === conversationID) {
+    //         return {
+    //           ...item,
+    //           title: data.title,
+    //         };
+    //       }
+    //       return item;
+    //     }),
+    //   }));
+    // }
+
+    dispatch(renameTitleRedux(payload));
+    setState((prev) => ({
+      ...prev,
+      edit: { ...prev.edit, isEditing: false },
+    }));
   };
 
-  const initEvents = () => {
-    if (renameInputRef.current?.input) {
-      const { input } = renameInputRef.current;
-
-      input.addEventListener("focus", bindFocusEventOnInput);
-      window.addEventListener("click", () =>
-        setState((prev) => ({
-          ...prev,
-          edit: { ...prev.edit, isEditing: false },
-        }))
-      );
-    }
-  };
-
-  const bindFocusEventOnInput = (event: FocusEvent) => {
-    event.stopPropagation();
+  // Khi input không còn focus thì sẽ thoát khỏi trại thái isEditing
+  const handleBlur = () => {
+    setState((prev) => ({
+      ...prev,
+      edit: { ...prev.edit, isEditing: false },
+    }));
   };
 
   const handleClickBtnRename = () => {
     setValue("title", title);
-    initEvents();
     setState((prev) => ({
       ...prev,
       edit: { ...prev.edit, isEditing: true },
@@ -171,13 +208,13 @@ const SidebarItem = ({
         {state.edit.isEditing ? (
           <Form onFinish={handleSubmit(onSubmit)}>
             <FormItem control={control} name="title">
-              <Input ref={renameInputRef}></Input>
+              <Input ref={renameInputRef} autoFocus onBlur={handleBlur} />
             </FormItem>
           </Form>
         ) : (
           <>
             <CustomLink to={`/c/${conversationID}`} className={cx("link")}>
-              {title}
+              {title.length > 30 ? title.substring(0, 30) + "..." : title}
             </CustomLink>
             <Space className={cx("btnContainer")}>
               <Dropdown
@@ -226,7 +263,8 @@ const SidebarItemContainer = ({
   );
 };
 
-export default function Sidebar() {
+// Thêm memo
+const Sidebar: FC = memo(() => {
   const [state, setState] = useState<SidebarStateProps>({
     conversations: [],
     shareModal: {
@@ -237,19 +275,33 @@ export default function Sidebar() {
     selectedConversation: undefined,
   });
 
+  // get Conversation from redux
+  const conversation = useSelector(
+    (state: RootState) => state.conversation.conversations
+  );
+
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const getInitialData = async () => {
+      // if (conversation.length === 0) {
       const conversationsData = await ChatService.getList_Conversations({});
+      // console.log({ conversationsData: conversationsData.data });
+      if (conversationsData) {
+        // Lưu conversation vào redux store conversations
+        dispatch(getConversationRedux(conversationsData.data));
 
-      setState((prev) => ({
-        ...prev,
-        conversations: conversationsData.data || [],
-        shareModal: {
-          ...prev.shareModal,
-          handleOpen: handleClickOpenShareModal,
-          handleClose: handleClickCloseShareModal,
-        },
-      }));
+        setState((prev) => ({
+          ...prev,
+          // conversations: conversationsData.data || [],
+          shareModal: {
+            ...prev.shareModal,
+            handleOpen: handleClickOpenShareModal,
+            handleClose: handleClickCloseShareModal,
+          },
+        }));
+      }
+      // }
     };
 
     getInitialData();
@@ -274,16 +326,21 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className={cx("wrapper")}>
-        <Space direction="vertical" size={12} style={{ width: "100%" }}>
-          <NewChatItem />
-          <SidebarItemContainer
-            items={state.conversations}
-            shareModalState={state.shareModal}
-          />
-        </Space>
-        <UserMenu />
-      </div>
+      {conversation.length > 0 && (
+        <div className={cx("wrapper")}>
+          <Space direction="vertical" size={12} style={{ width: "100%" }}>
+            <NewChatItem />
+            <SidebarItemContainer
+              // items={state.conversations}
+              // Truyền conversation từ redux vào Components
+              items={conversation}
+              shareModalState={state.shareModal}
+            />
+          </Space>
+          <UserMenu />
+        </div>
+      )}
     </>
   );
-}
+});
+export default Sidebar;
