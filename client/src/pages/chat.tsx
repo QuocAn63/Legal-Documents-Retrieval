@@ -3,9 +3,9 @@ import styles from "../styles/chat.module.scss";
 import classNames from "classnames/bind";
 import { FormItem } from "react-hook-form-antd";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { z } from "zod";
-import { chatContentValidate } from "../helpers/validates";
-import { zodResolver } from "@hookform/resolvers/zod";
+// import { z } from "zod";
+// import { chatContentValidate } from "../helpers/validates";
+// import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import MessagesContainer from "../components/message";
 import { ChatService } from "../services/chat.service";
@@ -18,15 +18,14 @@ import { faker } from "@faker-js/faker";
 import { addConversationRedux } from "../redux/conversations";
 
 import { IMessage } from "../interfaces/chat";
-import Paragraph from "antd/es/typography/Paragraph";
 
 // Validate
 
 const cx = classNames.bind(styles);
 
-const schema = z.object({
-  content: chatContentValidate.content,
-});
+// const schema = z.object({
+//   content: chatContentValidate.content,
+// });
 
 interface IChatInput {
   content: string;
@@ -43,14 +42,8 @@ interface IChat {
 }
 
 export default function Chat({ isMain = false }: ChatPageProps) {
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    setError,
-    formState: { errors },
-  } = useForm<IChatInput>({
-    resolver: zodResolver(schema),
+  const { control, handleSubmit, setValue } = useForm<IChatInput>({
+    // resolver: zodResolver(schema),
   });
   const location = useLocation();
   const [state, setState] = useState<IChat>({
@@ -85,50 +78,54 @@ export default function Chat({ isMain = false }: ChatPageProps) {
   const onSubmit: SubmitHandler<IChatInput> = async (data) => {
     try {
       // Add conversation vào redux store
-      if (check === true) {
-        const messageData: IMessage = {
-          messageID: faker.string.uuid(),
-          conversationID: conversationID as string,
-          userID: state.messages[0].userID,
-          content: data.content,
-          createdAt: faker.date.recent().toISOString(),
-          updatedAt: faker.date.recent().toISOString(),
-          isBOT: 0,
-        };
 
-        const message = await ChatService.save_Messages(messageData);
+      if (data.content !== "") {
+        if (check === true) {
+          const messageData: IMessage = {
+            messageID: faker.string.uuid(),
+            conversationID: conversationID as string,
+            userID: state.messages[0].userID,
+            content: data.content,
+            createdAt: faker.date.recent().toISOString(),
+            updatedAt: faker.date.recent().toISOString(),
+            isBOT: 0,
+          };
 
-        if (message.status === 201) {
-          setState((prev) => ({
-            ...prev,
-            isLoading: false,
-            messages: [...prev.messages, messageData],
-          }));
+          const message = await ChatService.save_Messages(messageData);
+
+          if (message.status === 201) {
+            setState((prev) => ({
+              ...prev,
+              // isLoading: false,
+              messages: [...prev.messages, messageData],
+            }));
+            setTimeout(() => {
+              clearControls();
+              handleReplyMessages();
+            }, 500);
+          }
+        } else {
+          const payload = {
+            conversationID: faker.string.uuid(),
+            title: data.content,
+            createdAt: faker.string.uuid(),
+            isArchive: 0,
+          };
+
+          dispatch(addConversationRedux(payload));
           setTimeout(() => {
+            // dispatch(addConversationRedux(payload));
             clearControls();
-            handleReplyMessages();
+            navigate(`c/${payload.conversationID}`);
           }, 500);
         }
       } else {
-        const payload = {
-          conversationID: faker.string.uuid(),
-          title: data.content,
-          createdAt: faker.string.uuid(),
-          isArchive: 0,
-        };
-
-        dispatch(addConversationRedux(payload));
-        setTimeout(() => {
-          // dispatch(addConversationRedux(payload));
-          clearControls();
-          navigate(`c/${payload.conversationID}`);
-        }, 500);
+        console.log("Chua nhap gi ca");
       }
     } catch (err: any) {
       const message = err?.message || err?.msg || err || "Error when";
       console.error(message);
       setState((prev) => ({ ...prev, isLoading: false }));
-      setError("root", { message });
     }
   };
 
@@ -159,6 +156,8 @@ export default function Chat({ isMain = false }: ChatPageProps) {
     }));
     const replyMessage = await ChatService.getReply_Messages(
       conversationID as string
+      // ConversationID
+      // UserToken
     );
     console.log(replyMessage.data);
 
@@ -219,11 +218,6 @@ export default function Chat({ isMain = false }: ChatPageProps) {
             </Flex>
           )}
         </div>
-        {errors.root?.message ? (
-          <Paragraph className={cx("generalErrorTitle")}>
-            {errors.root.message}
-          </Paragraph>
-        ) : null}
         <Form onFinish={handleSubmit(onSubmit)}>
           <FormItem control={control} name="content">
             <Input
@@ -231,9 +225,10 @@ export default function Chat({ isMain = false }: ChatPageProps) {
               id="content"
               variant="outlined"
               placeholder="Hỏi gì đó đi..."
-              className={cx(errors.root?.message ? "textBox error" : "textBox")}
+              className={cx("textBox")}
               ref={chatInputRef}
               autoFocus
+              disabled={state.isLoading ? true : false}
             ></Input>
           </FormItem>
         </Form>

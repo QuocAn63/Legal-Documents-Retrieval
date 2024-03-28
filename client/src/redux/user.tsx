@@ -7,67 +7,23 @@ const initialState: IAuth = {
     isAdmin: false,
     username: null,
     email: null,
-    accessToken: null,
+    token: null,
   },
-  error: null,
-  loading: false,
-  success: false,
 };
 
 const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    loginStart: (state) => {
-      state.loading = true;
-    },
-    loginSuccess: (state, action) => {
-      state.loading = false;
-      state.success = true;
+    loginRedux: (state, action) => {
       state.user = action.payload;
     },
-    loginFailure: (state, action) => {
-      (state.error = action.payload), (state.loading = false);
-    },
-    logOutStart: (state) => {
-      state.loading = true;
-      state.success = true;
-    },
-    logOutSuccess: (state) => {
-      state.user = null;
-      state.loading = false;
-      state.success = true;
-    },
-    logOutFailure: (state, action) => {
-      state.loading = true;
-      state.error = action.payload;
-      state.success = false;
-    },
 
-    signUpStart: (state) => {
-      state.loading = true;
-    },
-    signUpSuccess: (state) => {
-      state.loading = false;
-      state.success = true;
-    },
-    signUpFailure: (state, action) => {
-      state.loading = false;
-      state.success = false;
-      state.error = action.payload;
+    logOutRedux: (state) => {
+      state.user = null;
     },
   },
 });
-export const {
-  loginStart,
-  loginFailure,
-  loginSuccess,
-  logOutFailure,
-  logOutStart,
-  logOutSuccess,
-  signUpStart,
-  signUpFailure,
-  signUpSuccess,
-} = userSlice.actions;
+export const { loginRedux, logOutRedux } = userSlice.actions;
 
 export default userSlice.reducer;

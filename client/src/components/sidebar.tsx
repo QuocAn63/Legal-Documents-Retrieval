@@ -13,17 +13,12 @@ import {
 } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import UserMenu from "./usermenu";
-import React, {
-  FC,
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { FC, memo, useEffect, useRef, useState } from "react";
 import { ChatService } from "../services/chat.service";
 import { IConversation } from "../interfaces/chat.tsx";
 import ShareModal from "./modals/share.tsx";
+import ArchivedModal from "./modals/archived.tsx";
+
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { conversationTitleValidate } from "../helpers/validates.tsx";
@@ -238,7 +233,8 @@ const SidebarItem = ({
           </>
         )}
       </div>
-      <ShareModal open={isOpen} onCancel={handleClose} />
+      {/* <ShareModal open={isOpen} onCancel={handleClose} /> */}
+      <ArchivedModal open={isOpen} onCancel={handleClose} />
     </>
   );
 };
@@ -284,9 +280,7 @@ const Sidebar: FC = memo(() => {
 
   useEffect(() => {
     const getInitialData = async () => {
-      // if (conversation.length === 0) {
       const conversationsData = await ChatService.getList_Conversations({});
-      // console.log({ conversationsData: conversationsData.data });
       if (conversationsData) {
         // Lưu conversation vào redux store conversations
         dispatch(getConversationRedux(conversationsData.data));

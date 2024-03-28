@@ -46,6 +46,9 @@ export default function ShareModal({
         content: {
           backgroundColor: "#2F2F2F",
         },
+        mask: {
+          opacity: 0.4,
+        },
       }}
       footer={null}
       className={cx("wrapper")}

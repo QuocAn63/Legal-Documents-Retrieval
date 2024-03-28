@@ -4,20 +4,26 @@ import { IResetPasswordInput } from "../../pages/resetPws";
 import { IResponseData } from "../../interfaces/request";
 
 const LoginData = {
-  email: faker.internet.email(),
+  // email: faker.internet.email(),
+  id: faker.string.uuid(),
+  username: "caoan632002",
   token: faker.string.uuid(),
+  email: "thangphamcao@gmail.com",
+  isAdmin: false,
 };
 
 export class FakeAuthAPI {
   static async login({
-    email,
+    // email,
+    username,
     password,
   }: {
-    email: string;
+    // email: string;
+    username: string;
     password: string;
   }): Promise<IResponseData> {
     return new Promise((resolve, reject) => {
-      if (email === "caoan632002@gmail.com" && password === "123123123") {
+      if (username === "caoan632002" && password === "123123123") {
         return setTimeout(() => {
           console.log("Login success");
           resolve({
@@ -36,16 +42,18 @@ export class FakeAuthAPI {
   }
 
   static async register({
-    email,
+    // email,
+    username,
     password,
     passwordConfirm,
   }: {
-    email: string;
+    // email: string;
+    username: string;
     password: string;
     passwordConfirm: string;
   }): Promise<IResponseData> {
     return new Promise((resolve, reject) => {
-      if (email === "caoan632002@gmail.com") {
+      if (username === "caoan632002@gmail.com") {
         return setTimeout(() => {
           console.log("Registring failed");
           reject({

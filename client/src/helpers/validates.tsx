@@ -1,11 +1,14 @@
 import { z } from "zod";
 
 export const loginValidateObjects = {
-  email: z
-    .string({
-      required_error: "Email không được bỏ trống",
-    })
-    .email("Địa chỉ Email không hợp lệ"),
+  // email: z
+  //   .string({
+  //     required_error: "Email không được bỏ trống",
+  //   })
+  //   .email("Địa chỉ Email không hợp lệ"),
+  username: z.string({
+    required_error: "Tên tài khoản không được bỏ trống",
+  }),
   password: z
     .string({ required_error: "Mật khẩu không được bỏ trống" })
     .min(6, "Mật khẩu phải lớn hơn 6 ký tự")
