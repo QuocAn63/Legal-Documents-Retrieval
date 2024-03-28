@@ -9,10 +9,11 @@ GO
 
 -- sp_users
 
-CREATE PROCEDURE sp_sharedConversations
+ALTER PROCEDURE sp_sharedConversations
 	(
 		@Activity					VARCHAR(20),
 		@ReturnMsg					NVARCHAR(1000) = NULL OUT,
+		@ReturnCode					CHAR(1) = NULL OUT,
 		@sharedConversationID		VARCHAR(40) = NULL,
 		@conversationID				VARCHAR(40) = NULL,
 		@userID						VARCHAR(40) = NULL,
@@ -59,8 +60,10 @@ CREATE PROCEDURE sp_sharedConversations
 		ELSE
 		IF @Activity = 'Update'
 			BEGIN
-				SET @ReturnMsg = dbo.getSysMsg('SYS_DB_MET');
-				RETURN @ReturnMsg;
+				UPDATE tbl_sharedConversations
+				SET sharedCode = @sharedCode,
+					updatedAt = GETDATE()
+				WHERE conversationID = @conversationID
 			END
 		ELSE
 		IF @Activity = 'Delete'
