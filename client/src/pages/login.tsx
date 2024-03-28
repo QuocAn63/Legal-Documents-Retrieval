@@ -7,20 +7,24 @@ import Title from "antd/es/typography/Title";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormItem } from "react-hook-form-antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Paragraph from "antd/es/typography/Paragraph";
 import { loginValidateObjects } from "../helpers/validates";
+import { useDispatch } from "react-redux";
+import { loginRedux } from "../redux/user";
 
 const cx = classNames.bind(styles);
 
 const schema = z.object({
-  email: loginValidateObjects.email,
+  // email: loginValidateObjects.email,
+  username: loginValidateObjects.username,
+
   password: loginValidateObjects.password,
 });
 
 export interface ILoginInput {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -31,9 +35,16 @@ export default function Login() {
     setError,
     formState: { errors },
   } = useForm<ILoginInput>({
-    resolver: zodResolver(schema),
+    defaultValues: {
+      username: "caoan632002",
+      password: "123123123",
+    },
+    // resolver: zodResolver(schema),
   });
+
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onSubmit: SubmitHandler<ILoginInput> = async (data) => {
     try {
@@ -42,6 +53,9 @@ export default function Login() {
 
       if (response.status === 200) {
         setIsLoading((prev) => false);
+        dispatch(loginRedux(response.data));
+        console.log("Đăng nhập thành công!");
+        navigate("/");
       }
     } catch (err: any) {
       const message = err?.message || err?.msg || "Error when";
@@ -58,11 +72,12 @@ export default function Login() {
       </div>
       <Form action="post" onFinish={handleSubmit(onSubmit)}>
         <Space direction="vertical" className={cx("contentGroup")} size={20}>
-          <FormItem control={control} name="email">
+          <FormItem control={control} name="username">
             <Input
-              id="email"
+              id="username"
               variant="outlined"
-              placeholder="Địa chỉ Email"
+              // placeholder="Địa chỉ Email"
+              placeholder="Tên tài khoản"
               className={cx("textBox")}
             />
           </FormItem>
@@ -72,6 +87,8 @@ export default function Login() {
               variant="outlined"
               placeholder="Mật khẩu"
               className={cx("textBox")}
+              // set default value
+
               type="password"
             />
           </FormItem>

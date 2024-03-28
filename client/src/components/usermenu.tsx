@@ -12,6 +12,8 @@ import { useState } from "react";
 import Title from "antd/es/typography/Title";
 import { Typography } from "antd";
 import { useRef } from "react";
+import { useDispatch } from "react-redux";
+import { logOutRedux } from "../redux/user";
 const { Text } = Typography;
 const cx = classNames.bind(styles);
 
@@ -89,6 +91,11 @@ const SettingModal = ({ ...props }: ModalProps) => {
 const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
   const { modalCloseHandler, modalOpenHandler } = settingHandlers;
 
+  const dispatch = useDispatch();
+  const handleLogOut = () => {
+    dispatch(logOutRedux());
+  };
+
   return (
     <div className={cx("selectionsContainer")}>
       <Space direction="vertical" size={0}>
@@ -101,7 +108,12 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
           Cài đặt
         </CustomButton>
         <span className="horizontal"></span>
-        <CustomButton block icon={<LogoutOutlined />} className={cx("btn")}>
+        <CustomButton
+          block
+          icon={<LogoutOutlined />}
+          className={cx("btn")}
+          onClick={handleLogOut}
+        >
           Đăng xuất
         </CustomButton>
       </Space>
