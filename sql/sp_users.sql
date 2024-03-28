@@ -13,6 +13,7 @@ CREATE OR ALTER PROCEDURE sp_users
 	(
 		@Activity		VARCHAR(20),
 		@ReturnMsg		NVARCHAR(1000) = NULL OUT,
+		@ReturnCode		CHAR(1) = NULL OUT,
 		@userID			VARCHAR(40) = NULL,
 		@username		VARCHAR(25) = NULL,
 		@password		VARCHAR(100) = NULL,
@@ -56,13 +57,15 @@ CREATE OR ALTER PROCEDURE sp_users
 				IF EXISTS (SELECT TOP 1 1 FROM tbl_users WHERE username = @username)
 					BEGIN
 						SET @ReturnMsg = dbo.getSysMsg('USR_UN_CFL')
-						RETURN @ReturnMsg;
+						SET @ReturnCode = 0;
+						RETURN;
 					END
 
 				IF EXISTS (SELECT TOP 1 1 FROM tbl_users WHERE email = @email)
 					BEGIN
 						SET @ReturnMsg = dbo.getSysMsg('USR_EML_CFL')
-						RETURN @ReturnMsg;
+						SET @ReturnCode = 0;
+						RETURN;
 					END
 
 				INSERT INTO tbl_users
@@ -76,13 +79,15 @@ CREATE OR ALTER PROCEDURE sp_users
 				IF EXISTS (SELECT TOP 1 1 FROM tbl_users WHERE email = @email AND username <> @username)
 					BEGIN
 						SET @ReturnMsg = dbo.getSysMsg('USR_EML_CFL')
-						RETURN @ReturnMsg;
+						SET @ReturnCode = 0;
+						RETURN;
 					END
 
 				IF EXISTS (SELECT TOP 1 1 FROM tbl_users WHERE [password] = @password)
 					BEGIN
 						SET @ReturnMsg = dbo.getSysMsg('USR_PWD_EQL')
-						RETURN @ReturnMsg;
+						SET @ReturnCode = 0;
+						RETURN;
 					END
 
 				UPDATE tbl_users

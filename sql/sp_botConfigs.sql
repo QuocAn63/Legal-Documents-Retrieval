@@ -13,6 +13,7 @@ CREATE PROCEDURE stpr_botConfigs
 	(
 		@Activity VARCHAR(20),
 		@ReturnMsg NVARCHAR(1000) = NULL OUT,
+		@ReturnCode CHAR(1) = NULL OUT,
 		@configID NVARCHAR(40) = NULL,
 		@userID NVARCHAR(40) = NULL,
 		@promptContent NVARCHAR(MAX) = NULL,
@@ -52,9 +53,12 @@ CREATE PROCEDURE stpr_botConfigs
 				IF NOT EXISTS (SELECT TOP 1 1 FROM tbl_users WHERE userID = @userID AND isBOT = 1)
 				BEGIN
 					SET @ReturnMsg = dbo.getSysMsg('CFG_NOT_BOT');
+					SET @ReturnCode = 0;
 					RETURN;
 				END
+
 				INSERT INTO tbl_botConfigs(configID, userID, promptContent, createdAt)
+				VALUES (@configID, @userID, @promptContent, GETDATE())
 			END
 		ELSE
 		IF @Activity = 'Update'
@@ -62,12 +66,13 @@ CREATE PROCEDURE stpr_botConfigs
 				UPDATE tbl_botConfigs
 				SET 
 					promptContent = @promptContent,
+					userID = @userID,
 					updatedAt = GETDATE()
 				WHERE
-					userID = @userID
+					configID = @configID
 			END
 		ELSE
 		IF @Activity = 'Delete'
 			BEGIN
-				DELETE FROM tbl_botConfigs WHERE userID = @userID
+				DELETE FROM tbl_botConfigs WHERE configID = @configID
 			END
