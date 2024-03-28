@@ -13,31 +13,48 @@ CREATE PROCEDURE stpr_botConfigs
 	(
 		@Activity VARCHAR(20),
 		@ReturnMsg NVARCHAR(1000) = NULL OUT,
-		@userID NVARCHAR(100) = NULL,
-		@promptContent NVARCHAR(500) = NULL,
-		@Where NVARCHAR(1000) = NULL
+		@configID NVARCHAR(40) = NULL,
+		@userID NVARCHAR(40) = NULL,
+		@promptContent NVARCHAR(MAX) = NULL,
+		@fromDate		VARCHAR(20) = NULL,
+		@toDate			VARCHAR(20) = NULL,
+		@pageIndex		INT = 1,
+		@pageSize		INT = 20
 	)
 	AS
-		DECLARE @sql NVARCHAR(1000) = '';
-
 		IF @Activity = 'GetDataAll'
 			BEGIN
-				SET @ReturnMsg = dbo.getSysMsg('SYS_DB_MET');
-				RETURN @ReturnMsg;
+				SELECT configID, userID, promptContent
+				,FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
+				,FORMAT(updatedAt, 'dd/mm/yyy hh:mm') updatedAt
+				FROM tbl_botConfigs
+				WHERE 1 = 1
+				AND (@configID IS NULL OR @configID = '' OR configID = @configID)
+				AND (@userID IS NULL OR @userID = '' OR userID = @userID)
+				AND (@promptContent IS NULL OR @promptContent = '' OR promptContent LIKE N'''%' + @configID + '%''')
+				AND (@fromDate IS NULL OR @fromDate = '' OR createdAt >= @fromDate)
+				AND (@toDate IS NULL OR @toDate = '' OR createdAt <= @toDate)
+				ORDER BY createdAt DESC
+				OFFSET @pageSize*(@pageIndex - 1) ROWS FETCH NEXT @pageSize ROWS ONLY
 			END
 		ELSE  
 		IF @Activity = 'GetDataByID'
 			BEGIN
-					SELECT userID, promptContent, FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
+					SELECT configID, userID, promptContent
+					,FORMAT(createdAt, 'dd/mm/yyy hh:mm') createdAt
 					,FORMAT(updatedAt, 'dd/mm/yyy hh:mm') updatedAt
 					FROM tbl_botConfigs
-					WHERE userID = @userID;
+					WHERE configID = @configID;
 			END
 		ELSE
 		IF @Activity = 'Save'
 			BEGIN
-				SET @ReturnMsg = dbo.getSysMsg('SYS_DB_MET');
-				RETURN @ReturnMsg;
+				IF NOT EXISTS (SELECT TOP 1 1 FROM tbl_users WHERE userID = @userID AND isBOT = 1)
+				BEGIN
+					SET @ReturnMsg = dbo.getSysMsg('CFG_NOT_BOT');
+					RETURN;
+				END
+				INSERT INTO tbl_botConfigs(configID, userID, promptContent, createdAt)
 			END
 		ELSE
 		IF @Activity = 'Update'

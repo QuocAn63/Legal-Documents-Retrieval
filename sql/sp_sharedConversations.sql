@@ -9,7 +9,7 @@ GO
 
 -- sp_users
 
-ALTER PROCEDURE sp_sharedConversations
+CREATE OR ALTER PROCEDURE sp_sharedConversations
 	(
 		@Activity					VARCHAR(20),
 		@ReturnMsg					NVARCHAR(1000) = NULL OUT,
