@@ -5,8 +5,8 @@ import ConversationEntity from './entities/conversations.entity';
 
 @Injectable()
 export default class ChatService {
-  private storedProcedure: SQLStoreProcedure<{ title: string }>;
-  constructor(private conversationRepository: Repository<{ title: string }>) {
+  private storedProcedure: SQLStoreProcedure<ConversationEntity>;
+  constructor(private conversationRepository: Repository<ConversationEntity>) {
     this.storedProcedure = new SQLStoreProcedure(conversationRepository);
   }
 
