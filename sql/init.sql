@@ -54,7 +54,8 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_m
 		content				NVARCHAR(MAX),
 		createdAt			DATETIME DEFAULT GETDATE(),
 		updatedAt			DATETIME,
-		isBOT				BIT
+		isBOT				BIT,
+		replyToMessageID	VARCHAR(40)
 	)
 
 	ALTER TABLE tbl_messages
@@ -65,6 +66,9 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_m
 
 	ALTER TABLE tbl_messages
 	ADD CONSTRAINT messages_conversationID FOREIGN KEY(conversationID) REFERENCES tbl_conversations(conversationID)
+
+	ALTER TABLE tbl_messages
+	ADD CONSTRAINT messages_replyToMessageID FOREIGN KEY(replyToMessageID) REFERENCES tbl_messages(messageID)
 	END
 
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tbl_sharedConversations')
