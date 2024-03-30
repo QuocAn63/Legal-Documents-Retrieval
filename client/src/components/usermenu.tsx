@@ -14,12 +14,28 @@ import { Typography } from "antd";
 import { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { logOutRedux } from "../redux/user";
+
+// Manage Modal ( Archive and Share Modal)
+import ManageModal from "./modals/manage.tsx";
+
 const { Text } = Typography;
 const cx = classNames.bind(styles);
 
 interface SettingHandlersProps {
   modalOpenHandler: () => void;
   modalCloseHandler: () => void;
+}
+
+interface ManageHandlersProps {
+  modalManageOpenHandler: () => void;
+  modalManageCloseHandler: () => void;
+}
+
+interface SettingModalProps {
+  manageHandlers: ManageHandlersProps;
+  settingHandlers: SettingHandlersProps;
+  setTypeHandlers: TypeHandlersProps;
+  props: ModalProps;
 }
 
 interface MenuSelectionsProps {
@@ -32,6 +48,10 @@ interface SettingModalItem {
   button: ReactNode;
 }
 
+interface TypeHandlersProps {
+  modalType: () => void;
+}
+
 const SettingModalItem = ({ title, button }: SettingModalItem) => {
   return (
     <Flex justify="space-between" align="center" className={cx("settingItem")}>
@@ -41,7 +61,16 @@ const SettingModalItem = ({ title, button }: SettingModalItem) => {
   );
 };
 
-const SettingModal = ({ ...props }: ModalProps) => {
+const SettingModal = ({
+  setTypeHandlers,
+  settingHandlers,
+  manageHandlers,
+  ...props
+}: SettingModalProps) => {
+  const { modalManageOpenHandler } = manageHandlers;
+  const { modalCloseHandler } = settingHandlers;
+  const { modalType } = setTypeHandlers;
+
   return (
     <Modal {...props}>
       <div className={cx("modalWrapper")}>
@@ -57,12 +86,33 @@ const SettingModal = ({ ...props }: ModalProps) => {
           <span className="horizontal"></span>
           <SettingModalItem
             title="Các hội thoại đã lưu"
-            button={<CustomButton outlined>Quản lý</CustomButton>}
+            button={
+              <CustomButton
+                outlined
+                onClick={() => {
+                  modalCloseHandler();
+                  modalManageOpenHandler();
+                }}
+              >
+                Quản lý
+              </CustomButton>
+            }
           />
           <span className="horizontal"></span>
           <SettingModalItem
             title="Các liên kết đã chia sẻ"
-            button={<CustomButton outlined>Quản lý</CustomButton>}
+            button={
+              <CustomButton
+                outlined
+                onClick={() => {
+                  modalCloseHandler();
+                  modalManageOpenHandler();
+                  modalType();
+                }}
+              >
+                Quản lý
+              </CustomButton>
+            }
           />
           <span className="horizontal"></span>
           <SettingModalItem
@@ -89,7 +139,7 @@ const SettingModal = ({ ...props }: ModalProps) => {
 };
 
 const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
-  const { modalCloseHandler, modalOpenHandler } = settingHandlers;
+  const { modalOpenHandler } = settingHandlers;
 
   const dispatch = useDispatch();
   const handleLogOut = () => {
@@ -122,21 +172,50 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
 };
 
 export default function UserMenu() {
-  const [state, setState] = useState({ isOpen: false });
+  const [state, setState] = useState({
+    isOpen: false,
+    isOpenManage: false,
+    type: 0,
+  });
   const userMenuRef = useRef(null);
 
   const settingHandlers: SettingHandlersProps = {
     modalOpenHandler: () => {
       setState((prev) => ({ ...prev, isOpen: true }));
     },
+
     modalCloseHandler: () => {
       setState((prev) => ({ ...prev, isOpen: false }));
     },
   };
 
+  const manageHandlers: ManageHandlersProps = {
+    modalManageOpenHandler: () => {
+      setState((prev) => ({ ...prev, isOpenManage: true }));
+    },
+    modalManageCloseHandler: () => {
+      setState((prev) => ({ ...prev, isOpenManage: false }));
+    },
+  };
+
+  const setTypeHandlers: TypeHandlersProps = {
+    modalType: () => {
+      setState((prev) => ({ ...prev, type: 1 }));
+    },
+  };
+
+  const handleCloseModalManage = () => {
+    manageHandlers.modalManageCloseHandler();
+    settingHandlers.modalOpenHandler();
+    setState((prev) => ({ ...prev, type: 0 }));
+  };
+
   return (
     <>
       <SettingModal
+        setTypeHandlers={setTypeHandlers}
+        manageHandlers={manageHandlers}
+        settingHandlers={settingHandlers}
         open={state.isOpen}
         destroyOnClose
         footer={null}
@@ -148,6 +227,14 @@ export default function UserMenu() {
         onCancel={settingHandlers.modalCloseHandler}
         closeIcon={<CloseOutlined className={cx("btnClose")} />}
       />
+
+      <ManageModal
+        open={state.isOpenManage}
+        type={state.type}
+        closeIcon={<CloseOutlined className={cx("btnClose")} />}
+        onCancel={handleCloseModalManage}
+      />
+
       <Dropdown
         dropdownRender={() => (
           <MenuSelections settingHandlers={settingHandlers} />

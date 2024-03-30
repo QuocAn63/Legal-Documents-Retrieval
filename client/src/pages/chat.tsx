@@ -38,7 +38,7 @@ interface ChatPageProps {
 interface IChat {
   isLoading: boolean;
   messages: IMessage[];
-  reply: IMessage[];
+  isSubmitting: boolean;
 }
 
 export default function Chat({ isMain = false }: ChatPageProps) {
@@ -49,7 +49,7 @@ export default function Chat({ isMain = false }: ChatPageProps) {
   const [state, setState] = useState<IChat>({
     isLoading: false,
     messages: [],
-    reply: [],
+    isSubmitting: false,
   });
 
   // get dispatch từ redux
@@ -78,6 +78,10 @@ export default function Chat({ isMain = false }: ChatPageProps) {
   const onSubmit: SubmitHandler<IChatInput> = async (data) => {
     try {
       // Add conversation vào redux store
+      setState((prev) => ({
+        ...prev,
+        isSubmitting: true,
+      }));
 
       if (data.content !== "") {
         if (check === true) {
@@ -96,13 +100,11 @@ export default function Chat({ isMain = false }: ChatPageProps) {
           if (message.status === 201) {
             setState((prev) => ({
               ...prev,
-              // isLoading: false,
               messages: [...prev.messages, messageData],
             }));
-            setTimeout(() => {
-              clearControls();
-              handleReplyMessages();
-            }, 500);
+
+            clearControls();
+            handleReplyMessages();
           }
         } else {
           const payload = {
@@ -111,13 +113,12 @@ export default function Chat({ isMain = false }: ChatPageProps) {
             createdAt: faker.string.uuid(),
             isArchive: 0,
           };
-
           dispatch(addConversationRedux(payload));
           setTimeout(() => {
             // dispatch(addConversationRedux(payload));
             clearControls();
             navigate(`c/${payload.conversationID}`);
-          }, 500);
+          }, 200);
         }
       } else {
         console.log("Chua nhap gi ca");
@@ -126,6 +127,12 @@ export default function Chat({ isMain = false }: ChatPageProps) {
       const message = err?.message || err?.msg || err || "Error when";
       console.error(message);
       setState((prev) => ({ ...prev, isLoading: false }));
+    } finally {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        isSubmitting: false,
+      }));
     }
   };
 
@@ -165,7 +172,6 @@ export default function Chat({ isMain = false }: ChatPageProps) {
       setState((prev) => ({
         ...prev,
         messages: [...prev.messages, replyMessage.data],
-        isLoading: false,
       }));
     }
   };
@@ -228,7 +234,7 @@ export default function Chat({ isMain = false }: ChatPageProps) {
               className={cx("textBox")}
               ref={chatInputRef}
               autoFocus
-              disabled={state.isLoading ? true : false}
+              disabled={state.isLoading || state.isSubmitting ? true : false}
             ></Input>
           </FormItem>
         </Form>
