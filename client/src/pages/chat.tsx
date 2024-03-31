@@ -11,13 +11,14 @@ import MessagesContainer from "../components/message";
 import { ChatService } from "../services/chat.service";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 // Fake Create Conversations
 import { faker } from "@faker-js/faker";
 import { addConversationRedux } from "../redux/conversations";
 
 import { IMessage } from "../interfaces/chat";
+import { RootState } from "../redux/store";
 
 // Validate
 
@@ -60,6 +61,12 @@ export default function Chat({ isMain = false }: ChatPageProps) {
   const { conversationID } = useParams();
 
   const [check, setCheck] = useState<boolean>(false);
+
+  // Lấy token từ store redux
+
+  const token = useSelector((state: RootState) => state.user?.user?.token);
+
+  console.log("Render-Lại");
 
   const navigate = useNavigate();
 
@@ -113,12 +120,65 @@ export default function Chat({ isMain = false }: ChatPageProps) {
             createdAt: faker.string.uuid(),
             isArchive: 0,
           };
-          dispatch(addConversationRedux(payload));
-          setTimeout(() => {
-            // dispatch(addConversationRedux(payload));
-            clearControls();
-            navigate(`c/${payload.conversationID}`);
-          }, 200);
+
+          // Tham số truyền vào API
+          const param = {
+            title: data.content,
+            token: token,
+          };
+
+          const saveConversation = await ChatService.save_Conversations(param);
+
+          const messageData: IMessage = {
+            messageID: faker.string.uuid(),
+            conversationID: faker.string.uuid(),
+            userID: state.messages[0].userID,
+            content: data.content,
+            createdAt: faker.date.recent().toISOString(),
+            updatedAt: faker.date.recent().toISOString(),
+            isBOT: 0,
+          };
+
+          const message = await ChatService.save_Messages(messageData);
+
+          Promise.all([saveConversation, message]).then(
+            ([saveConversationResult, saveMessageResult]) => {
+              if (
+                saveConversationResult.status === 200 &&
+                saveMessageResult.status === 201
+              ) {
+                dispatch(addConversationRedux(payload));
+                // setState((prev) => ({
+                //   ...prev,
+                //   messages: [messageData],
+                // }));
+
+                setTimeout(() => {
+                  clearControls();
+                  handleReplyMessages();
+                  navigate(`c/${payload.conversationID}`);
+                }, 200);
+              }
+            }
+          );
+
+          // if (saveConversation.status === 200) {
+          //   dispatch(addConversationRedux(payload));
+          //   setTimeout(() => {
+          //     // dispatch(addConversationRedux(payload));
+          //     clearControls();
+          //   }, 200);
+          // }
+
+          // if (message.status === 200) {
+          //   setState((prev) => ({
+          //     ...prev,
+          //     messages: [messageData],
+          //   }));
+
+          //   handleReplyMessages();
+          // }
+          // navigate(`c/${payload.conversationID}`);
         }
       } else {
         console.log("Chua nhap gi ca");
@@ -209,7 +269,7 @@ export default function Chat({ isMain = false }: ChatPageProps) {
     setState({
       isLoading: false,
       messages: [],
-      reply: [],
+      isSubmitting: false,
     });
   };
 

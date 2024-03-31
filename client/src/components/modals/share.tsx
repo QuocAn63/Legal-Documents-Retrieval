@@ -44,11 +44,12 @@ export default function ShareModal({
     <Modal
       styles={{
         content: {
+          flex: 1,
           backgroundColor: "#2F2F2F",
         },
-        mask: {
-          opacity: 0.4,
-        },
+        // mask: {
+        //   opacity: 0.7,
+        // },
       }}
       footer={null}
       className={cx("wrapper")}

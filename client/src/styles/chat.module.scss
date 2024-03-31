@@ -37,6 +37,9 @@
             font-size: 16px;
         }
     }
+    .textBox[disabled]{
+        cursor: default;
+    }
 
     .error{
         border-color: $error-color;

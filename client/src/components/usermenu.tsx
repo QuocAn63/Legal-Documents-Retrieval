@@ -1,5 +1,5 @@
 import { Dropdown, Flex, Image, Modal, ModalProps, Space } from "antd";
-import { ReactNode } from "react";
+import { memo, ReactNode, useEffect } from "react";
 import CustomButton from "./button";
 import styles from "../styles/usermenu.module.scss";
 import classNames from "classnames/bind";
@@ -12,11 +12,16 @@ import { useState } from "react";
 import Title from "antd/es/typography/Title";
 import { Typography } from "antd";
 import { useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logOutRedux } from "../redux/user";
 
 // Manage Modal ( Archive and Share Modal)
 import ManageModal from "./modals/manage.tsx";
+import { ChatService } from "../services/chat.service.tsx";
+import { RootState } from "../redux/store.tsx";
+import { IConversation } from "../interfaces/chat.tsx";
+import SharedService from "../services/shared.service.tsx";
+import { ISharedConversation1 } from "../interfaces/shared.tsx";
 
 const { Text } = Typography;
 const cx = classNames.bind(styles);
@@ -29,6 +34,11 @@ interface SettingHandlersProps {
 interface ManageHandlersProps {
   modalManageOpenHandler: () => void;
   modalManageCloseHandler: () => void;
+  getList_Archived: () => Promise<void>;
+  getList_Shared: () => Promise<void>;
+  handleDeleteAll: () => void;
+
+  handleDelete: (indexToDel: number) => void;
 }
 
 interface SettingModalProps {
@@ -67,7 +77,8 @@ const SettingModal = ({
   manageHandlers,
   ...props
 }: SettingModalProps) => {
-  const { modalManageOpenHandler } = manageHandlers;
+  const { modalManageOpenHandler, getList_Archived, getList_Shared } =
+    manageHandlers;
   const { modalCloseHandler } = settingHandlers;
   const { modalType } = setTypeHandlers;
 
@@ -92,6 +103,7 @@ const SettingModal = ({
                 onClick={() => {
                   modalCloseHandler();
                   modalManageOpenHandler();
+                  getList_Archived();
                 }}
               >
                 Quản lý
@@ -108,6 +120,7 @@ const SettingModal = ({
                   modalCloseHandler();
                   modalManageOpenHandler();
                   modalType();
+                  getList_Shared();
                 }}
               >
                 Quản lý
@@ -171,11 +184,23 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
   );
 };
 
-export default function UserMenu() {
-  const [state, setState] = useState({
+interface IUserMenu {
+  isOpen: boolean;
+  isOpenManage: boolean;
+  type: number;
+  manage: (IConversation | ISharedConversation1)[];
+  isLoading: boolean;
+}
+
+const UserMenu = memo(() => {
+  const token = useSelector((state: RootState) => state.user.user?.token);
+
+  const [state, setState] = useState<IUserMenu>({
     isOpen: false,
     isOpenManage: false,
     type: 0,
+    manage: [],
+    isLoading: false,
   });
   const userMenuRef = useRef(null);
 
@@ -195,6 +220,58 @@ export default function UserMenu() {
     },
     modalManageCloseHandler: () => {
       setState((prev) => ({ ...prev, isOpenManage: false }));
+    },
+    getList_Archived: async () => {
+      try {
+        if (state.manage.length <= 0) {
+          setState((prev) => ({ ...prev, isLoading: true }));
+        }
+        const listArchived = await ChatService.getList_archived_Conversations(
+          token as string
+        );
+        if (listArchived.status === 200) {
+          setState((prev) => ({
+            ...prev,
+            manage: listArchived.data || [],
+            isLoading: false,
+          }));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getList_Shared: async () => {
+      try {
+        if (state.manage.length <= 0) {
+          setState((prev) => ({ ...prev, isLoading: true }));
+        }
+
+        const listShared = await SharedService.getList_shared(token as string);
+        if (listShared.status === 200) {
+          setState((prev) => ({
+            ...prev,
+            manage: listShared.data || [],
+            isLoading: false,
+          }));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    handleDeleteAll: () => {
+      console.log("Delete all");
+
+      setState((prev) => ({
+        ...prev,
+        manage: [],
+      }));
+    },
+    handleDelete: (indexToDel: number) => {
+      const newData = state.manage.filter((_, index) => index !== indexToDel);
+      setState((prev) => ({
+        ...prev,
+        manage: newData,
+      }));
     },
   };
 
@@ -233,6 +310,9 @@ export default function UserMenu() {
         type={state.type}
         closeIcon={<CloseOutlined className={cx("btnClose")} />}
         onCancel={handleCloseModalManage}
+        manage={state.manage}
+        isLoading={state.isLoading}
+        manageHandlers={manageHandlers}
       />
 
       <Dropdown
@@ -259,4 +339,6 @@ export default function UserMenu() {
       </Dropdown>
     </>
   );
-}
+});
+
+export default UserMenu;

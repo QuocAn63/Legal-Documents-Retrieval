@@ -6,7 +6,9 @@ import {
 import FakeShareService from "./fakeAPIs/share.fakerservice";
 
 export default class SharedService {
-  static getList_shared(): Promise<IResponseData<ISharedConversation1[]>> {
+  static getList_shared(
+    userToken: string
+  ): Promise<IResponseData<ISharedConversation1[]>> {
     return FakeShareService.getList_shared();
   }
 

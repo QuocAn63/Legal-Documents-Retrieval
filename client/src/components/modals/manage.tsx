@@ -8,6 +8,7 @@ import {
   Pagination,
   PaginationProps,
   ConfigProvider,
+  Spin,
 } from "antd";
 import {
   CloseOutlined,
@@ -21,51 +22,48 @@ import Typography from "antd/es/typography";
 // import CustomButton from "../button";
 import { useEffect, useState } from "react";
 import CustomButton from "../button";
+import { IConversation } from "../../interfaces/chat";
+import { ISharedConversation1 } from "../../interfaces/shared";
 
 const { Title } = Typography;
 
 const cx = classNames.bind(styles);
 
+interface ManageHandlersProps {
+  handleDeleteAll: () => void;
+  handleDelete: (indexToDel: number) => void;
+}
+
 interface ShareModalProps extends ModalProps {
   type: number;
+  manage: (IConversation | ISharedConversation1)[];
+  manageHandlers: ManageHandlersProps;
+  isLoading: boolean;
 }
 
 interface ShareModalStateProps {
-  isLoading: boolean;
-  data: any[];
+  totalPage: number;
+  currentIndex: number;
+  currentType: number;
 }
 
-// Fake dữ liệu Archived
-
-const data: any[] = [
-  { name: "Push git lên code", date: "28/03/2024" },
-  { name: "React native là gì", date: "28/03/2024" },
-  { name: "Sơn Tùng MTP top 1 VN phải không", date: "28/03/2024" },
-  { name: "Jack là ai", date: "28/03/2024" },
-];
-
-const dataPage2: any[] = [
-  { name: "Tại sao lại như vậy", date: "28/03/2024" },
-  { name: "PHP là gì", date: "28/03/2024" },
-  { name: "Quá khứ của J97", date: "28/03/2024" },
-  { name: "Mcyi", date: "28/03/2024" },
-];
-
 const renderContent = (
-  item: { name: string; date: string },
+  item: IConversation | ISharedConversation1,
   type: number,
-  handleDelete: (indexDel: number) => void,
-  index: number
+  index: number,
+  manageHandlers: ManageHandlersProps
 ) => {
   return (
     <Col style={{ gap: 10, padding: "5px 0 5px 0" }}>
       <Row>
         <Flex flex={1} align="center" style={{ paddingRight: "16px" }}>
-          <a style={{ fontWeight: "400" }}>{item.name}</a>
+          <a style={{ fontWeight: "400" }}>
+            {"title" in item ? item.title : item.sharedCode}
+          </a>
         </Flex>
-        <Flex flex={2} align="center">
+        <Flex flex={1} align="center">
           <Flex flex={1}>
-            <span className={cx("titleMain")}>{item.date}</span>
+            <span className={cx("titleMain")}>{item.createdAt}</span>
           </Flex>
           <Flex flex={1} justify="end">
             {type === 0 ? (
@@ -80,7 +78,7 @@ const renderContent = (
             <Tooltip title="Xóa lưu trữ">
               <DeleteOutlined
                 className={cx("icon")}
-                onClick={() => handleDelete(index)}
+                onClick={() => manageHandlers.handleDelete(index)}
               />
             </Tooltip>
           </Flex>
@@ -91,38 +89,32 @@ const renderContent = (
   );
 };
 
-export default function ManageModal({ type, ...props }: ShareModalProps) {
+// Constant
+const TOTAL_ITEM_PAGE = 4;
+
+export default function ManageModal({
+  type,
+  manage,
+  manageHandlers,
+  isLoading,
+  ...props
+}: ShareModalProps) {
   const [state, setState] = useState<ShareModalStateProps>({
-    isLoading: false,
-    data: data,
+    totalPage: 1,
+    currentType: -1,
+    currentIndex: 0,
   });
 
   useEffect(() => {
-    return () => {};
-  });
-
-  const handleDeleteAll = () => {
-    setState((prev) => ({
-      ...prev,
-      data: [],
-    }));
-  };
-
-  const handleDelete = (indexDel: number) => {
-    const newData = state.data.filter((_, index) => index !== indexDel);
-
-    console.log(indexDel);
-
-    setState((prev) => ({
-      ...prev,
-      data: newData,
-    }));
-  };
+    const totalPage = Math.ceil(manage.length / TOTAL_ITEM_PAGE) * 10;
+    setState((prev) => ({ ...prev, totalPage: totalPage }));
+  }, [manage.length, manage, type]);
 
   const onChangePage: PaginationProps["onChange"] = (pageNumber) => {
+    const newStartIndex = (pageNumber - 1) * TOTAL_ITEM_PAGE;
     setState((prev) => ({
       ...prev,
-      data: pageNumber === 1 ? data : dataPage2,
+      currentIndex: newStartIndex,
     }));
   };
 
@@ -152,7 +144,7 @@ export default function ManageModal({ type, ...props }: ShareModalProps) {
         <Flex flex={1} align="center" style={{ paddingRight: "16px" }}>
           <span className={cx("titleMain")}>Tên</span>
         </Flex>
-        <Flex flex={2}>
+        <Flex flex={1}>
           <Flex flex={1} align="center">
             <span className={cx("titleMain")}>Ngày</span>
           </Flex>
@@ -161,7 +153,10 @@ export default function ManageModal({ type, ...props }: ShareModalProps) {
               outlined={true}
               status={"important"}
               background={true}
-              onClick={handleDeleteAll}
+              onClick={() => {
+                manageHandlers.handleDeleteAll();
+                setState((prev) => ({ ...prev, isLoading: false }));
+              }}
             >
               Xóa tất cả
             </CustomButton>
@@ -169,11 +164,48 @@ export default function ManageModal({ type, ...props }: ShareModalProps) {
         </Flex>
       </Row>
       <span className="horizontal"></span>
-      {type === 0 && state.data.length > 0 ? (
-        state.data.map((item, index) =>
-          renderContent(item, type, handleDelete, index)
-        )
-      ) : (
+      {manage.length > 0 &&
+        !isLoading &&
+        manage
+          .slice(state.currentIndex, state.currentIndex + TOTAL_ITEM_PAGE)
+          .map((item, index) =>
+            renderContent(item, type, index, manageHandlers)
+          )}
+      {isLoading && (
+        <Flex justify="center">
+          <Spin />
+        </Flex>
+      )}
+
+      {manage.length > 0 && (
+        <Flex justify="center" align="center" style={{ padding: 10 }}>
+          <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: "rgb(66, 66, 66)",
+                colorPrimaryHover: "white",
+                colorPrimaryBorder: "rgb(66, 66, 66)",
+                colorBgTextHover: "rgb(66, 66, 66)",
+              },
+              components: {
+                Pagination: {
+                  itemActiveBg: "rgb(66, 66, 66)",
+                  itemActiveColorDisabled: "white",
+                },
+              },
+            }}
+          >
+            <Pagination
+              className={cx("page")}
+              defaultCurrent={0}
+              total={state.totalPage}
+              onChange={onChangePage}
+              showLessItems={true}
+            />
+          </ConfigProvider>
+        </Flex>
+      )}
+      {manage.length <= 0 && !isLoading && (
         <Row
           style={{
             paddingBottom: "32px",
@@ -189,33 +221,6 @@ export default function ManageModal({ type, ...props }: ShareModalProps) {
               : "liên kết chia sẻ nào được lưu trữ."}
           </span>
         </Row>
-      )}
-      {state.data.length > 0 && (
-        <Flex justify="center" align="center" style={{ padding: 10 }}>
-          <ConfigProvider
-            theme={{
-              token: {
-                colorPrimary: "black",
-              },
-              components: {
-                Pagination: {
-                  itemActiveBg: "rgb(155, 155, 155)",
-                  itemActiveColorDisabled: "black",
-                },
-              },
-            }}
-          >
-            <Pagination
-              className={cx("page")}
-              showQuickJumper
-              defaultCurrent={0}
-              defaultPageSize={10}
-              total={20}
-              onChange={onChangePage}
-              showLessItems={true}
-            />
-          </ConfigProvider>
-        </Flex>
       )}
     </Modal>
   );

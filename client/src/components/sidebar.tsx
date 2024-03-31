@@ -210,7 +210,7 @@ const SidebarItem = ({
         ) : (
           <>
             <CustomLink to={`/c/${conversationID}`} className={cx("link")}>
-              {title.length > 30 ? title.substring(0, 30) + "..." : title}
+              {title.length > 50 ? title.substring(0, 50) + "..." : title}
             </CustomLink>
             <Space className={cx("btnContainer")}>
               <Dropdown
