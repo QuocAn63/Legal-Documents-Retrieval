@@ -18,6 +18,7 @@ const DatabaseOptions: TypeOrmModuleAsyncOptions = {
       password: configService.getOrThrow('DB_PASSWORD'),
       database: configService.getOrThrow('DB_NAME'),
       autoLoadEntities: true,
+      entities: ['../../src/modules/**/entities/*.entity.ts'],
       synchronize: isOnDev,
       logging: isOnDev,
       logger: 'advanced-console',

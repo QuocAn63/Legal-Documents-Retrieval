@@ -9,22 +9,32 @@ import {
 } from 'typeorm';
 
 @Entity({
-  name: 'conversations',
+  name: 'users',
 })
-export default class ConversationEntity extends BaseEntity {
+export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 25 })
+  @Column({
+    type: 'varchar',
+    length: 25,
+    unique: true,
+  })
   username: string;
 
-  @Column({ type: 'varchar' })
+  @Column({
+    type: 'varchar',
+  })
   password: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({
+    type: 'varchar',
+  })
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({
+    type: 'varchar',
+  })
   googleID: string;
 
   @CreateDateColumn({
@@ -41,9 +51,20 @@ export default class ConversationEntity extends BaseEntity {
   })
   updatedAt: string;
 
-  @Column({ type: 'bit', default: '0' })
-  isBOT: string;
+  @DeleteDateColumn({
+    type: 'datetime',
+    default: 'GETDATE()',
+    nullable: true,
+  })
+  deletedAt: string;
 
-  @Column({ type: 'bit', default: '0' })
-  isADMIN: string;
+  @Column({
+    type: 'bit',
+  })
+  isBOT: number;
+
+  @Column({
+    type: 'bit',
+  })
+  isADMIN: number;
 }

@@ -1,20 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import SQLStoreProcedure from 'src/utils/proc.utils';
 import ConversationEntity from './entities/conversations.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export default class ChatService {
-  private storedProcedure: SQLStoreProcedure<ConversationEntity>;
-  constructor(private conversationRepository: Repository<ConversationEntity>) {
-    this.storedProcedure = new SQLStoreProcedure(conversationRepository);
-  }
+  constructor(
+    @InjectRepository(ConversationEntity)
+    private readonly conversationRepository: Repository<ConversationEntity>,
+  ) {}
 
-  async getList() {
-    return this.storedProcedure.executeProcedure(
-      'sp_conversations',
-      'GetDataAll',
-      {},
-    );
-  }
+  async getList() {}
 }

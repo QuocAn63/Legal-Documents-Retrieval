@@ -1,7 +1,12 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth';
 import { ChatModule } from '../chat';
+import { DatabaseModule } from '../database';
 import { ConfigModule } from '@nestjs/config';
-import DatabaseModule from '../database/database.module';
+import { UserModule } from '../user';
+import { DocumentModule } from '../document';
+import { SystemMessageModule } from '../system-message/system-message.module';
+import { ReportModule } from '../report';
 
 @Module({
   imports: [
@@ -10,6 +15,12 @@ import DatabaseModule from '../database/database.module';
     }),
     DatabaseModule.forRootAsync(),
     ChatModule,
+    AuthModule,
+    UserModule,
+    ConfigModule,
+    DocumentModule,
+    SystemMessageModule,
+    ReportModule,
   ],
   controllers: [],
   providers: [],
