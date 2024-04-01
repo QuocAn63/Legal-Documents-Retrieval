@@ -1,5 +1,5 @@
 export default interface IBaseService<T> {
-  getList(...props: any): Promise<Array<T> | []>;
+  getList<T>(...props: any): Promise<Array<T> | []>;
 
   get(...props: any): Promise<T>;
 

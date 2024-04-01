@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { In, Repository } from 'typeorm';
+import { FindManyOptions, FindOptions, In, Repository } from 'typeorm';
 import ConversationEntity from './entities/conversations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import SharedConversationEntity from './entities/sharedConversations.entity';
@@ -14,6 +14,7 @@ import {
   SaveConversationDTO,
   UpdateConversationDTO,
 } from './dto/conversation.dto';
+import MessageEntity from './entities/messages.entity';
 
 type ConversationType = 'Normal' | 'Shared' | 'Archived';
 
@@ -25,40 +26,78 @@ type SharedConvParams = Pick<SharedConversationEntity, 'userID'>;
 
 @Injectable()
 export default class ChatService
-  implements IBaseService<ConversationEntity | SharedConversationEntity>
+  implements
+    IBaseService<ConversationEntity | SharedConversationEntity | MessageEntity>
 {
   constructor(
     @InjectRepository(ConversationEntity)
     private readonly conversationRepo: Repository<ConversationEntity>,
     @InjectRepository(SharedConversationEntity)
     private readonly sharedConversationRepo: Repository<SharedConversationEntity>,
+    @InjectRepository(MessageEntity)
+    private readonly messageRepo: Repository<MessageEntity>,
   ) {}
 
-  async getList<T extends ConversationType>(
-    type: T,
-    params: T extends 'Shared' ? SharedConvParams : NormalConvParams,
-    pagination: IQueryParams,
-  ): Promise<ConversationEntity[] | SharedConversationEntity[]> {
-    let data: ConversationEntity[] | SharedConversationEntity[];
-    let offset = OffsetUtil.getOffset(
-      pagination.pageIndex | 1,
-      pagination.pageIndex | 20,
-    );
+  // async getList<T extends ConversationType>(
+  //   type: T,
+  //   params: T extends 'Shared' ? SharedConvParams : NormalConvParams,
+  //   pagination: IQueryParams,
+  // ): Promise<ConversationEntity[] | SharedConversationEntity[]> {
+  //   let data: ConversationEntity[] | SharedConversationEntity[];
+  //   let offset = OffsetUtil.getOffset(
+  //     pagination.pageIndex | 1,
+  //     pagination.pageIndex | 20,
+  //   );
 
-    if (type === 'Shared') {
-      data = await this.sharedConversationRepo.find({
-        where: { ...params },
+  //   if (type === 'Shared') {
+  //     data = await this.sharedConversationRepo.find({
+  //       where: { ...params },
+  //       skip: offset,
+  //       relations: ['conversations'],
+  //     });
+  //   } else {
+  //     data = await this.conversationRepo.find({
+  //       where: { ...params, isArchived: type === 'Normal' ? '0' : '1' },
+  //       skip: offset,
+  //     });
+  //   }
+
+  //   return data;
+  // }
+
+  async getList<T>(
+    entityParams: Partial<T>,
+    { pageIndex, pageSize }: IQueryParams,
+  ): Promise<T[] | []> {
+    let responseData;
+
+    const offset = OffsetUtil.getOffset(pageIndex, pageSize);
+
+    if (entityParams instanceof ConversationEntity) {
+      responseData = await this.conversationRepo.find({
+        where: { ...(entityParams as any) },
         skip: offset,
-        relations: ['conversations'],
-      });
-    } else {
-      data = await this.conversationRepo.find({
-        where: { ...params, isArchived: type === 'Normal' ? '0' : '1' },
-        skip: offset,
+        take: pageSize,
       });
     }
 
-    return data;
+    if (entityParams instanceof SharedConversationEntity) {
+      responseData = await this.sharedConversationRepo.find({
+        where: { ...(entityParams as any) },
+        skip: offset,
+        take: pageSize,
+      });
+    }
+
+    if (entityParams instanceof MessageEntity) {
+      responseData = await this.messageRepo.find({
+        where: { ...(entityParams as any) },
+        skip: offset,
+        take: pageSize,
+      });
+    }
+
+    return responseData;
   }
 
   async get<T extends ConversationType>(type: T, id: string) {
