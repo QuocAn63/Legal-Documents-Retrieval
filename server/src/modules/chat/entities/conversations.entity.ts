@@ -1,9 +1,12 @@
+import { UserEntity } from 'src/modules/user/entities/user.entity';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -15,17 +18,11 @@ export default class ConversationEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 25 })
-  username: string;
-
   @Column({ type: 'varchar' })
-  password: string;
+  userID: string;
 
-  @Column({ type: 'varchar', length: 50 })
-  email: string;
-
-  @Column({ type: 'varchar' })
-  googleID: string;
+  @Column({ type: 'nvarchar' })
+  title: string;
 
   @CreateDateColumn({
     type: 'datetime',
@@ -42,8 +39,9 @@ export default class ConversationEntity extends BaseEntity {
   updatedAt: string;
 
   @Column({ type: 'bit', default: '0' })
-  isBOT: string;
+  isArchived: string;
 
-  @Column({ type: 'bit', default: '0' })
-  isADMIN: string;
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: 'userID' })
+  user: UserEntity;
 }
