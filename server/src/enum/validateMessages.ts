@@ -15,4 +15,7 @@ export enum ValidateMessages {
   //   PasswordConfirm
   PASSWORDCONFIRM_EMPTY = 'Mật khẩu nhập lại không được bỏ trống',
   PASSWORDCONFIRM_NOT_EQUAL = 'Mật khẩu nhập lại không giống',
+
+  // Email
+  EMAIL_INVALID = 'Địa chỉ Email không hợp lệ',
 }

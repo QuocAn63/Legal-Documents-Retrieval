@@ -1,8 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { LoginDTO } from './dto/auth.dto';
+import {
+  LoginDTO,
+  SaveUserWithEmailDTO,
+  SaveUserWithUsernameDTO,
+} from './dto/auth.dto';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 import HashUtil from 'src/utils/hash.util';
 import { ValidateMessages } from 'src/enum/validateMessages';
@@ -31,8 +39,30 @@ export default class AuthService {
     return await this.jwtService.signAsync(authTokenPayload);
   }
 
-  async saveUser(data: RegisteringDTO): Promise<UserEntity> {
-    const newUser = this.userRepo.create(data);
-    return await this.userRepo.save(newUser);
+  async saveUser<T extends 'username' | 'email'>(
+    method: T,
+    data: T extends 'username' ? SaveUserWithUsernameDTO : SaveUserWithEmailDTO,
+  ): Promise<string> {
+    let userObj = new UserEntity();
+    userObj.isBOT = 0;
+    userObj.isADMIN = 0;
+
+    if (method === 'username' && data instanceof SaveUserWithUsernameDTO) {
+      if (!(await this.userRepo.findOneBy({ username: data.username })).id) {
+        throw new BadGatewayException(ValidateMessages.USERNAME_EXISTS);
+      }
+
+      const encryptedPassword = await HashUtil.hash(data.password);
+
+      userObj.username = data.username;
+      userObj.password = encryptedPassword;
+    } else if (data instanceof SaveUserWithEmailDTO) {
+      userObj.email = data.email;
+      userObj.googleID = data.token;
+    }
+
+    const saveUserResponse = await this.userRepo.save(userObj);
+
+    return saveUserResponse.id;
   }
 }
