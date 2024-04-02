@@ -17,41 +17,19 @@ export default class ReportService implements IBaseService<ReportEntity> {
     params: Partial<ReportEntity>,
     { pageIndex = 1, pageSize = 20 }: IQueryParams,
   ): Promise<ReportEntity[] | []> {
-    let findOptions: FindOptionsWhere<ReportEntity>;
-    let responseData: ReportEntity[] = [];
-    let offset = OffsetUtil.getOffset(pageIndex, pageSize);
+    const queryBuilder = this.reportRepo.createQueryBuilder('reports');
 
-    findOptions = {
-      id: Raw(
-        (raw) =>
-          `1 = 1 AND (${raw} IS NULL OR ${raw} = '' OR [id] = ${params.id}`,
-      ),
-      messageID: Raw(
-        (raw) =>
-          `(${raw} IS NULL OR ${raw} = '' OR [messageID] = ${params.messageID}`,
-      ),
-      reasonID: Raw(
-        (raw) =>
-          `(${raw} IS NULL OR ${raw} = '' OR [reasonID] = ${params.reasonID}`,
-      ),
-      status: Raw(
-        (raw) =>
-          `(${raw} IS NULL OR ${raw} = '' OR [status] = ${params.status}`,
-      ),
-      userID: Raw(
-        (raw) =>
-          `(${raw} IS NULL OR ${raw} = '' OR [userID] = ${params.userID}`,
-      ),
-      description: Like(params.description || ''),
-    };
+    for (const field in params) {
+      if (params[field] !== undefined) {
+        const value = params[field];
 
-    responseData = await this.reportRepo.find({
-      where: findOptions,
-      take: pageSize,
-      skip: offset,
-    });
+        queryBuilder.andWhere(`reports.${field} = :value`, { value });
+      }
+    }
 
-    return responseData;
+    queryBuilder.skip(OffsetUtil.getOffset(pageIndex, pageSize)).take(pageSize);
+
+    return await queryBuilder.getMany();
   }
 
   get(...props: any): Promise<ReportEntity> {
