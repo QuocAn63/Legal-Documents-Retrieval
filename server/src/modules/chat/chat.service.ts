@@ -1,12 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import {
-  BaseEntity,
-  FindManyOptions,
-  FindOptions,
-  FindOptionsWhere,
-  In,
-  Repository,
-} from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import ConversationEntity from './entities/conversations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import SharedConversationEntity from './entities/sharedConversations.entity';
@@ -29,14 +22,6 @@ import {
   SaveMessageDTO,
   UpdateMessageDTO,
 } from './dto/message.dto';
-
-type ConversationType = 'Normal' | 'Shared' | 'Archived';
-
-type NormalConvParams = Pick<
-  ConversationEntity,
-  'title' | 'isArchived' | 'userID'
->;
-type SharedConvParams = Pick<SharedConversationEntity, 'userID'>;
 
 @Injectable()
 export default class ChatService
@@ -87,22 +72,6 @@ export default class ChatService
     return responseData;
   }
 
-  async get<T extends ConversationType>(type: T, id: string) {
-    let data: SharedConversationEntity | ConversationEntity;
-
-    if (type === 'Shared') {
-      data = await this.sharedConversationRepo.findOne({
-        where: { id },
-        relations: ['conversations'],
-      });
-    } else
-      data = await this.conversationRepo.findOne({
-        where: { id, isArchived: type === 'Normal' ? '0' : '1' },
-      });
-
-    return data;
-  }
-
   async save<
     T extends SaveConversationDTO | SaveSharedConversationDTO | SaveMessageDTO,
   >(userID: string, data: T): Promise<string> {
@@ -127,6 +96,12 @@ export default class ChatService
     saveResponse = await repo.save({ userID, ...data });
 
     return saveResponse.id;
+  }
+
+  async get(
+    ...props: any
+  ): Promise<ConversationEntity | SharedConversationEntity | MessageEntity> {
+    return;
   }
 
   async update<T extends UpdateConversationDTO | UpdateSharedConversationDTO>(
@@ -164,22 +139,16 @@ export default class ChatService
     let repo: Repository<
       ConversationEntity | SharedConversationEntity | MessageEntity
     >;
-    let findOptions: FindOptionsWhere<
-      ConversationEntity | SharedConversationEntity | MessageEntity
-    >;
 
     if (data instanceof DeleteConversationDTO) {
       repo = this.conversationRepo;
-      findOptions = { id: In(data.IDs), isArchived: data.isArchived };
     } else if (data instanceof DeleteSharedConversationDTO) {
       repo = this.sharedConversationRepo;
-      findOptions = { id: In(data.IDs) };
     } else if (data instanceof DeleteMessageDTO) {
       repo = this.messageRepo;
-      findOptions = { id: In(data.IDs) };
     }
 
-    deleteResponse = await repo.delete(findOptions);
+    deleteResponse = await repo.delete({ id: In(data.IDs) });
 
     return deleteResponse;
   }

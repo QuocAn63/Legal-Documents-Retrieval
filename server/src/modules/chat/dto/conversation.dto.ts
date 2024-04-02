@@ -28,10 +28,4 @@ export class UpdateConversationDTO {
 export class DeleteConversationDTO {
   @IsArray()
   IDs: string[];
-
-  @IsString()
-  @IsEnum(['0', '1'], {
-    message: ValidateMessages.CONVERSATION_ISARCHIVED_VALUE,
-  })
-  isArchived: string;
 }

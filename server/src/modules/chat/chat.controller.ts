@@ -44,7 +44,7 @@ export default class ChatController {
   ) {
     const { id } = authToken;
     const { pageIndex, pageSize } = pagination;
-    return this.chatService.getList<ConversationEntity>(
+    return await this.chatService.getList<ConversationEntity>(
       { userID: id, isArchived: '0' },
       { pageIndex, pageSize },
     );
@@ -176,4 +176,8 @@ export default class ChatController {
 
     return await this.chatService.delete<DeleteMessageDTO>(id, data);
   }
+
+  // Reports
+  @Post('/messages/:messageID/report')
+  async report_messages() {}
 }

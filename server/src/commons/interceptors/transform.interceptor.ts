@@ -4,9 +4,10 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { IQueryMetadata } from 'src/interfaces/query.interface';
 import { IResponseData } from 'src/interfaces/response.interface';
 
 @Injectable()
@@ -17,10 +18,30 @@ export class TransformInterceptor<T>
     ctx: ExecutionContext,
     next: CallHandler,
   ): Observable<IResponseData<T>> {
+    const request = ctx.switchToHttp().getRequest<Request>();
     const response = ctx.switchToHttp().getResponse<Response>();
 
     const status = response.statusCode;
 
-    return next.handle().pipe(map((data) => ({ status, data: data })));
+    return next.handle().pipe(
+      map((data) => {
+        let metadata = {};
+
+        if (typeof data === 'object' && Array.isArray(data)) {
+          let pageIndex = request.query['pageIndex']
+            ? Number.parseInt(request.query['pageIndex'].toString())
+            : 1;
+          let pageSize = request.query['pageSize']
+            ? Number.parseInt(request.query['pageSize'].toString())
+            : 1;
+          let length = data.length;
+          let totalPages = Math.floor(data.length / pageSize);
+
+          metadata = { pageIndex, pageSize, totalPages };
+        }
+
+        return { status, data: data, metadata };
+      }),
+    );
   }
 }
