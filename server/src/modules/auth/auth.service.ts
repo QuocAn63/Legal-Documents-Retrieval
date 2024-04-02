@@ -29,7 +29,7 @@ export default class AuthService {
     const user = await this.userRepo.findOneBy({ username: data.username });
 
     if (!(await HashUtil.compare(data.password, user.password))) {
-      throw new UnauthorizedException(ValidateMessages.PASSWORD_WRONG);
+      throw new UnauthorizedException(ValidateMessages.USER_PASSWORD_WRONG);
     }
 
     authTokenPayload = {
@@ -49,7 +49,7 @@ export default class AuthService {
 
     if (method === 'username' && data instanceof SaveUserWithUsernameDTO) {
       if (!(await this.userRepo.findOneBy({ username: data.username })).id) {
-        throw new BadGatewayException(ValidateMessages.USERNAME_EXISTS);
+        throw new BadGatewayException(ValidateMessages.USER_USERNAME_EXISTS);
       }
 
       const encryptedPassword = await HashUtil.hash(data.password);

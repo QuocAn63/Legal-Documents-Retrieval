@@ -1,5 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { FindManyOptions, FindOptions, In, Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BaseEntity,
+  FindManyOptions,
+  FindOptions,
+  FindOptionsWhere,
+  In,
+  Repository,
+} from 'typeorm';
 import ConversationEntity from './entities/conversations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import SharedConversationEntity from './entities/sharedConversations.entity';
@@ -7,14 +14,21 @@ import OffsetUtil from 'src/utils/offset.util';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import IBaseService from 'src/interfaces/baseService.interface';
 import {
+  DeleteSharedConversationDTO,
   SaveSharedConversationDTO,
   UpdateSharedConversationDTO,
 } from './dto/sharedConversation.dto';
 import {
+  DeleteConversationDTO,
   SaveConversationDTO,
   UpdateConversationDTO,
 } from './dto/conversation.dto';
 import MessageEntity from './entities/messages.entity';
+import {
+  DeleteMessageDTO,
+  SaveMessageDTO,
+  UpdateMessageDTO,
+} from './dto/message.dto';
 
 type ConversationType = 'Normal' | 'Shared' | 'Archived';
 
@@ -38,36 +52,9 @@ export default class ChatService
     private readonly messageRepo: Repository<MessageEntity>,
   ) {}
 
-  // async getList<T extends ConversationType>(
-  //   type: T,
-  //   params: T extends 'Shared' ? SharedConvParams : NormalConvParams,
-  //   pagination: IQueryParams,
-  // ): Promise<ConversationEntity[] | SharedConversationEntity[]> {
-  //   let data: ConversationEntity[] | SharedConversationEntity[];
-  //   let offset = OffsetUtil.getOffset(
-  //     pagination.pageIndex | 1,
-  //     pagination.pageIndex | 20,
-  //   );
-
-  //   if (type === 'Shared') {
-  //     data = await this.sharedConversationRepo.find({
-  //       where: { ...params },
-  //       skip: offset,
-  //       relations: ['conversations'],
-  //     });
-  //   } else {
-  //     data = await this.conversationRepo.find({
-  //       where: { ...params, isArchived: type === 'Normal' ? '0' : '1' },
-  //       skip: offset,
-  //     });
-  //   }
-
-  //   return data;
-  // }
-
   async getList<T>(
     entityParams: Partial<T>,
-    { pageIndex, pageSize }: IQueryParams,
+    { pageIndex = 1, pageSize = 20 }: IQueryParams,
   ): Promise<T[] | []> {
     let responseData;
 
@@ -116,60 +103,84 @@ export default class ChatService
     return data;
   }
 
-  async save<T extends ConversationType>(
-    type: T,
-    data: T extends 'Shared' ? SaveSharedConversationDTO : SaveConversationDTO,
-  ): Promise<string> {
-    let saveResponse: SharedConversationEntity | ConversationEntity;
+  async save<
+    T extends SaveConversationDTO | SaveSharedConversationDTO | SaveMessageDTO,
+  >(userID: string, data: T): Promise<string> {
+    let saveResponse:
+      | SharedConversationEntity
+      | ConversationEntity
+      | MessageEntity;
+    let repo: Repository<
+      ConversationEntity | SharedConversationEntity | MessageEntity
+    >;
 
-    if (type === 'Shared') {
-      saveResponse = await this.sharedConversationRepo.save({ ...data });
+    if (data instanceof SaveConversationDTO) {
+      repo = this.conversationRepo;
+    } else if (data instanceof SaveSharedConversationDTO) {
+      repo = this.sharedConversationRepo;
+    } else if (data instanceof SaveMessageDTO) {
+      repo = this.messageRepo;
     } else {
-      saveResponse = await this.conversationRepo.save({ ...data });
+      throw new BadRequestException();
     }
+
+    saveResponse = await repo.save({ userID, ...data });
 
     return saveResponse.id;
   }
 
-  async update<T extends ConversationType>(
-    type: T,
-    data: T extends 'Shared'
-      ? UpdateSharedConversationDTO
-      : UpdateConversationDTO,
+  async update<T extends UpdateConversationDTO | UpdateSharedConversationDTO>(
+    userID: string,
+    data: T,
   ): Promise<string> {
     let updateResponse;
+    let repo: Repository<ConversationEntity | SharedConversationEntity>;
+    let findOptions: FindOptionsWhere<
+      ConversationEntity | SharedConversationEntity
+    >;
 
-    if (type === 'Shared') {
-      updateResponse = await this.sharedConversationRepo.update(
-        { id: data.conversationID, userID: data.userID },
-        { ...data },
-      );
+    if (data instanceof UpdateSharedConversationDTO) {
+      repo = this.sharedConversationRepo;
+      findOptions = { id: data.sharedConversationID, userID };
+    } else if (data instanceof UpdateConversationDTO) {
+      repo = this.conversationRepo;
+      findOptions = { id: data.conversationID, userID };
     } else {
-      updateResponse = await this.conversationRepo.update(
-        { id: data.conversationID, userID: data.userID },
-        { ...data },
-      );
+      throw new BadRequestException();
     }
+
+    updateResponse = await repo.update(findOptions, { ...data });
 
     return updateResponse.id;
   }
 
-  async delete<T extends ConversationType>(
-    type: T,
-    IDs: string[],
-  ): Promise<string[]> {
+  async delete<
+    T extends
+      | DeleteConversationDTO
+      | DeleteSharedConversationDTO
+      | DeleteMessageDTO,
+  >(userID: string, data: T): Promise<string[]> {
     let deleteResponse;
+    let repo: Repository<
+      ConversationEntity | SharedConversationEntity | MessageEntity
+    >;
+    let findOptions: FindOptionsWhere<
+      ConversationEntity | SharedConversationEntity | MessageEntity
+    >;
 
-    if (type === 'Shared') {
-      deleteResponse = await this.sharedConversationRepo.delete({
-        id: In(IDs),
-      });
-    } else {
-      deleteResponse = await this.conversationRepo.delete({ id: In(IDs) });
+    if (data instanceof DeleteConversationDTO) {
+      repo = this.conversationRepo;
+      findOptions = { id: In(data.IDs), isArchived: data.isArchived };
+    } else if (data instanceof DeleteSharedConversationDTO) {
+      repo = this.sharedConversationRepo;
+      findOptions = { id: In(data.IDs) };
+    } else if (data instanceof DeleteMessageDTO) {
+      repo = this.messageRepo;
+      findOptions = { id: In(data.IDs) };
     }
 
-    console.log(deleteResponse);
+    deleteResponse = await repo.delete(findOptions);
 
-    return IDs;
+    return deleteResponse;
   }
 }

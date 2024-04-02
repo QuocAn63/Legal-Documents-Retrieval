@@ -6,7 +6,7 @@ export enum ValidateMessages {
   USER_USERNAME_NOT_EXISTS = 'Tên tài khoản không tồn tại',
   USER_USERNAME_EXISTS = 'Tên tài khoản đã tồn tại',
   USER_ID_NOT_EXISTS = 'Không tìm thấy tài khoản',
-
+  USER_EMAIL_INVALID = 'Địa chỉ email không hợp lệ',
   //   Passwod
   USER_PASSWORD_LENGTH = 'Mật khẩu phải từ 6 đến 50 ký tự',
   USER_PASSWORD_EMPTY = 'Mật khẩu không được bỏ trống',
@@ -25,4 +25,9 @@ export enum ValidateMessages {
 
   // SharedConversations
   SHAREDCONVERSATION_ID_NOT_EXISTS = 'Tiêu đề không được để trống',
+  SHAREDCONVERSATION_SHAREDCODE_EMPTY = 'Mã chia sẽ không được để trống',
+
+  // Messages
+  MESSAGE_CONTENT_EMPTY = 'Nội dung tin nhắn không được để trống',
+  MESSAGE_ISBOT_INVALID = "Loại tin nhắn phải là '0' hoặc '1'",
 }

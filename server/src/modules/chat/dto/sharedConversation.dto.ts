@@ -1,4 +1,4 @@
-import { IsEmpty, IsEnum, IsString, Length } from 'class-validator';
+import { IsArray, IsEmpty, IsEnum, IsString, Length } from 'class-validator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class SaveSharedConversationDTO {
@@ -18,9 +18,10 @@ export class UpdateSharedConversationDTO {
 
   @IsString()
   @IsEmpty({ message: ValidateMessages.CONVERSATION_ID_NOT_EXISTS })
-  conversationID: string;
+  sharedCode: string;
+}
 
-  @IsString()
-  @IsEmpty({ message: ValidateMessages.USER_ID_NOT_EXISTS })
-  userID: string;
+export class DeleteSharedConversationDTO {
+  @IsArray()
+  IDs: string[];
 }
