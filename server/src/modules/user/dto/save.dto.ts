@@ -4,6 +4,7 @@ export class SaveUserDTO {
 import {
   IsEmail,
   IsEmpty,
+  IsNotEmpty,
   IsString,
   Length,
   Matches,
@@ -13,7 +14,7 @@ import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class SaveUserWithUsernameDTO {
   @IsString()
-  @IsEmpty({ message: ValidateMessages.USER_USERNAME_EMPTY })
+  @IsNotEmpty({ message: ValidateMessages.USER_USERNAME_EMPTY })
   @Matches(/[$&+,:;=?@#|'<>.-^*()%!A-Z]/g, {
     message: ValidateMessages.USER_USERNAME_INVALID,
   })
@@ -21,12 +22,12 @@ export class SaveUserWithUsernameDTO {
   username: string;
 
   @IsString()
-  @IsEmpty({ message: ValidateMessages.USER_PASSWORD_EMPTY })
+  @IsNotEmpty({ message: ValidateMessages.USER_PASSWORD_EMPTY })
   @Length(6, 50, { message: ValidateMessages.USER_PASSWORD_LENGTH })
   password: string;
 
   @IsString()
-  @IsEmpty({ message: ValidateMessages.USER_PASSWORDCONFIRM_EMPTY })
+  @IsNotEmpty({ message: ValidateMessages.USER_PASSWORDCONFIRM_EMPTY })
   @Validate(
     (data) => {
       return data.password === data.passwordConfirm;
@@ -41,6 +42,6 @@ export class SaveUserWithEmailDTO {
   email: string;
 
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   token: string;
 }

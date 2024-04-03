@@ -35,14 +35,13 @@ export default class SharedConversationEntity extends BaseEntity {
 
   @CreateDateColumn({
     type: 'datetime',
-    default: 'GETDATE()',
+    default: () => 'GETDATE()',
     nullable: true,
   })
   createdAt: string;
 
   @UpdateDateColumn({
     type: 'datetime',
-    default: 'GETDATE()',
     nullable: true,
   })
   updatedAt: string;

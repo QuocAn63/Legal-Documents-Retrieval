@@ -18,42 +18,43 @@ export class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 25,
-    unique: true,
+    nullable: true,
   })
   username: string;
 
   @Column({
     type: 'varchar',
+    nullable: true,
   })
   password: string;
 
   @Column({
     type: 'varchar',
+    nullable: true,
   })
   email: string;
 
   @Column({
     type: 'varchar',
+    nullable: true,
   })
   googleID: string;
 
   @CreateDateColumn({
     type: 'datetime',
-    default: 'GETDATE()',
+    default: () => 'GETDATE()',
     nullable: true,
   })
   createdAt: string;
 
   @UpdateDateColumn({
     type: 'datetime',
-    default: 'GETDATE()',
     nullable: true,
   })
   updatedAt: string;
 
   @DeleteDateColumn({
     type: 'datetime',
-    default: 'GETDATE()',
     nullable: true,
   })
   deletedAt: string;

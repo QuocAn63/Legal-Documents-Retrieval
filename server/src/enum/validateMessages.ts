@@ -6,6 +6,9 @@ export enum ValidateMessages {
   USER_USERNAME_NOT_EXISTS = 'Tên tài khoản không tồn tại',
   USER_USERNAME_EXISTS = 'Tên tài khoản đã tồn tại',
   USER_ID_NOT_EXISTS = 'Không tìm thấy tài khoản',
+  USER_EMAIL_EMPTY = 'Địa chỉ email không được bỏ trống',
+  USER_EMAIL_EXISTS = 'Địa chỉ email đã tồn tại',
+  USER_EMAIL_NOT_EXISTS = 'Địa chỉ email không tồn tại',
   USER_EMAIL_INVALID = 'Địa chỉ email không hợp lệ',
   //   Passwod
   USER_PASSWORD_LENGTH = 'Mật khẩu phải từ 6 đến 50 ký tự',

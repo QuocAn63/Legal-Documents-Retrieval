@@ -2,6 +2,7 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import IBaseService from 'src/interfaces/baseService.interface';
 import { UserEntity } from './entities/user.entity';
@@ -49,25 +50,29 @@ export default class UserService implements IBaseService<UserEntity> {
   async save<T extends SaveUserWithUsernameDTO | SaveUserWithEmailDTO>(
     data: T,
   ): Promise<string> {
-    let userObj = new UserEntity();
-    userObj.isBOT = 0;
-    userObj.isADMIN = 0;
+    let userInstance = this.userRepo.create();
+    userInstance.isBOT = 0;
+    userInstance.isADMIN = 0;
 
-    if (data instanceof SaveUserWithUsernameDTO) {
-      if (!(await this.userRepo.findOneBy({ username: data.username })).id) {
+    if ('username' in data) {
+      if (await this.userRepo.findOneBy({ username: data.username })) {
         throw new BadGatewayException(ValidateMessages.USER_USERNAME_EXISTS);
       }
 
       const encryptedPassword = await HashUtil.hash(data.password);
 
-      userObj.username = data.username;
-      userObj.password = encryptedPassword;
-    } else if (data instanceof SaveUserWithEmailDTO) {
-      userObj.email = data.email;
-      userObj.googleID = data.token;
+      userInstance.username = data.username;
+      userInstance.password = encryptedPassword;
+    } else if ('email' in data) {
+      userInstance.email = data.email;
+      userInstance.googleID = data.token;
     }
 
-    const saveUserResponse = await this.userRepo.save(userObj);
+    const saveUserResponse = await userInstance.save();
+
+    if (!saveUserResponse) {
+      throw new InternalServerErrorException();
+    }
 
     return saveUserResponse.id;
   }
