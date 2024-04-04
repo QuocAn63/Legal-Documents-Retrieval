@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserModule } from '../user';
 import OauthService from '../oauth/oauth.service';
+import MailService from '../mail/mail.service';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import OauthService from '../oauth/oauth.service';
     UserModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, OauthService],
+  providers: [AuthService, OauthService, MailService],
 })
 export default class AuthModule {}

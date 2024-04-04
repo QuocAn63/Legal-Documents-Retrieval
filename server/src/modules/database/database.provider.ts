@@ -22,6 +22,7 @@ const DatabaseOptions: TypeOrmModuleAsyncOptions = {
       synchronize: isOnDev,
       logging: isOnDev,
       logger: 'advanced-console',
+      requestTimeout: 30000,
       extra: {
         trustServerCertificate: true,
       },

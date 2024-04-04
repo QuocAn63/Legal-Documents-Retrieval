@@ -9,6 +9,7 @@ import {
   Length,
   Matches,
   Validate,
+  ValidateIf,
 } from 'class-validator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
@@ -28,12 +29,9 @@ export class SaveUserWithUsernameDTO {
 
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_PASSWORDCONFIRM_EMPTY })
-  @Validate(
-    (data) => {
-      return data.password === data.passwordConfirm;
-    },
-    { message: ValidateMessages.USER_PASSWORDCONFIRM_NOT_EQUAL },
-  )
+  @ValidateIf((obj, value) => obj.password !== value, {
+    message: ValidateMessages.USER_PASSWORDCONFIRM_NOT_EQUAL,
+  })
   passwordConfirm: string;
 }
 
@@ -43,5 +41,5 @@ export class SaveUserWithEmailDTO {
 
   @IsString()
   @IsNotEmpty()
-  token: string;
+  googleID: string;
 }

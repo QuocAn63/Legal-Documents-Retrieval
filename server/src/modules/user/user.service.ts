@@ -65,7 +65,7 @@ export default class UserService implements IBaseService<UserEntity> {
       userInstance.password = encryptedPassword;
     } else if ('email' in data) {
       userInstance.email = data.email;
-      userInstance.googleID = data.token;
+      userInstance.googleID = data.googleID;
     }
 
     const saveUserResponse = await userInstance.save();

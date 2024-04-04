@@ -10,7 +10,12 @@ import {
 import AuthService from './auth.service';
 import { SaveUserWithUsernameDTO } from '../user/dto/save.dto';
 import { UserService } from '../user';
-import { ForgotPwdDTO, LoginDTO } from './dto/auth.dto';
+import {
+  ForgotPwdDTO,
+  LoginWithUsernameDTO,
+  OAuthLoginDTO,
+  ResetPwdDTO,
+} from './dto/auth.dto';
 import OauthService from '../oauth/oauth.service';
 
 @Controller('/auth')
@@ -22,7 +27,7 @@ export default class AuthController {
   ) {}
 
   @Post('/login')
-  async login(@Body() data: LoginDTO) {
+  async login(@Body() data: LoginWithUsernameDTO) {
     return await this.authService.validateUser(data);
   }
 
@@ -33,9 +38,7 @@ export default class AuthController {
 
   @Get('/oauth/google')
   async handleGoogleOauth() {
-    const url = this.authService.checkAndSending();
-
-    return url;
+    return this.oauthService.getRedirectURL();
   }
 
   @Get('/oauth/google/callback')
@@ -44,9 +47,14 @@ export default class AuthController {
       throw new BadRequestException();
     }
 
-    return await this.oauthService.getUserProfile(code);
+    return await this.authService.handleGoogleCallback(code);
   }
 
   @Post('/pwdforgot')
-  async auth_forgot(@Body() data: ForgotPwdDTO) {}
+  async auth_forgot(@Body() data: ForgotPwdDTO) {
+    return await this.authService.handleResetPwdRequest(data);
+  }
+
+  @Get('/pwdreset')
+  async auth_pwd_reset(@Body() data: ResetPwdDTO) {}
 }

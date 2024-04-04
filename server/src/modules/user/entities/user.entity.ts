@@ -68,4 +68,10 @@ export class UserEntity extends BaseEntity {
     type: 'bit',
   })
   isADMIN: number;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  resetPwdToken: string;
 }
