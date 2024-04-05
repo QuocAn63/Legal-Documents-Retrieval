@@ -9,7 +9,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { ForgotPwdDTO, LoginWithUsernameDTO } from './dto/auth.dto';
+import {
+  ForgotPwdDTO,
+  LoginWithUsernameDTO,
+  ResetPwdDTO,
+} from './dto/auth.dto';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 import HashUtil from 'src/utils/hash.util';
 import { ValidateMessages } from 'src/enum/validateMessages';
@@ -97,5 +101,29 @@ export default class AuthService {
       token,
     );
     return info;
+  }
+
+  async resetUserPassword(token: string, data: ResetPwdDTO) {
+    try {
+      const tokenPayload: { email: string } =
+        await this.jwtService.verifyAsync(token);
+      const { email } = tokenPayload;
+
+      const encryptedPassword = await HashUtil.hash(data.password);
+
+      const updateUserResponse = await this.userRepo.update(
+        { email },
+        { password: encryptedPassword },
+      );
+
+      if (!updateUserResponse.affected) {
+        throw new BadRequestException();
+      }
+
+      return updateUserResponse.raw.id;
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
   }
 }

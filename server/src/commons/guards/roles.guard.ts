@@ -1,11 +1,5 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
-import { Roles } from '../decorators/roles.decorator';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 
 export default class RolesGuard implements CanActivate {

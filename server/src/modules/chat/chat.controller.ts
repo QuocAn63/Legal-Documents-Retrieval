@@ -30,7 +30,9 @@ import {
   SaveSharedConversationDTO,
   UpdateSharedConversationDTO,
 } from './dto/sharedConversation.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Chat')
 @UseGuards(AuthGuard, RolesGuard)
 @Roles('USER')
 @Controller('/chat')

@@ -13,11 +13,12 @@ import { UserService } from '../user';
 import {
   ForgotPwdDTO,
   LoginWithUsernameDTO,
-  OAuthLoginDTO,
   ResetPwdDTO,
 } from './dto/auth.dto';
 import OauthService from '../oauth/oauth.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Authenticate')
 @Controller('/auth')
 export default class AuthController {
   constructor(
@@ -56,5 +57,10 @@ export default class AuthController {
   }
 
   @Get('/pwdreset')
-  async auth_pwd_reset(@Body() data: ResetPwdDTO) {}
+  async auth_pwd_reset(
+    @Query('token') token: string,
+    @Body() data: ResetPwdDTO,
+  ) {
+    return await this.authService.resetUserPassword(token, data);
+  }
 }

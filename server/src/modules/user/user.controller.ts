@@ -4,7 +4,9 @@ import { AuthGuard, RolesGuard } from 'src/commons/guards';
 import UserService from './user.service';
 import { CustomQueryParams } from 'src/commons/decorators/pagination.decorator';
 import { UserEntity } from './entities/user.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('users')
 export default class UserController {
