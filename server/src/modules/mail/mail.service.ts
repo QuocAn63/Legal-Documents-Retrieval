@@ -9,6 +9,9 @@ export default class MailService {
   constructor(private readonly configService: ConfigService) {
     this.transporter = createTransport({
       service: 'Gmail',
+      tls: {
+        rejectUnauthorized: false,
+      },
       auth: {
         user: this.configService.getOrThrow('EMAIL_USERNAME'),
         pass: this.configService.getOrThrow('EMAIL_PASSWORD'),
@@ -20,7 +23,8 @@ export default class MailService {
     const info = await this.transporter.sendMail({
       to,
       subject: 'Reset password',
-      html: resetPwdEmailTemplate.replace('[TOKEN]', token),
+      text: 'Reset password',
+      html: resetPwdEmailTemplate.replaceAll('[TOKEN]', token),
     });
 
     return info;

@@ -80,7 +80,7 @@ export default class AuthService {
   async handleResetPwdRequest(data: ForgotPwdDTO) {
     const { email } = data;
 
-    const token = await this.jwtService.signAsync(
+    const resetPwdToken = await this.jwtService.signAsync(
       {
         email,
       },
@@ -89,7 +89,9 @@ export default class AuthService {
 
     const user = await this.userRepo.update(
       { email },
-      { resetPwdToken: token },
+      {
+        resetPwdToken,
+      },
     );
 
     if (!user.affected) {
@@ -98,7 +100,7 @@ export default class AuthService {
 
     const info = await this.mailService.sendResetPasswordLinkToMails(
       [email],
-      token,
+      resetPwdToken,
     );
     return info;
   }
