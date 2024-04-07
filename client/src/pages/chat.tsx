@@ -19,6 +19,7 @@ import { addConversationRedux } from "../redux/conversations";
 
 import { IMessage } from "../interfaces/chat";
 import { RootState } from "../redux/store";
+import { ArrowDownOutlined } from "@ant-design/icons";
 
 // Validate
 
@@ -40,6 +41,7 @@ interface IChat {
   isLoading: boolean;
   messages: IMessage[];
   isSubmitting: boolean;
+  scrollToEnd: boolean;
 }
 
 export default function Chat({ isMain = false }: ChatPageProps) {
@@ -51,6 +53,7 @@ export default function Chat({ isMain = false }: ChatPageProps) {
     isLoading: false,
     messages: [],
     isSubmitting: false,
+    scrollToEnd: true,
   });
 
   // get dispatch từ redux
@@ -66,9 +69,9 @@ export default function Chat({ isMain = false }: ChatPageProps) {
 
   const token = useSelector((state: RootState) => state.user?.user?.token);
 
-  console.log("Render-Lại");
-
   const navigate = useNavigate();
+
+  const messageContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (conversationID !== undefined) {
@@ -77,6 +80,62 @@ export default function Chat({ isMain = false }: ChatPageProps) {
       setCheck(false);
     }
   }, [conversationID]);
+
+  useEffect(() => {
+    const container = messageContainerRef.current;
+
+    const handleScroll = () => {
+      const container = messageContainerRef.current;
+      if (container) {
+        if (
+          container.scrollTop <
+          container.scrollHeight - container.clientHeight - 150
+        ) {
+          setState((prev) => ({
+            ...prev,
+            scrollToEnd: true,
+          }));
+        } else {
+          setState((prev) => ({
+            ...prev,
+            scrollToEnd: false,
+          }));
+        }
+      }
+    };
+    container?.addEventListener("scroll", handleScroll);
+
+    return () => {
+      container?.removeEventListener("scroll", handleScroll);
+    };
+  }, [messageContainerRef]);
+
+  // Scroll xuống khi fetch message
+  useEffect(() => {
+    const container = messageContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+
+      setState((prev) => ({
+        ...prev,
+        lastScrollPosition: container.scrollHeight,
+      }));
+    }
+  }, [state.messages, messageContainerRef, location.pathname]);
+
+  // Click to Scroll To End
+  const handleScrollToEnd = () => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTo({
+        top: messageContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      setState((prev) => ({
+        ...prev,
+        scrollToEnd: false,
+      }));
+    }
+  };
 
   const clearControls = () => {
     setValue("content", "");
@@ -270,14 +329,56 @@ export default function Chat({ isMain = false }: ChatPageProps) {
       isLoading: false,
       messages: [],
       isSubmitting: false,
+      scrollToEnd: false,
     });
   };
 
   return (
     <Flex justify="center" className={cx("wrapper")}>
       <Flex justify="center" vertical className={cx("contentGroup")}>
-        <div className={cx("messageContainer")}>
-          {!isMain ? <MessagesContainer messages={state.messages} /> : null}
+        <div
+          className={cx("messageContainer")}
+          ref={messageContainerRef}
+          style={{ position: "relative" }}
+          // onScroll={handleScroll}
+        >
+          {!isMain ? (
+            <>
+              <MessagesContainer messages={state.messages} />
+
+              {state.scrollToEnd && (
+                <Flex
+                  onClick={handleScrollToEnd}
+                  className={cx("btnDown")}
+                  justify="center"
+                  style={{
+                    position: "sticky",
+                    bottom: "30px",
+                  }}
+                >
+                  <Flex
+                    style={{
+                      borderRadius: "360px",
+                      borderColor: "rgba(255, 255, 255, 0.1)",
+                      borderWidth: "2px",
+                      backgroundColor: "rgb(33, 33, 33)",
+                      borderStyle: "solid",
+                      display: "inline-flex",
+                      padding: "5px",
+                    }}
+                  >
+                    <ArrowDownOutlined
+                      style={{
+                        fontSize: "20px",
+                        color: "rgb(277, 277, 277)",
+                        zIndex: 1,
+                      }}
+                    />
+                  </Flex>
+                </Flex>
+              )}
+            </>
+          ) : null}
           {state.isLoading && (
             <Flex justify="center" className={cx("wrapSpin")}>
               <Spin className={cx("spin")} />

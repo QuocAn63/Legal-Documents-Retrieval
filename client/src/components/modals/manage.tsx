@@ -30,8 +30,8 @@ const { Title } = Typography;
 const cx = classNames.bind(styles);
 
 interface ManageHandlersProps {
-  handleDeleteAll: () => void;
-  handleDelete: (indexToDel: number) => void;
+  handleDeleteAll: (type: number) => void;
+  handleDelete: (indexToDel: number, type: number) => void;
 }
 
 interface ShareModalProps extends ModalProps {
@@ -39,12 +39,13 @@ interface ShareModalProps extends ModalProps {
   manage: (IConversation | ISharedConversation1)[];
   manageHandlers: ManageHandlersProps;
   isLoading: boolean;
+  onCancel: () => void;
 }
 
 interface ShareModalStateProps {
   totalPage: number;
   currentIndex: number;
-  currentType: number;
+  currentPage: number;
 }
 
 const renderContent = (
@@ -78,7 +79,7 @@ const renderContent = (
             <Tooltip title="Xóa lưu trữ">
               <DeleteOutlined
                 className={cx("icon")}
-                onClick={() => manageHandlers.handleDelete(index)}
+                onClick={() => manageHandlers.handleDelete(index, type)}
               />
             </Tooltip>
           </Flex>
@@ -97,12 +98,13 @@ export default function ManageModal({
   manage,
   manageHandlers,
   isLoading,
+  onCancel,
   ...props
 }: ShareModalProps) {
   const [state, setState] = useState<ShareModalStateProps>({
     totalPage: 1,
-    currentType: -1,
     currentIndex: 0,
+    currentPage: 1,
   });
 
   useEffect(() => {
@@ -110,11 +112,26 @@ export default function ManageModal({
     setState((prev) => ({ ...prev, totalPage: totalPage }));
   }, [manage.length, manage, type]);
 
+  const resetDefault = () => {
+    setState((prev) => ({
+      ...prev,
+      currentIndex: 0,
+      currentPage: 1,
+    }));
+  };
+
+  const handleCancelModal = () => {
+    resetDefault();
+    onCancel();
+  };
+
   const onChangePage: PaginationProps["onChange"] = (pageNumber) => {
     const newStartIndex = (pageNumber - 1) * TOTAL_ITEM_PAGE;
+
     setState((prev) => ({
       ...prev,
       currentIndex: newStartIndex,
+      currentPage: newStartIndex / 4 + 1,
     }));
   };
 
@@ -129,6 +146,7 @@ export default function ManageModal({
       width={800}
       footer={null}
       className={cx("wrapper")}
+      onCancel={handleCancelModal}
       closeIcon={<CloseOutlined className={cx("btnClose")} />}
       {...props}
     >
@@ -154,7 +172,7 @@ export default function ManageModal({
               status={"important"}
               background={true}
               onClick={() => {
-                manageHandlers.handleDeleteAll();
+                manageHandlers.handleDeleteAll(type);
                 setState((prev) => ({ ...prev, isLoading: false }));
               }}
             >
@@ -197,10 +215,11 @@ export default function ManageModal({
           >
             <Pagination
               className={cx("page")}
-              defaultCurrent={0}
+              defaultCurrent={1}
               total={state.totalPage}
               onChange={onChangePage}
               showLessItems={true}
+              current={state.currentPage}
             />
           </ConfigProvider>
         </Flex>

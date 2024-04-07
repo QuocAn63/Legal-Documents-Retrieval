@@ -36,16 +36,16 @@ interface ManageHandlersProps {
   modalManageCloseHandler: () => void;
   getList_Archived: () => Promise<void>;
   getList_Shared: () => Promise<void>;
-  handleDeleteAll: () => void;
-
-  handleDelete: (indexToDel: number) => void;
+}
+interface ManageFunctionsProps<T> {
+  handleDeleteAll: (type: number) => void;
+  handleDelete: (indexToDel: number, type: number) => void;
 }
 
-interface SettingModalProps {
+interface SettingModalProps extends ModalProps {
   manageHandlers: ManageHandlersProps;
   settingHandlers: SettingHandlersProps;
   setTypeHandlers: TypeHandlersProps;
-  props: ModalProps;
 }
 
 interface MenuSelectionsProps {
@@ -59,7 +59,7 @@ interface SettingModalItem {
 }
 
 interface TypeHandlersProps {
-  modalType: () => void;
+  modalType: (type: number) => void;
 }
 
 const SettingModalItem = ({ title, button }: SettingModalItem) => {
@@ -103,6 +103,7 @@ const SettingModal = ({
                 onClick={() => {
                   modalCloseHandler();
                   modalManageOpenHandler();
+                  modalType(0);
                   getList_Archived();
                 }}
               >
@@ -119,7 +120,7 @@ const SettingModal = ({
                 onClick={() => {
                   modalCloseHandler();
                   modalManageOpenHandler();
-                  modalType();
+                  modalType(1);
                   getList_Shared();
                 }}
               >
@@ -188,8 +189,10 @@ interface IUserMenu {
   isOpen: boolean;
   isOpenManage: boolean;
   type: number;
-  manage: (IConversation | ISharedConversation1)[];
+  archived: IConversation[];
+  shared: ISharedConversation1[];
   isLoading: boolean;
+  firstCall: boolean;
 }
 
 const UserMenu = memo(() => {
@@ -199,7 +202,9 @@ const UserMenu = memo(() => {
     isOpen: false,
     isOpenManage: false,
     type: 0,
-    manage: [],
+    archived: [],
+    shared: [],
+    firstCall: false,
     isLoading: false,
   });
   const userMenuRef = useRef(null);
@@ -223,18 +228,20 @@ const UserMenu = memo(() => {
     },
     getList_Archived: async () => {
       try {
-        if (state.manage.length <= 0) {
+        if (state.archived.length <= 0 && !state.isLoading) {
           setState((prev) => ({ ...prev, isLoading: true }));
         }
-        const listArchived = await ChatService.getList_archived_Conversations(
-          token as string
-        );
-        if (listArchived.status === 200) {
-          setState((prev) => ({
-            ...prev,
-            manage: listArchived.data || [],
-            isLoading: false,
-          }));
+        if (state.archived.length <= 0) {
+          const listArchived = await ChatService.getList_archived_Conversations(
+            token as string
+          );
+          if (listArchived.status === 200) {
+            setState((prev) => ({
+              ...prev,
+              archived: listArchived.data || [],
+              isLoading: false,
+            }));
+          }
         }
       } catch (error) {
         console.log(error);
@@ -242,49 +249,67 @@ const UserMenu = memo(() => {
     },
     getList_Shared: async () => {
       try {
-        if (state.manage.length <= 0) {
+        if (state.shared.length <= 0 && !state.isLoading) {
           setState((prev) => ({ ...prev, isLoading: true }));
         }
 
-        const listShared = await SharedService.getList_shared(token as string);
-        if (listShared.status === 200) {
-          setState((prev) => ({
-            ...prev,
-            manage: listShared.data || [],
-            isLoading: false,
-          }));
+        if (state.shared.length <= 0) {
+          const listShared = await SharedService.getList_shared(
+            token as string
+          );
+          if (listShared.status === 200) {
+            setState((prev) => ({
+              ...prev,
+              shared: listShared.data || [],
+              isLoading: false,
+            }));
+          }
         }
       } catch (error) {
         console.log(error);
       }
     },
-    handleDeleteAll: () => {
-      console.log("Delete all");
+  };
 
+  const manageFunction: ManageFunctionsProps<
+    IConversation | ISharedConversation1
+  > = {
+    handleDeleteAll: (type: number) => {
       setState((prev) => ({
         ...prev,
-        manage: [],
+        archived: type === 0 ? [] : prev.archived,
+        shared: type === 1 ? [] : prev.shared,
       }));
     },
-    handleDelete: (indexToDel: number) => {
-      const newData = state.manage.filter((_, index) => index !== indexToDel);
-      setState((prev) => ({
-        ...prev,
-        manage: newData,
-      }));
+    handleDelete: (indexToDel: number, type: number) => {
+      const newData =
+        type === 0
+          ? state.archived.filter((_, index) => index !== indexToDel)
+          : state.shared.filter((_, index) => index !== indexToDel);
+
+      if (type === 0) {
+        setState((prev) => ({
+          ...prev,
+          archived: newData as IConversation[],
+        }));
+      } else {
+        setState((prev) => ({
+          ...prev,
+          shared: newData as ISharedConversation1[],
+        }));
+      }
     },
   };
 
   const setTypeHandlers: TypeHandlersProps = {
-    modalType: () => {
-      setState((prev) => ({ ...prev, type: 1 }));
+    modalType: (type: number) => {
+      setState((prev) => ({ ...prev, type: type }));
     },
   };
 
   const handleCloseModalManage = () => {
     manageHandlers.modalManageCloseHandler();
     settingHandlers.modalOpenHandler();
-    setState((prev) => ({ ...prev, type: 0 }));
   };
 
   return (
@@ -310,9 +335,9 @@ const UserMenu = memo(() => {
         type={state.type}
         closeIcon={<CloseOutlined className={cx("btnClose")} />}
         onCancel={handleCloseModalManage}
-        manage={state.manage}
+        manage={state.type === 0 ? state.archived : state.shared}
         isLoading={state.isLoading}
-        manageHandlers={manageHandlers}
+        manageHandlers={manageFunction}
       />
 
       <Dropdown

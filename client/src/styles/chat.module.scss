@@ -10,9 +10,15 @@
         height: calc(100vh - 20px);
     }
 
-    .messageContainer {flex-grow: 1;
-        overflow-y: scroll;
+    .messageContainer {
+        flex-grow: 1;
+        overflow-y: auto;
+        .btnDown:hover {
+            cursor: pointer;
+            opacity: 0.7;
+        }
     }
+   
 
     .textBox {
         background-color: transparent;
@@ -52,4 +58,5 @@
     .wrapSpin{
         margin-bottom: 20px;
     }
+    
 }
