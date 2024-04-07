@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  Patch,
   Post,
   Query,
   Redirect,
@@ -27,6 +29,7 @@ export default class AuthController {
     private readonly oauthService: OauthService,
   ) {}
 
+  @HttpCode(200)
   @Post('/login')
   async login(@Body() data: LoginWithUsernameDTO) {
     return await this.authService.validateUser(data);
@@ -56,11 +59,9 @@ export default class AuthController {
     return await this.authService.handleResetPwdRequest(data);
   }
 
-  @Get('/pwdreset')
-  async auth_pwd_reset(
-    @Query('token') token: string,
-    @Body() data: ResetPwdDTO,
-  ) {
-    return await this.authService.resetUserPassword(token, data);
+  @HttpCode(204)
+  @Patch('/pwdreset')
+  async auth_pwd_reset(@Body() data: ResetPwdDTO) {
+    return await this.authService.resetUserPassword(data);
   }
 }

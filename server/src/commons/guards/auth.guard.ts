@@ -30,8 +30,6 @@ export default class AuthGuard implements CanActivate {
         secret: this.configService.getOrThrow('AUTH_SECRET'),
       });
 
-      console.log(payload);
-
       request.user = payload;
     } catch (ex) {
       throw new UnauthorizedException(ex);
@@ -41,7 +39,6 @@ export default class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    console.log(request.headers.authorization);
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
 
     return type === 'Bearer' ? token : undefined;

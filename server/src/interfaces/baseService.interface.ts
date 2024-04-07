@@ -1,7 +1,13 @@
-export default interface IBaseService<T> {
-  getList(...props: any): Promise<T[] | []>;
+import { IQueryParams } from './query.interface';
 
-  get(...props: any): Promise<T>;
+export default interface IBaseService<T> {
+  getList(
+    entityParams: Partial<T>,
+    query: IQueryParams,
+    ...props: any
+  ): Promise<T[] | []>;
+
+  get(entityParams: Partial<T>, ...props: any): Promise<T>;
 
   save(...props: any): Promise<string>;
 

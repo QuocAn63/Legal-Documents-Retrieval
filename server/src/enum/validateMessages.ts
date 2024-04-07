@@ -33,4 +33,7 @@ export enum ValidateMessages {
   // Messages
   MESSAGE_CONTENT_EMPTY = 'Nội dung tin nhắn không được để trống',
   MESSAGE_ISBOT_INVALID = "Loại tin nhắn phải là '0' hoặc '1'",
+
+  // Token
+  TOKEN_EMPTY = 'Token trống',
 }

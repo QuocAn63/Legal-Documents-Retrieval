@@ -4,9 +4,12 @@ import ReportController from './report.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import ReportEntity from './entities/report.entity';
 import ReportReasonEntity from './entities/reportReason.entity';
+import MessageEntity from '../chat/entities/messages.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReportEntity, ReportReasonEntity])],
+  imports: [
+    TypeOrmModule.forFeature([ReportEntity, ReportReasonEntity, MessageEntity]),
+  ],
   providers: [ReportService],
   controllers: [ReportController],
 })

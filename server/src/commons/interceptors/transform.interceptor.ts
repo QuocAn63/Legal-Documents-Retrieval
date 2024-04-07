@@ -33,9 +33,9 @@ export class TransformInterceptor<T>
             : 1;
           let pageSize = request.query['pageSize']
             ? Number.parseInt(request.query['pageSize'].toString())
-            : 1;
-          let length = data.length;
-          let totalPages = Math.floor(data.length / pageSize);
+            : 20;
+
+          let totalPages = Math.ceil(data.length / pageSize);
 
           metadata = { pageIndex, pageSize, totalPages };
         }

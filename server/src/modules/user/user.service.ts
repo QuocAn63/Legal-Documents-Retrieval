@@ -43,8 +43,8 @@ export default class UserService implements IBaseService<UserEntity> {
     return await queryBuilder.getMany();
   }
 
-  async get(userID: string): Promise<UserEntity> {
-    return await this.userRepo.findOneBy({ id: userID });
+  async get(entityParams: Partial<UserEntity>): Promise<UserEntity> {
+    return await this.userRepo.findOneBy({ id: entityParams.id });
   }
 
   async save<T extends SaveUserWithUsernameDTO | SaveUserWithEmailDTO>(

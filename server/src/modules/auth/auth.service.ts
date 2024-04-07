@@ -105,10 +105,11 @@ export default class AuthService {
     return info;
   }
 
-  async resetUserPassword(token: string, data: ResetPwdDTO) {
+  async resetUserPassword(data: ResetPwdDTO) {
     try {
-      const tokenPayload: { email: string } =
-        await this.jwtService.verifyAsync(token);
+      const tokenPayload: { email: string } = await this.jwtService.verifyAsync(
+        data.token,
+      );
       const { email } = tokenPayload;
 
       const encryptedPassword = await HashUtil.hash(data.password);
@@ -124,7 +125,6 @@ export default class AuthService {
 
       return updateUserResponse.raw.id;
     } catch (err) {
-      console.log(err);
       throw new Error(err);
     }
   }

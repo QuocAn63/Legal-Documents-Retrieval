@@ -37,6 +37,10 @@ export class ForgotPwdDTO {
 
 export class ResetPwdDTO {
   @IsString()
+  @IsNotEmpty({ message: ValidateMessages.TOKEN_EMPTY })
+  token: string;
+
+  @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_PASSWORD_EMPTY })
   @Length(6, 50, { message: ValidateMessages.USER_PASSWORD_LENGTH })
   password: string;

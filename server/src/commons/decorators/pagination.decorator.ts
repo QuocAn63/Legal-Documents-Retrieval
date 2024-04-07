@@ -1,6 +1,5 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 import { Request } from 'express';
-import { EntitySchema } from 'typeorm';
 
 export const Pagination = createParamDecorator(
   (defaultPageSize = 20, ctx: ExecutionContext) => {
