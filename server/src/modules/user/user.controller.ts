@@ -12,17 +12,18 @@ import {
 import { Roles } from 'src/commons/decorators/roles.decorator';
 import { AuthGuard, RolesGuard } from 'src/commons/guards';
 import UserService from './user.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import { FilterUserDTO } from './dto/filter.dto';
 import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
-import { SaveBOTDTO, SaveUserWithUsernameDTO } from './dto/save.dto';
+import { SaveBOTDTO } from './dto/save.dto';
 import { UpdateUserDTO } from './dto/update.dto';
 import { AuthToken } from 'src/commons/decorators/auth.decorator';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 import { DeleteUserDTO } from './dto/delete.dto';
 
+@ApiTags('users')
 @ApiBearerAuth()
 @Roles('ADMIN')
 @UseGuards(AuthGuard, RolesGuard)

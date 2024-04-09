@@ -12,6 +12,7 @@ export default class RolesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+    console.log(roles);
     const http = context.switchToHttp();
     const request = http.getRequest();
     const authToken = request.user as IAuthToken;

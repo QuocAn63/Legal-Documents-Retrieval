@@ -1,11 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsString,
-  Length,
-  Validate,
-  ValidateIf,
-} from 'class-validator';
+import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
+import { Match } from 'src/commons/decorators/match.decorator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class UpdateUserDTO {
@@ -39,11 +34,11 @@ export class UpdateUserDTO {
       'Mật khẩu mới',
     ),
   })
-  @ValidateIf(
-    (data, value) => {
-      return data.newPassword !== value;
-    },
-    { message: ValidateMessages.USER_PASSWORDCONFIRM_NOT_EQUAL },
-  )
+  @Match('password', {
+    message: ValidateMessages.USER_PASSWORDCONFIRM_NOT_EQUAL.replace(
+      'Mật khẩu',
+      'Mật khẩu mới',
+    ),
+  })
   newPasswordConfirm: string;
 }

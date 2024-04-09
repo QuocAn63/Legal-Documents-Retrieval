@@ -5,7 +5,13 @@ import { FindOperator, Like } from 'typeorm';
 export class QueryTransformPipe implements PipeTransform {
   transform<T>(value: any, metadata: ArgumentMetadata) {
     let newValue: Record<string, FindOperator<T> | string> = value;
-    let fieldsNeedLike = ['title', 'description', 'content'];
+    let fieldsNeedLike = [
+      'title',
+      'description',
+      'content',
+      'username',
+      'email',
+    ];
 
     if (metadata.type === 'query') {
       Object.keys(value).forEach((key) => {

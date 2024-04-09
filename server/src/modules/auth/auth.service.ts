@@ -39,7 +39,10 @@ export default class AuthService {
     let authTokenPayload: IAuthToken;
 
     if ('username' in data) {
-      user = await this.userRepo.findOneBy({ username: data.username });
+      user = await this.userRepo.findOne({
+        where: { username: data.username },
+        select: ['id', 'email', 'isBOT', 'isADMIN', 'password'],
+      });
     } else if ('email' in data) {
       user = await this.userRepo.findOneBy({
         email: data.email,

@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -9,6 +10,7 @@ import {
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class LoginWithUsernameDTO {
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_USERNAME_EMPTY })
   @Matches(/[$&+,:;=?@#|'<>.-^*()%!A-Z]/g, {
@@ -17,6 +19,7 @@ export class LoginWithUsernameDTO {
   @Length(6, 25, { message: ValidateMessages.USER_USERNAME_LENGTH })
   username: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_PASSWORD_EMPTY })
   @Length(6, 50, { message: ValidateMessages.USER_PASSWORD_LENGTH })
@@ -30,21 +33,25 @@ export class OAuthLoginDTO {
 }
 
 export class ForgotPwdDTO {
+  @ApiProperty()
   @IsNotEmpty({ message: ValidateMessages.USER_EMAIL_EMPTY })
   @IsEmail({}, { message: ValidateMessages.USER_EMAIL_INVALID })
   email: string;
 }
 
 export class ResetPwdDTO {
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.TOKEN_EMPTY })
   token: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_PASSWORD_EMPTY })
   @Length(6, 50, { message: ValidateMessages.USER_PASSWORD_LENGTH })
   password: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({
     message: ValidateMessages.USER_PASSWORDCONFIRM_EMPTY,

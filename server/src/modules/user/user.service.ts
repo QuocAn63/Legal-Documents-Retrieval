@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import IBaseService from 'src/interfaces/baseService.interface';
 import { UserEntity } from './entities/user.entity';
@@ -91,8 +92,14 @@ export default class UserService implements IBaseService<UserEntity> {
   async update(userToken: IAuthToken, data: UpdateUserDTO): Promise<string> {
     const { password, newPassword } = data;
     const { id } = userToken;
+    const user = await this.userRepo.findOne({
+      where: { id },
+      select: ['password'],
+    });
 
-    const user = await this.userRepo.findOneBy({ id });
+    if (user === null) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
 
     const isPasswordEquals = await HashUtil.compare(password, user.password);
 
@@ -114,19 +121,18 @@ export default class UserService implements IBaseService<UserEntity> {
     return 'Cập nhật thành công';
   }
 
-  async delete(userToken: IAuthToken, data: DeleteUserDTO): Promise<string[]> {
+  async delete(userToken: IAuthToken, data: DeleteUserDTO): Promise<string> {
     const { id, isADMIN } = userToken;
-    let deletedIDs = [];
     let deleteResult: DeleteResult;
 
     if ((data.IDs.includes(id) && data.IDs.length == 1) || isADMIN) {
-      deleteResult = await this.userRepo.delete({ id: In(data.IDs) });
+      deleteResult = await this.userRepo.softDelete({ id: In(data.IDs) });
     }
 
-    if (typeof deleteResult === 'object' && Array.isArray(deleteResult)) {
-      deletedIDs = deleteResult.map((result) => result.id);
+    if (!deleteResult.affected) {
+      throw new BadRequestException('Xóa không thành công');
     }
 
-    return deletedIDs;
+    return 'Xóa thành công';
   }
 }
