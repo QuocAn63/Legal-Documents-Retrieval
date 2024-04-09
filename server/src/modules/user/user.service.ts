@@ -8,9 +8,13 @@ import IBaseService from 'src/interfaces/baseService.interface';
 import { UserEntity } from './entities/user.entity';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import OffsetUtil from 'src/utils/offset.util';
-import { DeleteResult, In, Repository } from 'typeorm';
+import { DeleteResult, FindOptionsWhere, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SaveUserWithEmailDTO, SaveUserWithUsernameDTO } from './dto/save.dto';
+import {
+  SaveBOTDTO,
+  SaveUserWithEmailDTO,
+  SaveUserWithUsernameDTO,
+} from './dto/save.dto';
 import { ValidateMessages } from 'src/enum/validateMessages';
 import HashUtil from 'src/utils/hash.util';
 import { IAuthToken } from 'src/interfaces/auth.interface';
@@ -25,34 +29,30 @@ export default class UserService implements IBaseService<UserEntity> {
   ) {}
 
   async getList(
-    params: Partial<UserEntity>,
+    entityParams: FindOptionsWhere<UserEntity>,
     { pageIndex = 1, pageSize = 20 }: IQueryParams,
   ): Promise<[] | UserEntity[]> {
-    const queryBuilder = this.userRepo.createQueryBuilder('users');
+    let responseData = [];
 
-    for (const field in params) {
-      if (params[field] !== undefined) {
-        const value = params[field];
+    responseData = await this.userRepo.find({
+      where: entityParams,
+      skip: OffsetUtil.getOffset(pageIndex, pageSize),
+      take: pageSize,
+    });
 
-        queryBuilder.andWhere(`users.${field} = :value`, { value });
-      }
-    }
-
-    queryBuilder.skip(OffsetUtil.getOffset(pageIndex, pageSize)).take(pageSize);
-
-    return await queryBuilder.getMany();
+    return responseData;
   }
 
-  async get(entityParams: Partial<UserEntity>): Promise<UserEntity> {
-    return await this.userRepo.findOneBy({ id: entityParams.id });
+  async get(entityParams: FindOptionsWhere<UserEntity>): Promise<UserEntity> {
+    return await this.userRepo.findOneBy(entityParams);
   }
 
   async save<T extends SaveUserWithUsernameDTO | SaveUserWithEmailDTO>(
     data: T,
   ): Promise<string> {
     let userInstance = this.userRepo.create();
-    userInstance.isBOT = 0;
-    userInstance.isADMIN = 0;
+    userInstance.isBOT = '0';
+    userInstance.isADMIN = '0';
 
     if ('username' in data) {
       if (await this.userRepo.findOneBy({ username: data.username })) {
@@ -77,6 +77,16 @@ export default class UserService implements IBaseService<UserEntity> {
     return saveUserResponse.id;
   }
 
+  async save_bot(data: SaveBOTDTO) {
+    const saveResponse = await this.userRepo.save({
+      username: data.username,
+      isBOT: '1',
+      isADMIN: '0',
+    });
+
+    return saveResponse.id;
+  }
+
   // Just for change password
   async update(userToken: IAuthToken, data: UpdateUserDTO): Promise<string> {
     const { password, newPassword } = data;
@@ -97,7 +107,11 @@ export default class UserService implements IBaseService<UserEntity> {
       { password: encryptedPassword },
     );
 
-    return saveUserResponse.raw.id;
+    if (!saveUserResponse.affected) {
+      throw new BadRequestException('Cập nhật không thành công');
+    }
+
+    return 'Cập nhật thành công';
   }
 
   async delete(userToken: IAuthToken, data: DeleteUserDTO): Promise<string[]> {

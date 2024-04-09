@@ -43,18 +43,14 @@ export default class SharedConversationController {
     );
   }
 
-  @Get('/:sharedConversationID')
+  @Get('/:sharedConversationCode')
   async get_sharedConversations(
     @AuthToken() authToken: IAuthToken,
-    @Param('sharedConversationID') sharedConversationID: string,
+    @Param('sharedConversationCode') sharedCode: string,
   ) {
-    if (!sharedConversationID) {
-      throw new NotFoundException('Không tìm thấy cuộc trò chuyện.');
-    }
-
     const { id } = authToken;
 
-    return this.sharedService.get({ userID: id, id: sharedConversationID }, {});
+    return this.sharedService.get({ userID: id, sharedCode }, {});
   }
 
   @Post('/')

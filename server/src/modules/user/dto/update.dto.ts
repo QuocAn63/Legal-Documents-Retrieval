@@ -1,14 +1,23 @@
-import { IsEmpty, IsString, Length, Validate } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsString,
+  Length,
+  Validate,
+  ValidateIf,
+} from 'class-validator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class UpdateUserDTO {
+  @ApiProperty()
   @IsString()
-  @IsEmpty({ message: ValidateMessages.USER_PASSWORD_EMPTY })
+  @IsNotEmpty({ message: ValidateMessages.USER_PASSWORD_EMPTY })
   @Length(6, 50, { message: ValidateMessages.USER_PASSWORD_LENGTH })
   password: string;
 
+  @ApiProperty()
   @IsString()
-  @IsEmpty({
+  @IsNotEmpty({
     message: ValidateMessages.USER_PASSWORD_EMPTY.replace(
       'Mật khẩu',
       'Mật khẩu mới',
@@ -22,16 +31,17 @@ export class UpdateUserDTO {
   })
   newPassword: string;
 
+  @ApiProperty()
   @IsString()
-  @IsEmpty({
+  @IsNotEmpty({
     message: ValidateMessages.USER_PASSWORDCONFIRM_EMPTY.replace(
       'Mật khẩu',
       'Mật khẩu mới',
     ),
   })
-  @Validate(
-    (data) => {
-      return data.newPassword === data.newPasswordConfirm;
+  @ValidateIf(
+    (data, value) => {
+      return data.newPassword !== value;
     },
     { message: ValidateMessages.USER_PASSWORDCONFIRM_NOT_EQUAL },
   )

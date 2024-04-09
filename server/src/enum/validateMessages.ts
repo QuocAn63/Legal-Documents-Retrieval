@@ -25,6 +25,7 @@ export enum ValidateMessages {
   CONVERSATION_TITLE_LENGTH = 'Tiêu đề phải từ 1 đến 150 ký tự',
   CONVERSATION_ISARCHIVED_VALUE = "Trạng thái phải là giá trị '0' hoặc '1'",
   CONVERSATION_ID_NOT_EXISTS = 'Không tìm thấy cuộc trò chuyện',
+  CONVERSATION_ID_EMPTY = 'Mã cuộc trò chuyện không được để trống',
 
   // SharedConversations
   SHAREDCONVERSATION_ID_NOT_EXISTS = 'Tiêu đề không được để trống',
@@ -33,7 +34,7 @@ export enum ValidateMessages {
   // Messages
   MESSAGE_CONTENT_EMPTY = 'Nội dung tin nhắn không được để trống',
   MESSAGE_ISBOT_INVALID = "Loại tin nhắn phải là '0' hoặc '1'",
-
+  MESSAGE_ID_EMPTY = 'Mã tin nhắn không được bỏ trống',
   // Token
   TOKEN_EMPTY = 'Token trống',
 }

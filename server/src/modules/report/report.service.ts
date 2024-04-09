@@ -14,22 +14,18 @@ export default class ReportService implements IBaseService<ReportEntity> {
   ) {}
 
   async getList(
-    params: Partial<ReportEntity>,
+    entityParams: FindOptionsWhere<ReportEntity>,
     { pageIndex = 1, pageSize = 20 }: IQueryParams,
   ): Promise<ReportEntity[] | []> {
-    const queryBuilder = this.reportRepo.createQueryBuilder('reports');
+    let responseData = [];
 
-    for (const field in params) {
-      if (params[field] !== undefined) {
-        const value = params[field];
+    responseData = await this.reportRepo.find({
+      where: entityParams,
+      skip: OffsetUtil.getOffset(pageIndex, pageSize),
+      take: pageSize,
+    });
 
-        queryBuilder.andWhere(`reports.${field} = :value`, { value });
-      }
-    }
-
-    queryBuilder.skip(OffsetUtil.getOffset(pageIndex, pageSize)).take(pageSize);
-
-    return await queryBuilder.getMany();
+    return responseData;
   }
 
   get(...props: any): Promise<ReportEntity> {

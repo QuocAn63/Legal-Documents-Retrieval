@@ -7,7 +7,7 @@ import {
 import IBaseService from 'src/interfaces/baseService.interface';
 import ConversationEntity from '../chat/entities/conversations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import OffsetUtil from 'src/utils/offset.util';
 import { IAuthToken } from 'src/interfaces/auth.interface';
@@ -15,7 +15,7 @@ import {
   DeleteConversationDTO,
   SaveConversationDTO,
   UpdateConversationDTO,
-} from '../chat/dto/conversation.dto';
+} from './dto/conversation.dto';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 
 @Injectable()
@@ -28,15 +28,15 @@ export default class ConversationService
   ) {}
 
   async getList(
-    entityParams: Partial<ConversationEntity>,
-    @Pagination() { pageIndex, pageSize }: IQueryParams,
+    entityParams: FindOptionsWhere<ConversationEntity>,
+    { pageIndex, pageSize }: IQueryParams,
     ...props: any
   ): Promise<[] | ConversationEntity[]> {
     let responseData = [];
     const offset = OffsetUtil.getOffset(pageIndex, pageSize);
 
     responseData = await this.conversationRepo.find({
-      where: { ...(entityParams as any) },
+      where: entityParams,
       skip: offset,
       take: pageSize,
     });
@@ -45,7 +45,7 @@ export default class ConversationService
   }
 
   async get(
-    entityParams: Partial<ConversationEntity>,
+    entityParams: FindOptionsWhere<ConversationEntity>,
     ...props: any
   ): Promise<ConversationEntity> {
     let responseData = null;

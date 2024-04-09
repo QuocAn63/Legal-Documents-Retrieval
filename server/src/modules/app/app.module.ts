@@ -8,6 +8,7 @@ import { SystemMessageModule } from '../system-message/system-message.module';
 import { ReportModule } from '../report';
 import { ConversationModule } from '../conversation';
 import { SharedConversationModule } from '../shared-conversation';
+import { MessageModule } from '../message/message.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SharedConversationModule } from '../shared-conversation';
     DatabaseModule.forRootAsync(),
     ConversationModule,
     SharedConversationModule,
+    MessageModule,
     AuthModule,
     UserModule,
     ConfigModule,

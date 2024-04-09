@@ -71,7 +71,12 @@ export default class AuthService {
     const user = await this.userRepo.findOneBy({ email, googleID });
 
     if (user === null) {
-      await this.userRepo.save({ email, googleID, isBOT: 0, isADMIN: 0 });
+      await this.userRepo.save({
+        email,
+        googleID,
+        isBOT: '0',
+        isADMIN: '0',
+      });
     }
 
     return await this.validateUser({ email, googleID });

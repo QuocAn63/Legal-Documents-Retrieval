@@ -7,21 +7,25 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthToken } from 'src/commons/decorators/auth.decorator';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
-import MessageEntity from '../chat/entities/messages.entity';
 import {
   DeleteConversationDTO,
+  FilterConversationDTO,
   SaveConversationDTO,
   UpdateConversationDTO,
-} from '../chat/dto/conversation.dto';
+} from './dto/conversation.dto';
 import ConversationService from './conversation.service';
 import { AuthGuard } from 'src/commons/guards';
+import ConversationEntity from '../chat/entities/conversations.entity';
+import { FindOptionsWhere } from 'typeorm';
+import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
@@ -34,11 +38,13 @@ export default class ConversationController {
   async getList_conversations(
     @AuthToken() authToken: IAuthToken,
     @Pagination(20) pagination: IQueryParams,
+    @Query(QueryTransformPipe) queries: FilterConversationDTO,
   ) {
+    console.log(queries);
     const { id } = authToken;
     const { pageIndex, pageSize } = pagination;
     return await this.conversationService.getList(
-      { userID: id, isArchived: '0' },
+      { userID: id, isArchived: '0', ...queries },
       { pageIndex, pageSize },
     );
   }

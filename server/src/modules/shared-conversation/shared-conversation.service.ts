@@ -6,7 +6,7 @@ import {
 import IBaseService from 'src/interfaces/baseService.interface';
 import SharedConversationEntity from '../chat/entities/sharedConversations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 import {
@@ -27,26 +27,27 @@ export default class SharedConversationService
     private readonly conversationService: ConversationService,
   ) {}
   async getList(
-    entityParams: Partial<SharedConversationEntity>,
+    entityParams: FindOptionsWhere<SharedConversationEntity>,
     ...props: any
   ): Promise<[] | SharedConversationEntity[]> {
     let responseData = [];
+    const { userID, ...params } = entityParams;
 
     responseData = await this.sharedRepo.find({
-      where: { userID: entityParams.id },
+      where: { userID, ...params },
     });
 
     return responseData;
   }
 
   async get(
-    entityParams: Partial<SharedConversationEntity>,
+    entityParams: FindOptionsWhere<SharedConversationEntity>,
     ...props: any
   ): Promise<SharedConversationEntity> {
     let responseData = null;
 
     responseData = await this.sharedRepo.findOneBy({
-      id: entityParams.id,
+      ...entityParams,
     });
 
     if (responseData === null) {
@@ -91,7 +92,7 @@ export default class SharedConversationService
 
     console.log(newSharedCode);
     const updateResponse = await this.sharedRepo.update(
-      { id: sharedConversationID },
+      { id: sharedConversationID, userID: authToken.id },
       { sharedCode: newSharedCode },
     );
 
@@ -106,7 +107,10 @@ export default class SharedConversationService
     authToken: IAuthToken,
     data: DeleteSharedConversationDTO,
   ): Promise<string | string[]> {
-    const deleteResponse = await this.sharedRepo.delete({ id: In(data.IDs) });
+    const deleteResponse = await this.sharedRepo.delete({
+      id: In(data.IDs),
+      userID: authToken.id,
+    });
 
     if (deleteResponse.affected) {
       throw new BadRequestException('Xóa không thành công');

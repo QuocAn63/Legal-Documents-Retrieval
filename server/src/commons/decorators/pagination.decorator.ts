@@ -12,18 +12,3 @@ export const Pagination = createParamDecorator(
     return { pageIndex, pageSize, fromDate, toDate };
   },
 );
-
-export const CustomQueryParams = <T>(fields: (keyof T)[]) =>
-  createParamDecorator((data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<Request>();
-    const queryParams = request.query;
-
-    const filteredParams: Partial<T> = {};
-    fields.forEach((field) => {
-      if (field in queryParams) {
-        filteredParams[field] = queryParams[field] as any;
-      }
-    });
-
-    return filteredParams;
-  })();

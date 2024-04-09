@@ -1,19 +1,16 @@
-export class SaveUserDTO {
-  username: string;
-}
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsEmpty,
   IsNotEmpty,
   IsString,
   Length,
   Matches,
-  Validate,
   ValidateIf,
 } from 'class-validator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class SaveUserWithUsernameDTO {
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_USERNAME_EMPTY })
   @Matches(/[$&+,:;=?@#|'<>.-^*()%!A-Z]/g, {
@@ -22,11 +19,13 @@ export class SaveUserWithUsernameDTO {
   @Length(6, 25, { message: ValidateMessages.USER_USERNAME_LENGTH })
   username: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_PASSWORD_EMPTY })
   @Length(6, 50, { message: ValidateMessages.USER_PASSWORD_LENGTH })
   password: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_PASSWORDCONFIRM_EMPTY })
   @ValidateIf((obj, value) => obj.password !== value, {
@@ -36,10 +35,20 @@ export class SaveUserWithUsernameDTO {
 }
 
 export class SaveUserWithEmailDTO {
+  @ApiProperty()
   @IsEmail({}, { message: ValidateMessages.USER_EMAIL_INVALID })
   email: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   googleID: string;
+}
+
+export class SaveBOTDTO {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({ message: ValidateMessages.USER_USERNAME_EMPTY })
+  @Length(6, 25, { message: ValidateMessages.USER_USERNAME_LENGTH })
+  username: string;
 }

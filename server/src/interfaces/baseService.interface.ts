@@ -1,13 +1,14 @@
+import { FindOptionsWhere } from 'typeorm';
 import { IQueryParams } from './query.interface';
 
 export default interface IBaseService<T> {
   getList(
-    entityParams: Partial<T>,
+    entityParams: FindOptionsWhere<T>,
     query: IQueryParams,
     ...props: any
   ): Promise<T[] | []>;
 
-  get(entityParams: Partial<T>, ...props: any): Promise<T>;
+  get(entityParams: FindOptionsWhere<T>, ...props: any): Promise<T>;
 
   save(...props: any): Promise<string>;
 
