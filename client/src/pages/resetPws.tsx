@@ -6,7 +6,7 @@ import Title from "antd/es/typography/Title";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormItem } from "react-hook-form-antd";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Paragraph from "antd/es/typography/Paragraph";
 import AuthService from "../services/auth.service";
 import { useState } from "react";
@@ -19,10 +19,20 @@ const schema = z.object({
   password: loginValidateObjects.password,
   passwordConfirm: loginValidateObjects.passwordConfirm,
 });
+// .refine(
+//   (values) => {
+//     return values.password === values.passwordConfirm;
+//   },
+//   {
+//     message: "Mật khẩu không trùng khớp!",
+//     path: ["passwordConfirm"],
+//   }
+// );
 
 export interface IResetPasswordInput {
   password: string;
   passwordConfirm: string;
+  resetPwdToken: string;
 }
 
 export default function ResetPassword() {
@@ -41,14 +51,30 @@ export default function ResetPassword() {
     message: string;
   }>({ isSent: false, status: "info", message: "" });
 
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+
+  const token = searchParams.get("token");
+
   const onSubmit: SubmitHandler<IResetPasswordInput> = async (data) => {
     try {
-      setIsLoading(true);
-      const response = await AuthService.forgotPasswordAccepted(data);
+      if (token) {
+        const reqData = {
+          resetPwdToken: token,
+          password: data.password,
+          passwordConfirm: data.passwordConfirm,
+        };
+        setIsLoading(true);
+        const response = await AuthService.forgotPasswordAccepted(reqData);
 
-      if (response.status === 200) {
-        setSentStatus((prev) => ({ ...prev, isSent: true, status: "success" }));
-        setIsLoading(false);
+        if (response.status === 200) {
+          setSentStatus((prev) => ({
+            ...prev,
+            isSent: true,
+            status: "success",
+          }));
+          setIsLoading(false);
+        }
       }
     } catch (err: any) {
       const message = err?.message || err?.msg || "Error form server";
@@ -86,7 +112,7 @@ export default function ResetPassword() {
                 />
                 {errors.root?.message ? (
                   <Paragraph className={cx("generalErrorTitle")}>
-                    {errors.root.message}
+                    {errors.root?.message}
                   </Paragraph>
                 ) : null}
               </FormItem>

@@ -5,6 +5,7 @@ import styles from "../styles/usermenu.module.scss";
 import classNames from "classnames/bind";
 import {
   CloseOutlined,
+  DatabaseOutlined,
   LogoutOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
@@ -82,70 +83,107 @@ const SettingModal = ({
   const { modalCloseHandler } = settingHandlers;
   const { modalType } = setTypeHandlers;
 
+  const [selectItem, setSelectItem] = useState<number>(0);
+
+  const handleSelectItem = (index: number) => {
+    setSelectItem(index);
+  };
+
   return (
-    <Modal {...props}>
+    <Modal {...props} width={680}>
       <div className={cx("modalWrapper")}>
         <Title level={4} className={cx("title")}>
           Cài đặt
         </Title>
         <span className="horizontal"></span>
-        <div className={cx("btnContainer")}>
-          <SettingModalItem
-            title="Giao diện"
-            button={<CustomButton outlined>Tối</CustomButton>}
-          />
-          <span className="horizontal"></span>
-          <SettingModalItem
-            title="Các hội thoại đã lưu"
-            button={
-              <CustomButton
-                outlined
-                onClick={() => {
-                  modalCloseHandler();
-                  modalManageOpenHandler();
-                  modalType(0);
-                  getList_Archived();
-                }}
-              >
-                Quản lý
-              </CustomButton>
-            }
-          />
-          <span className="horizontal"></span>
-          <SettingModalItem
-            title="Các liên kết đã chia sẻ"
-            button={
-              <CustomButton
-                outlined
-                onClick={() => {
-                  modalCloseHandler();
-                  modalManageOpenHandler();
-                  modalType(1);
-                  getList_Shared();
-                }}
-              >
-                Quản lý
-              </CustomButton>
-            }
-          />
-          <span className="horizontal"></span>
-          <SettingModalItem
-            title="Xóa tất cả hội thoại"
-            button={
-              <CustomButton outlined status="important" background>
-                Xóa tất cả
-              </CustomButton>
-            }
-          />
-          <span className="horizontal"></span>
-          <SettingModalItem
-            title="Xóa tài khoản"
-            button={
-              <CustomButton outlined status="important" background>
-                Xóa
-              </CustomButton>
-            }
-          />
+
+        <div style={{ display: "flex" }}>
+          <div className={cx("btnContainerLeft")}>
+            <CustomButton
+              selected={selectItem === 0}
+              icon={<SettingOutlined />}
+              className={cx("btn")}
+              onClick={() => handleSelectItem(0)}
+            >
+              Cài đặt chung
+            </CustomButton>
+
+            <CustomButton
+              selected={selectItem === 1}
+              icon={<DatabaseOutlined />}
+              className={cx("btn")}
+              onClick={() => handleSelectItem(1)}
+            >
+              Dữ liệu
+            </CustomButton>
+          </div>
+          <div className={cx("btnContainer")}>
+            {selectItem === 0 && (
+              <>
+                <SettingModalItem
+                  title="Giao diện"
+                  button={<CustomButton outlined>Tối</CustomButton>}
+                />
+                <span className="horizontal"></span>
+                <SettingModalItem
+                  title="Các hội thoại đã lưu"
+                  button={
+                    <CustomButton
+                      outlined
+                      onClick={() => {
+                        modalCloseHandler();
+                        modalManageOpenHandler();
+                        modalType(0);
+                        getList_Archived();
+                      }}
+                    >
+                      Quản lý
+                    </CustomButton>
+                  }
+                />
+                <span className="horizontal"></span>
+
+                <SettingModalItem
+                  title="Xóa tất cả hội thoại"
+                  button={
+                    <CustomButton outlined status="important" background>
+                      Xóa tất cả
+                    </CustomButton>
+                  }
+                />
+              </>
+            )}
+            {selectItem === 1 && (
+              <>
+                <SettingModalItem
+                  title="Các liên kết đã chia sẻ"
+                  button={
+                    <CustomButton
+                      outlined
+                      onClick={() => {
+                        modalCloseHandler();
+                        modalManageOpenHandler();
+                        modalType(1);
+                        getList_Shared();
+                      }}
+                    >
+                      Quản lý
+                    </CustomButton>
+                  }
+                />
+
+                <span className="horizontal"></span>
+                <SettingModalItem
+                  title="Xóa tài khoản"
+                  button={
+                    <CustomButton outlined status="important" background>
+                      Xóa
+                    </CustomButton>
+                  }
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </Modal>
@@ -162,7 +200,7 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
 
   return (
     <div className={cx("selectionsContainer")}>
-      <Space direction="vertical" size={0}>
+      <Space direction="vertical" size={0} style={{ width: "100%" }}>
         <CustomButton
           block
           icon={<SettingOutlined />}

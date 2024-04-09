@@ -166,7 +166,7 @@ export const MessageItem = ({
                 <Button
                   type="text"
                   icon={<CopyOutlined />}
-                  onClick={() => handleCopyClick("test")}
+                  onClick={() => handleCopyClick(content)}
                   className={cx("btn")}
                 />
               )}

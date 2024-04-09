@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const loginValidateObjects = {
-  // email: z
-  //   .string({
-  //     required_error: "Email không được bỏ trống",
-  //   })
-  //   .email("Địa chỉ Email không hợp lệ"),
+  email: z
+    .string({
+      required_error: "Email không được bỏ trống",
+    })
+    .email("Địa chỉ Email không hợp lệ"),
   username: z.string({
     required_error: "Tên tài khoản không được bỏ trống",
   }),

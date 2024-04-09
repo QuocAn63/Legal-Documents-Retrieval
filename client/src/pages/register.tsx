@@ -23,7 +23,8 @@ const schema = z.object({
 export interface IRegisterInput {
   password: string;
   passwordConfirm: string;
-  email: string;
+  // email: string;
+  username: string;
 }
 
 export default function Register() {

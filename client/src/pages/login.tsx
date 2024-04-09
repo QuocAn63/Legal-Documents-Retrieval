@@ -5,23 +5,24 @@ import AuthService from "../services/auth.service";
 import { Button, Form, Input, Space } from "antd";
 import Title from "antd/es/typography/Title";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+// import { zodResolver } from "@hookform/resolvers/zod";
 import { FormItem } from "react-hook-form-antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Paragraph from "antd/es/typography/Paragraph";
-import { loginValidateObjects } from "../helpers/validates";
+// import { loginValidateObjects } from "../helpers/validates";
 import { useDispatch } from "react-redux";
 import { loginRedux } from "../redux/user";
+import { GoogleCircleFilled } from "@ant-design/icons";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 const cx = classNames.bind(styles);
 
-const schema = z.object({
-  // email: loginValidateObjects.email,
-  username: loginValidateObjects.username,
-
-  password: loginValidateObjects.password,
-});
+// const schema = z.object({
+//   // email: loginValidateObjects.email,
+//   username: loginValidateObjects.username,
+//   password: loginValidateObjects.password,
+// });
 
 export interface ILoginInput {
   username: string;
@@ -64,6 +65,8 @@ export default function Login() {
       setError("root", { message });
     }
   };
+
+  const handleLoginGoogle = () => {};
 
   return (
     <div className={cx("wrapper")}>
@@ -118,12 +121,27 @@ export default function Login() {
           </Space>
         </Space>
       </Form>
-      {/* <hr />
-        <div>
-          <Button className={cx("btn")} icon={<GoogleCircleFilled />}>
-            Đăng nhập bằng Google
-          </Button>
-        </div> */}
+      <hr />
+      {/* <div>
+        <Button
+          className={cx("btn")}
+          icon={<GoogleCircleFilled />}
+          onClick={handleLoginGoogle}
+        >
+          Đăng nhập bằng Google
+        </Button>
+      </div> */}
+
+      <div>
+        <GoogleLogin
+          onSuccess={(credentialResponse) => {
+            console.log(credentialResponse);
+          }}
+          onError={() => {
+            console.log("Login Failed");
+          }}
+        />
+      </div>
     </div>
   );
 }

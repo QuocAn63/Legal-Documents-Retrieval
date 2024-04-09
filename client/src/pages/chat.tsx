@@ -180,9 +180,12 @@ export default function Chat({ isMain = false }: ChatPageProps) {
             isArchive: 0,
           };
 
+          // Call API return summary title
+
+          // const summaryTitle =  await summary_Title(payload.title)
           // Tham số truyền vào API
           const param = {
-            title: data.content,
+            title: data.content, // summaryTitle
             token: token,
           };
 

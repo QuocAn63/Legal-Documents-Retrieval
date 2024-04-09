@@ -40,7 +40,21 @@
         padding-bottom: 12px;
     }
 
+    .btn{
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 10px;
+        height: auto;
+        padding: 6px 15px;
+    }
+    .btnContainerLeft{
+        flex:1;
+    }
+
     .btnContainer {
+        flex:4;
         padding-left: 40px;
         .settingItem {
             width: 100%;
