@@ -1,5 +1,5 @@
 import { Dropdown, Flex, Image, Modal, ModalProps, Space } from "antd";
-import { memo, ReactNode, useEffect } from "react";
+import { memo, ReactNode } from "react";
 import CustomButton from "./button";
 import styles from "../styles/usermenu.module.scss";
 import classNames from "classnames/bind";
@@ -23,6 +23,7 @@ import { RootState } from "../redux/store.tsx";
 import { IConversation } from "../interfaces/chat.tsx";
 import SharedService from "../services/shared.service.tsx";
 import { ISharedConversation1 } from "../interfaces/shared.tsx";
+import { googleLogout } from "@react-oauth/google";
 
 const { Text } = Typography;
 const cx = classNames.bind(styles);
@@ -194,7 +195,11 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
   const { modalOpenHandler } = settingHandlers;
 
   const dispatch = useDispatch();
+  const type = useSelector((state: RootState) => state.user?.user?.type);
   const handleLogOut = () => {
+    if (type === "Google") {
+      googleLogout();
+    }
     dispatch(logOutRedux());
   };
 
@@ -234,7 +239,10 @@ interface IUserMenu {
 }
 
 const UserMenu = memo(() => {
-  const token = useSelector((state: RootState) => state.user.user?.token);
+  const token = useSelector((state: RootState) => state.user?.user?.token);
+
+  const user = useSelector((state: RootState) => state.user?.user);
+  console.log(token);
 
   const [state, setState] = useState<IUserMenu>({
     isOpen: false,
@@ -390,13 +398,14 @@ const UserMenu = memo(() => {
         <div className={cx("wrapper")} ref={userMenuRef}>
           <Space size={8}>
             <Image
-              src="/default-avatar.png"
+              // src="/default-avatar.png"
+              src={user?.picture || "/default-avatar.png"}
               preview={false}
               width={40}
               height={40}
               className={cx("avatarHolder")}
             />
-            <span className={cx("username")}>User</span>
+            <span className={cx("username")}>{user?.username}</span>
           </Space>
         </div>
       </Dropdown>

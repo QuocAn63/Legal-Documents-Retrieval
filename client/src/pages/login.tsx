@@ -12,9 +12,13 @@ import { useState } from "react";
 import Paragraph from "antd/es/typography/Paragraph";
 // import { loginValidateObjects } from "../helpers/validates";
 import { useDispatch } from "react-redux";
-import { loginRedux } from "../redux/user";
+import { loginGoogleRedux, loginRedux } from "../redux/user";
 import { GoogleCircleFilled } from "@ant-design/icons";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import {
+  GoogleLogin,
+  GoogleOAuthProvider,
+  useGoogleLogin,
+} from "@react-oauth/google";
 
 const cx = classNames.bind(styles);
 
@@ -66,7 +70,43 @@ export default function Login() {
     }
   };
 
-  const handleLoginGoogle = () => {};
+  const handleLoginGoogle = useGoogleLogin({
+    onSuccess: (tokenResponse) => getUserInfoGoogle(tokenResponse.access_token),
+  });
+
+  // API lấy thông tin từ google
+  const getUserInfoGoogle = async (accessToken: any) => {
+    try {
+      console.log(accessToken);
+
+      const response = await fetch(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+        .then((data) => data.json())
+        .then((data) => {
+          const user = {
+            id: data.id,
+            isAdmin: false,
+            username: data.given_name + " " + data.family_name,
+            email: data.email,
+            token: accessToken,
+            picture: data.picture,
+            type: "Google",
+          };
+
+          dispatch(loginGoogleRedux(user));
+        });
+      return response;
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  };
 
   return (
     <div className={cx("wrapper")}>
@@ -122,7 +162,8 @@ export default function Login() {
         </Space>
       </Form>
       <hr />
-      {/* <div>
+
+      <div>
         <Button
           className={cx("btn")}
           icon={<GoogleCircleFilled />}
@@ -130,9 +171,8 @@ export default function Login() {
         >
           Đăng nhập bằng Google
         </Button>
-      </div> */}
-
-      <div>
+      </div>
+      {/* <div>
         <GoogleLogin
           onSuccess={(credentialResponse) => {
             console.log(credentialResponse);
@@ -141,7 +181,7 @@ export default function Login() {
             console.log("Login Failed");
           }}
         />
-      </div>
+      </div> */}
     </div>
   );
 }

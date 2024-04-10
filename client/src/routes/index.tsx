@@ -14,9 +14,23 @@ import ResetPassword from "../pages/resetPws";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { useEffect } from "react";
+import { GoogleLogin } from "@react-oauth/google";
 
 // puiblic (login/register)
 // private routes
+
+const TestPages = () => {
+  return (
+    <GoogleLogin
+      onSuccess={(credentialResponse) => {
+        console.log(credentialResponse);
+      }}
+      onError={() => {
+        console.log("Login Failed");
+      }}
+    />
+  );
+};
 
 const PublicLayout = () => {
   const userToken = useSelector((state: RootState) => state.user.user?.token);
@@ -52,6 +66,10 @@ const router = createBrowserRouter([
       {
         path: "resetpwd",
         element: <ResetPassword />,
+      },
+      {
+        path: "test",
+        element: <TestPages />,
       },
     ],
   },
