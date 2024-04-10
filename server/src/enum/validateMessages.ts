@@ -37,4 +37,10 @@ export enum ValidateMessages {
   MESSAGE_ID_EMPTY = 'Mã tin nhắn không được bỏ trống',
   // Token
   TOKEN_EMPTY = 'Token trống',
+
+  // Reports
+  REPORT_ID_EMPTY = 'Mã báo cáo không được để trống',
+  REPORT_MSGID_EMPTY = 'Mã tin nhắn không được để trống',
+  REPORT_REASONID_EMPTY = 'Mã lý do không được để trống',
+  REPORT_STATUS_EMPTY = 'Tình trạng không được để trống',
 }
