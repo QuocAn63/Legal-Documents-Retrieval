@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import CustomButton from "../button";
 import { IConversation } from "../../interfaces/chat";
 import { ISharedConversation1 } from "../../interfaces/shared";
+import { formatTime } from "../../helpers/formatTIme";
 
 const { Title } = Typography;
 
@@ -57,16 +58,26 @@ const renderContent = (
   return (
     <Col style={{ gap: 10, padding: "5px 0 5px 0" }}>
       <Row>
-        <Flex flex={1} align="center" style={{ paddingRight: "16px" }}>
-          <a style={{ fontWeight: "400" }}>
+        <Flex align="center" style={{ paddingRight: "24px", width: "50%" }}>
+          <a
+            style={{
+              fontWeight: "400",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "90%",
+            }}
+          >
             {"title" in item ? item.title : item.sharedCode}
           </a>
         </Flex>
-        <Flex flex={1} align="center">
-          <Flex flex={1}>
-            <span className={cx("titleMain")}>{item.createdAt}</span>
+        <Flex flex="0 0 50%" align="center">
+          <Flex flex="0 0 50%">
+            <span className={cx("titleMain")}>
+              {formatTime(item.createdAt)}
+            </span>
           </Flex>
-          <Flex flex={1} justify="end">
+          <Flex flex="0 0 50%" justify="end">
             {type === 0 ? (
               <Tooltip title="Bỏ lưu trữ">
                 <ContainerOutlined className={cx("icon")} />
@@ -91,7 +102,7 @@ const renderContent = (
 };
 
 // Constant
-const TOTAL_ITEM_PAGE = 4;
+const TOTAL_ITEM_PAGE = 5;
 
 export default function ManageModal({
   type,
@@ -141,6 +152,7 @@ export default function ManageModal({
         content: {
           flex: 1,
           backgroundColor: "#2F2F2F",
+          minHeight: "450px",
         },
       }}
       width={800}
@@ -158,8 +170,9 @@ export default function ManageModal({
         {type === 0 ? "Cuộc trò chuyện đã lưu" : "Các liên kết được chia sẽ"}
       </Title>
       <span className="horizontal"></span>
+
       <Row>
-        <Flex flex={1} align="center" style={{ paddingRight: "16px" }}>
+        <Flex align="center" style={{ paddingRight: "24px", width: "50%" }}>
           <span className={cx("titleMain")}>Tên</span>
         </Flex>
         <Flex flex={1}>
@@ -168,9 +181,7 @@ export default function ManageModal({
           </Flex>
           <Flex flex={1} justify="end" align="center">
             <CustomButton
-              outlined={true}
               status={"important"}
-              background={true}
               onClick={() => {
                 manageHandlers.handleDeleteAll(type);
                 setState((prev) => ({ ...prev, isLoading: false }));
@@ -196,34 +207,52 @@ export default function ManageModal({
       )}
 
       {manage.length > 0 && (
-        <Flex justify="center" align="center" style={{ padding: 10 }}>
-          <ConfigProvider
-            theme={{
-              token: {
-                colorPrimary: "rgb(66, 66, 66)",
-                colorPrimaryHover: "white",
-                colorPrimaryBorder: "rgb(66, 66, 66)",
-                colorBgTextHover: "rgb(66, 66, 66)",
-              },
-              components: {
-                Pagination: {
-                  itemActiveBg: "rgb(66, 66, 66)",
-                  itemActiveColorDisabled: "white",
-                },
-              },
+        <div
+          style={{
+            bottom: 0,
+            position: "absolute",
+            transform: "translateX(-50%)",
+            width: "100%",
+            left: "50%",
+          }}
+        >
+          <Flex
+            justify="center"
+            align="center"
+            style={{
+              padding: 20,
+              bottom: 0,
             }}
           >
-            <Pagination
-              className={cx("page")}
-              defaultCurrent={1}
-              total={state.totalPage}
-              onChange={onChangePage}
-              showLessItems={true}
-              current={state.currentPage}
-            />
-          </ConfigProvider>
-        </Flex>
+            <ConfigProvider
+              theme={{
+                token: {
+                  colorPrimary: "rgb(66, 66, 66)",
+                  colorPrimaryHover: "white",
+                  colorPrimaryBorder: "rgb(66, 66, 66)",
+                  colorBgTextHover: "rgb(66, 66, 66)",
+                },
+                components: {
+                  Pagination: {
+                    itemActiveBg: "rgb(66, 66, 66)",
+                    itemActiveColorDisabled: "white",
+                  },
+                },
+              }}
+            >
+              <Pagination
+                className={cx("page")}
+                defaultCurrent={1}
+                total={state.totalPage}
+                onChange={onChangePage}
+                showLessItems={true}
+                current={state.currentPage}
+              />
+            </ConfigProvider>
+          </Flex>
+        </div>
       )}
+
       {manage.length <= 0 && !isLoading && (
         <Row
           style={{

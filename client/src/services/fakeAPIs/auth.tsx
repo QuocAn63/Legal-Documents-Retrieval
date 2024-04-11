@@ -41,6 +41,18 @@ export class FakeAuthAPI {
     });
   }
 
+  static async loginGoogle(): Promise<IResponseData> {
+    return new Promise((resolve, reject) => {
+      return setTimeout(() => {
+        console.log("Login success");
+        resolve({
+          status: 200,
+          data: "/login/google",
+        });
+      }, 1000);
+    });
+  }
+
   static async register({
     // email,
     username,

@@ -23,7 +23,6 @@ import { RootState } from "../redux/store.tsx";
 import { IConversation } from "../interfaces/chat.tsx";
 import SharedService from "../services/shared.service.tsx";
 import { ISharedConversation1 } from "../interfaces/shared.tsx";
-import { googleLogout } from "@react-oauth/google";
 
 const { Text } = Typography;
 const cx = classNames.bind(styles);
@@ -198,7 +197,7 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
   const type = useSelector((state: RootState) => state.user?.user?.type);
   const handleLogOut = () => {
     if (type === "Google") {
-      googleLogout();
+      // googleLogout();
     }
     dispatch(logOutRedux());
   };

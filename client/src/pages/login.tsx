@@ -14,11 +14,8 @@ import Paragraph from "antd/es/typography/Paragraph";
 import { useDispatch } from "react-redux";
 import { loginGoogleRedux, loginRedux } from "../redux/user";
 import { GoogleCircleFilled } from "@ant-design/icons";
-import {
-  GoogleLogin,
-  GoogleOAuthProvider,
-  useGoogleLogin,
-} from "@react-oauth/google";
+
+import { redirect } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
@@ -70,41 +67,16 @@ export default function Login() {
     }
   };
 
-  const handleLoginGoogle = useGoogleLogin({
-    onSuccess: (tokenResponse) => getUserInfoGoogle(tokenResponse.access_token),
-  });
+  // const handleLoginGoogle = useGoogleLogin({
+  //   onSuccess: (tokenResponse) => getUserInfoGoogle(tokenResponse.access_token),
+  // });
 
-  // API lấy thông tin từ google
-  const getUserInfoGoogle = async (accessToken: any) => {
-    try {
-      console.log(accessToken);
-
-      const response = await fetch(
-        "https://www.googleapis.com/oauth2/v2/userinfo",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      )
-        .then((data) => data.json())
-        .then((data) => {
-          const user = {
-            id: data.id,
-            isAdmin: false,
-            username: data.given_name + " " + data.family_name,
-            email: data.email,
-            token: accessToken,
-            picture: data.picture,
-            type: "Google",
-          };
-
-          dispatch(loginGoogleRedux(user));
-        });
-      return response;
-    } catch (error) {
-      console.error("Error fetching user info:", error);
+  const handleLoginGoogle = async () => {
+    const loginGoogle = await AuthService.loginGoogle();
+    if (loginGoogle.status === 200) {
+      const googlePopUp = window.open();
+      // return redirect(`/${loginGoogle.data}`);
+      googlePopUp!.location.href = loginGoogle.data;
     }
   };
 
@@ -172,16 +144,6 @@ export default function Login() {
           Đăng nhập bằng Google
         </Button>
       </div>
-      {/* <div>
-        <GoogleLogin
-          onSuccess={(credentialResponse) => {
-            console.log(credentialResponse);
-          }}
-          onError={() => {
-            console.log("Login Failed");
-          }}
-        />
-      </div> */}
     </div>
   );
 }

@@ -15,19 +15,20 @@ import { loginValidateObjects } from "../helpers/validates";
 
 const cx = classNames.bind(styles);
 
-const schema = z.object({
-  password: loginValidateObjects.password,
-  passwordConfirm: loginValidateObjects.passwordConfirm,
-});
-// .refine(
-//   (values) => {
-//     return values.password === values.passwordConfirm;
-//   },
-//   {
-//     message: "Mật khẩu không trùng khớp!",
-//     path: ["passwordConfirm"],
-//   }
-// );
+const schema = z
+  .object({
+    password: loginValidateObjects.password,
+    passwordConfirm: loginValidateObjects.passwordConfirm,
+  })
+  .refine(
+    (values) => {
+      return values.password === values.passwordConfirm;
+    },
+    {
+      message: "Mật khẩu không trùng khớp!",
+      path: ["passwordConfirm"],
+    }
+  );
 
 export interface IResetPasswordInput {
   password: string;
