@@ -43,4 +43,13 @@ export enum ValidateMessages {
   REPORT_MSGID_EMPTY = 'Mã tin nhắn không được để trống',
   REPORT_REASONID_EMPTY = 'Mã lý do không được để trống',
   REPORT_STATUS_EMPTY = 'Tình trạng không được để trống',
+  // Documents
+  DOCUMENT_ID_EMPTY = 'Mã tài liệu không được để trống',
+  DOCUMENT_LABEL_EMPTY = 'Nhãn tài liệu không được để trống',
+  DOCUMENT_LABEL_LENGTH = 'Nhãn tài liệu phải dưới 100 ký tự',
+  DOCUMENT_CONFIGID_EMPTY = 'Mã cấu hình không được để trống',
+  DOCUMENT_CONFIGID_NOT_EXISTS = 'Mã cấu hình không tồn tại',
+  DOCUMENT_PATH_EMPTY = 'Đường dẫn tài liệu không được để trống',
+  DOCUMENT_PATH_CONFLICT = 'Trùng đường dẫn tài liệu',
+  DOCUMENT_FILE_SIZE = 'File tài liệu phải nhỏ hơn 3mb',
 }

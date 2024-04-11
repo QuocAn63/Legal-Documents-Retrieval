@@ -21,14 +21,14 @@ export default class ReportService implements IBaseService<ReportEntity> {
 
   async getList(
     entityParams: FindOptionsWhere<ReportEntity>,
-    { pageIndex = 1, pageSize = 20 }: IQueryParams,
+    pagination: IQueryParams,
   ): Promise<ReportEntity[] | []> {
     let responseData = [];
 
     responseData = await this.reportRepo.find({
       where: entityParams,
-      skip: OffsetUtil.getOffset(pageIndex, pageSize),
-      take: pageSize,
+      skip: OffsetUtil.getOffset(pagination),
+      take: pagination.pageSize,
     });
 
     return responseData;

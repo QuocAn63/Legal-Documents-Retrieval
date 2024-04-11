@@ -31,14 +31,14 @@ export default class UserService implements IBaseService<UserEntity> {
 
   async getList(
     entityParams: FindOptionsWhere<UserEntity>,
-    { pageIndex = 1, pageSize = 20 }: IQueryParams,
+    pagination: IQueryParams,
   ): Promise<[] | UserEntity[]> {
     let responseData = [];
 
     responseData = await this.userRepo.find({
       where: entityParams,
-      skip: OffsetUtil.getOffset(pageIndex, pageSize),
-      take: pageSize,
+      skip: OffsetUtil.getOffset(pagination),
+      take: pagination.pageSize,
     });
 
     return responseData;

@@ -25,15 +25,15 @@ export class MessageService implements IBaseService<MessageEntity> {
 
   async getList(
     entityParams: FindOptionsWhere<MessageEntity>,
-    { pageIndex, pageSize }: IQueryParams,
+    pagination: IQueryParams,
     ...props: any
   ): Promise<[] | MessageEntity[]> {
     let responseData = [];
 
     responseData = await this.messageRepo.find({
       where: entityParams,
-      skip: OffsetUtil.getOffset(pageIndex, pageSize),
-      take: pageSize,
+      skip: OffsetUtil.getOffset(pagination),
+      take: pagination.pageSize,
     });
 
     return responseData;

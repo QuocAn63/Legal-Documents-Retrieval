@@ -29,16 +29,15 @@ export default class ConversationService
 
   async getList(
     entityParams: FindOptionsWhere<ConversationEntity>,
-    { pageIndex, pageSize }: IQueryParams,
+    pagination: IQueryParams,
     ...props: any
   ): Promise<[] | ConversationEntity[]> {
     let responseData = [];
-    const offset = OffsetUtil.getOffset(pageIndex, pageSize);
 
     responseData = await this.conversationRepo.find({
       where: entityParams,
-      skip: offset,
-      take: pageSize,
+      skip: OffsetUtil.getOffset(pagination),
+      take: pagination.pageSize,
     });
 
     return responseData;

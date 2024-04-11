@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 import { DocumentEntity } from '../entities/document.entity';
+import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class FilterDocumentDTO {
   @ApiProperty()
@@ -18,3 +19,21 @@ export class FilterDocumentDTO {
   @IsOptional()
   configID: string;
 }
+
+// export class SaveDocumentDTO {
+//   @ApiProperty()
+//   @IsString()
+//   @IsNotEmpty({ message: ValidateMessages.DOCUMENT_CONFIGID_EMPTY })
+//   configID: string;
+
+//   @ApiProperty()
+//   @IsString()
+//   @IsNotEmpty({ message: ValidateMessages.DOCUMENT_LABEL_EMPTY })
+//   @Length(1, 100, { message: ValidateMessages.DOCUMENT_LABEL_LENGTH })
+//   label: string;
+
+//   @ApiProperty()
+//   @IsString()
+//   @IsNotEmpty({ message: ValidateMessages.DOCUMENT_PATH_EMPTY })
+//   path: string;
+// }
