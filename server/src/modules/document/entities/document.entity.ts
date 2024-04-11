@@ -6,8 +6,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
-  ManyToMany,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity({ name: 'documents' })
@@ -20,6 +20,9 @@ export class DocumentEntity extends BaseEntity {
 
   @Column({ type: 'varchar' })
   path: string;
+
+  @Column({ type: 'varchar' })
+  configID: string;
 
   @CreateDateColumn({
     type: 'datetime',
@@ -34,7 +37,7 @@ export class DocumentEntity extends BaseEntity {
   })
   updatedAt: string;
 
-  @ManyToMany((config) => ConfigEntity, (config) => config.id)
-  @JoinColumn()
-  configs: ConfigEntity[];
+  @ManyToOne(() => ConfigEntity, (config) => config.id)
+  @JoinColumn({ name: 'configID' })
+  config: ConfigEntity;
 }

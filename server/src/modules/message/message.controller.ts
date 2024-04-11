@@ -19,7 +19,7 @@ import {
   DeleteMessageDTO,
   SaveMessageDTO,
   UpdateMessageDTO,
-} from '../chat/dto/message.dto';
+} from './dto/message.dto';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard)

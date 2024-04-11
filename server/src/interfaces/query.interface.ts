@@ -4,9 +4,3 @@ export type IQueryParams = {
   fromDate?: string;
   toDate?: string;
 };
-
-export type IQueryMetadata = {
-  pageIndex: number;
-  pageSize: number;
-  totalPages: number;
-};

@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import IBaseService from 'src/interfaces/baseService.interface';
-import ConversationEntity from '../chat/entities/conversations.entity';
+import ConversationEntity from './entities/conversations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { IQueryParams } from 'src/interfaces/query.interface';

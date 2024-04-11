@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import ConversationEntity from './conversations.entity';
+import ConversationEntity from '../../conversation/entities/conversations.entity';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
 
 @Entity({ name: 'sharedConversations' })

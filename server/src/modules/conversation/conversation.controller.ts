@@ -23,7 +23,7 @@ import {
 } from './dto/conversation.dto';
 import ConversationService from './conversation.service';
 import { AuthGuard } from 'src/commons/guards';
-import ConversationEntity from '../chat/entities/conversations.entity';
+import ConversationEntity from './entities/conversations.entity';
 import { FindOptionsWhere } from 'typeorm';
 import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
 

@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import SharedConversationController from './shared-conversation.controller';
 import SharedConversationService from './shared-conversation.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import SharedConversationEntity from '../chat/entities/sharedConversations.entity';
+import SharedConversationEntity from './entities/sharedConversations.entity';
 import { ConversationService } from '../conversation';
-import ConversationEntity from '../chat/entities/conversations.entity';
+import ConversationEntity from '../conversation/entities/conversations.entity';
 
 @Module({
   imports: [

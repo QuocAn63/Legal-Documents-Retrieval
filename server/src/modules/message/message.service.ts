@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import MessageEntity from '../chat/entities/messages.entity';
+import MessageEntity from './entities/messages.entity';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 import IBaseService from 'src/interfaces/baseService.interface';
 import { IQueryParams } from 'src/interfaces/query.interface';
@@ -13,7 +13,7 @@ import {
   DeleteMessageDTO,
   SaveMessageDTO,
   UpdateMessageDTO,
-} from '../chat/dto/message.dto';
+} from './dto/message.dto';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 
 @Injectable()

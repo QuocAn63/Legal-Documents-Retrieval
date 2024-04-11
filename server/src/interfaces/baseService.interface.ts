@@ -4,7 +4,7 @@ import { IQueryParams } from './query.interface';
 export default interface IBaseService<T> {
   getList(
     entityParams: FindOptionsWhere<T>,
-    query: IQueryParams,
+    pagination: IQueryParams,
     ...props: any
   ): Promise<T[] | []>;
 

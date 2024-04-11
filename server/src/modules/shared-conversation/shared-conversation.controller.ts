@@ -19,7 +19,7 @@ import {
   DeleteSharedConversationDTO,
   SaveSharedConversationDTO,
   UpdateSharedConversationDTO,
-} from '../chat/dto/sharedConversation.dto';
+} from './dto/sharedConversation.dto';
 import { AuthGuard } from 'src/commons/guards';
 
 @ApiBearerAuth()

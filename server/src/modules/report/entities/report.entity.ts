@@ -1,4 +1,4 @@
-import MessageEntity from 'src/modules/chat/entities/messages.entity';
+import MessageEntity from 'src/modules/message/entities/messages.entity';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
 import {
   BaseEntity,

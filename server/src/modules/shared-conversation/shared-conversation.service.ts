@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import IBaseService from 'src/interfaces/baseService.interface';
-import SharedConversationEntity from '../chat/entities/sharedConversations.entity';
+import SharedConversationEntity from './entities/sharedConversations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { IQueryParams } from 'src/interfaces/query.interface';
@@ -13,7 +13,7 @@ import {
   DeleteSharedConversationDTO,
   SaveSharedConversationDTO,
   UpdateSharedConversationDTO,
-} from '../chat/dto/sharedConversation.dto';
+} from './dto/sharedConversation.dto';
 import { ConversationService } from '../conversation';
 import { v4 } from 'uuid';
 
