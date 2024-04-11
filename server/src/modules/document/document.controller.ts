@@ -1,19 +1,20 @@
 import {
+  Body,
   Controller,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  ParseFilePipe,
+  ForbiddenException,
   Post,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import DocumentService from './document.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ValidateMessages } from 'src/enum/validateMessages';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard, RolesGuard } from 'src/commons/guards';
 import { Roles } from 'src/commons/decorators/roles.decorator';
+import { SaveDocumentDTO } from './dto/document.dto';
+import { RequestWithFileValidation } from 'src/interfaces/request.interface';
 
 @ApiTags('documents')
 @ApiBearerAuth()
@@ -23,22 +24,22 @@ import { Roles } from 'src/commons/decorators/roles.decorator';
 export default class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: SaveDocumentDTO,
+  })
   @Post('/')
-  @UseInterceptors(FileInterceptor('document'))
+  @UseInterceptors(FileInterceptor('file'))
   async save_documents(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({
-            maxSize: 3000000,
-            message: ValidateMessages.DOCUMENT_FILE_SIZE,
-          }),
-          new FileTypeValidator({ fileType: 'pdf' }),
-        ],
-      }),
-    )
+    @Req() request: RequestWithFileValidation,
+    @Body() data: SaveDocumentDTO,
+    @UploadedFile()
     file: Express.Multer.File,
   ) {
-    console.log(file);
+    if (request.fileValidation !== undefined) {
+      throw new ForbiddenException(request.fileValidation);
+    }
+
+    return await this.documentService.save(data, file);
   }
 }

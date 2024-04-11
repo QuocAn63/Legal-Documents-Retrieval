@@ -8,20 +8,21 @@ export default class RolesGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     let isAccessible = true;
-    const roles = this.reflector.getAllAndOverride<string[]>('Roles', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    console.log(roles);
+    const roles = this.reflector.getAllAndOverride<Array<'ADMIN' | 'USER'>>(
+      'Roles',
+      [context.getHandler(), context.getClass()],
+    );
+
     const http = context.switchToHttp();
     const request = http.getRequest();
     const authToken = request.user as IAuthToken;
+    const userRole: 'ADMIN' | 'USER' = authToken.isADMIN ? 'ADMIN' : 'USER';
 
     if (authToken.isBOT) {
       isAccessible = false;
     }
 
-    if (roles.includes('ADMIN') && !authToken.isADMIN) {
+    if (!roles.includes(userRole) && userRole !== 'ADMIN') {
       isAccessible = false;
     }
 

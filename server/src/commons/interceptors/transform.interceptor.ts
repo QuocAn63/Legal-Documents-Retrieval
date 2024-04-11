@@ -7,7 +7,6 @@ import {
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IQueryMetadata } from 'src/interfaces/query.interface';
 import { IResponseData } from 'src/interfaces/response.interface';
 
 @Injectable()

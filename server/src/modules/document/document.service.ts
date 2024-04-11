@@ -6,12 +6,15 @@ import IBaseService from 'src/interfaces/baseService.interface';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import OffsetUtil from 'src/utils/offset.util';
 import { SaveDocumentDTO } from './dto/document.dto';
+import { ConfigService } from '../config';
+// import { SaveDocumentDTO } from './dto/document.dto';
 
 @Injectable()
 export default class DocumentService implements IBaseService<DocumentEntity> {
   constructor(
     @InjectRepository(DocumentEntity)
     private readonly documentRepo: Repository<DocumentEntity>,
+    private readonly configService: ConfigService,
   ) {}
 
   async getList(
@@ -45,7 +48,25 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
     return responseData;
   }
 
-  async save(data: SaveDocumentDTO): Promise<string> {
+  async save(
+    data: SaveDocumentDTO,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    const { configID } = data;
+
+    const saveResponse = await this.documentRepo.save({
+      ...data,
+      path: file.path,
+    });
+
+    return;
+  }
+
+  async update(...props: any): Promise<string> {
+    return;
+  }
+
+  async delete(...props: any): Promise<string | string[]> {
     return;
   }
 }

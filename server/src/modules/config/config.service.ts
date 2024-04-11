@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export default class ConfigService {}
+export default class ConfigService {
+    constructor(private readonly )
+}
