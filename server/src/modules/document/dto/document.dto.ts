@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+} from 'class-validator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class FilterDocumentDTO {
@@ -31,6 +39,41 @@ export class SaveDocumentDTO {
   @Length(1, 100, { message: ValidateMessages.DOCUMENT_LABEL_LENGTH })
   label: string;
 
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty({ message: ValidateMessages.DOCUMENT_LABEL_EMPTY })
+  rank: number;
+
   @ApiProperty({ type: 'string', format: 'binary' })
   file: any;
+}
+
+export class UpdateDocumentDTO {
+  @ApiProperty()
+  @IsUUID('4', { message: ValidateMessages.COMMON_UUID_INVALID })
+  @IsNotEmpty({ message: ValidateMessages.DOCUMENT_ID_EMPTY })
+  documentID: string;
+
+  @ApiProperty()
+  @IsUUID('4', { message: ValidateMessages.COMMON_UUID_INVALID })
+  @IsNotEmpty({ message: ValidateMessages.DOCUMENT_CONFIGID_EMPTY })
+  configID: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({ message: ValidateMessages.DOCUMENT_LABEL_EMPTY })
+  @Length(1, 100, { message: ValidateMessages.DOCUMENT_LABEL_LENGTH })
+  label: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty({ message: ValidateMessages.DOCUMENT_LABEL_EMPTY })
+  rank: number;
+}
+
+export class DeleteDocumentDTO {
+  @ApiProperty()
+  @IsArray()
+  @IsNotEmpty({ message: ValidateMessages.COMMON_ID_EMPTY })
+  IDs: string[];
 }

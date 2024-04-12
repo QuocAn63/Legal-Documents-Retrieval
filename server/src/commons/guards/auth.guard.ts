@@ -5,21 +5,33 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { IAuthToken } from 'src/interfaces/auth.interface';
+import { RequestWithPublicRoute } from 'src/interfaces/request.interface';
+import { Request } from 'express';
 
 @Injectable()
 export default class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const http = context.switchToHttp();
-    const request = http.getRequest<Request>();
+    const request = http.getRequest<RequestWithPublicRoute>();
     const token = this.extractTokenFromHeader(request);
+    const isPublicRoute = this.reflector.getAllAndOverride<boolean>(
+      'IS_PUBLIC',
+      [context.getClass(), context.getHandler()],
+    );
+
+    if (isPublicRoute) {
+      request.isPublic = true;
+      return true;
+    }
 
     if (!token) {
       throw new UnauthorizedException();

@@ -30,6 +30,7 @@ export default class MessageEntity extends BaseEntity {
 
   @Column({
     type: 'nvarchar',
+    length: 'max',
   })
   content: string;
 
@@ -49,7 +50,7 @@ export default class MessageEntity extends BaseEntity {
   @Column({
     type: 'bit',
   })
-  isBOT: string;
+  isBOT: boolean;
 
   @ManyToOne((user) => UserEntity)
   @JoinColumn({ name: 'userID' })

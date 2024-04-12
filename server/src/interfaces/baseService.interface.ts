@@ -10,7 +10,7 @@ export default interface IBaseService<T> {
 
   get(entityParams: FindOptionsWhere<T>, ...props: any): Promise<T>;
 
-  save(...props: any): Promise<string>;
+  save(...props: any): Promise<T>;
 
   update(...props: any): Promise<string>;
 

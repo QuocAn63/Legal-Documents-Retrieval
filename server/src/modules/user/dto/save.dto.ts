@@ -7,6 +7,7 @@ import {
   Matches,
   ValidateIf,
 } from 'class-validator';
+import { Match } from 'src/commons/decorators/match.decorator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class SaveUserWithUsernameDTO {
@@ -28,7 +29,7 @@ export class SaveUserWithUsernameDTO {
   @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.USER_PASSWORDCONFIRM_EMPTY })
-  @ValidateIf((obj, value) => obj.password !== value, {
+  @Match('password', {
     message: ValidateMessages.USER_PASSWORDCONFIRM_NOT_EQUAL,
   })
   passwordConfirm: string;

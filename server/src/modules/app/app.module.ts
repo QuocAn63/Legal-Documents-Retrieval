@@ -9,6 +9,7 @@ import { ReportModule } from '../report';
 import { ConversationModule } from '../conversation';
 import { SharedConversationModule } from '../shared-conversation';
 import { MessageModule } from '../message/message.module';
+import { BotModule } from '../bot';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MessageModule } from '../message/message.module';
     DocumentModule,
     SystemMessageModule,
     ReportModule,
+    BotModule,
   ],
   controllers: [],
   providers: [],

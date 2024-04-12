@@ -5,17 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DocumentEntity } from './entities/document.entity';
 import { ConfigEntity } from '../config/entities/config.entity';
 import { MulterModule } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
-import { join } from 'path';
+import { ConfigService as AppConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
 import { editedFilename, pdfFileFilter } from 'src/configs/multer.config';
-
+import { ConfigModule, ConfigService } from '../config';
 @Module({
   imports: [
     TypeOrmModule.forFeature([DocumentEntity, ConfigEntity]),
     MulterModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
+      inject: [AppConfigService],
+      useFactory: async (configService: AppConfigService) => {
         const dest = configService.getOrThrow('DOCUMENT_PATH');
 
         return {
@@ -27,8 +26,9 @@ import { editedFilename, pdfFileFilter } from 'src/configs/multer.config';
         };
       },
     }),
+    ConfigModule,
   ],
-  providers: [DocumentService],
+  providers: [DocumentService, ConfigService],
   controllers: [DocumentController],
 })
 export default class DocumentModule {}

@@ -58,7 +58,8 @@ export default class SharedConversationController {
     @AuthToken() authToken: IAuthToken,
     @Body() data: SaveSharedConversationDTO,
   ) {
-    return await this.sharedService.save(authToken, data);
+    const newShared = await this.sharedService.save(authToken, data);
+    return newShared.sharedCode;
   }
 
   @Patch('/')

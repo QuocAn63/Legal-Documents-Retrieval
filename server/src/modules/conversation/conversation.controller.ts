@@ -26,13 +26,17 @@ import { AuthGuard } from 'src/commons/guards';
 import ConversationEntity from './entities/conversations.entity';
 import { FindOptionsWhere } from 'typeorm';
 import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
+import { MessageService } from '../message/message.service';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
 @ApiTags('conversations')
 @Controller('conversations')
 export default class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly messageService: MessageService,
+  ) {}
 
   @Get('/')
   async getList_conversations(
@@ -76,33 +80,38 @@ export default class ConversationController {
     return this.conversationService.get({ userID: id, id: conversationID }, {});
   }
 
-  //   @Get('/:conversationID/messages')
-  //   async getList_messages(
-  //     @AuthToken() authToken: IAuthToken,
-  //     @Pagination(5) pagination: IQueryParams,
-  //     @Param('conversationID') conversationID: string,
-  //   ) {
-  //     if (!conversationID) {
-  //       throw new NotFoundException(
-  //         'Không tìm thấy cuộc trò chuyện cũng như tin nhắn của cuộc trò chuyện này.',
-  //       );
-  //     }
+  @Get('/:conversationID/messages')
+  async getList_messages(
+    @AuthToken() authToken: IAuthToken,
+    @Pagination(5) pagination: IQueryParams,
+    @Param('conversationID') conversationID: string,
+  ) {
+    const conversation = await this.conversationService.get({
+      id: conversationID,
+    });
 
-  //     const { id } = authToken;
-  //     const { pageIndex, pageSize, toDate } = pagination;
+    const messages = await this.messageService.getList(
+      { conversation },
+      pagination,
+    );
 
-  //     return this.conversationService.getList(
-  //       { userID: id, conversationID },
-  //       { pageIndex, pageSize, toDate },
-  //     );
-  //   }
+    return {
+      ...conversation,
+      messages,
+    };
+  }
 
   @Post('/')
   async save_conversations(
     @AuthToken() authToken: IAuthToken,
     @Body() data: SaveConversationDTO,
   ) {
-    return await this.conversationService.save(authToken, data);
+    const newConversation = await this.conversationService.save(
+      authToken,
+      data,
+    );
+
+    return newConversation.id;
   }
 
   @Patch('/')

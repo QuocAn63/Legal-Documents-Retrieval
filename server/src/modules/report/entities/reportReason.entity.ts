@@ -9,7 +9,7 @@ import {
 
 @Entity({ name: 'reportReasons' })
 export default class ReportReasonEntity extends BaseEntity {
-  @PrimaryGeneratedColumn('identity')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({

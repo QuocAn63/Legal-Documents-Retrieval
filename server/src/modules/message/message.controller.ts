@@ -55,7 +55,8 @@ export class MessageController {
     @AuthToken() authToken: IAuthToken,
     @Body() data: SaveMessageDTO,
   ) {
-    return await this.messageService.save(authToken, data);
+    const newMessage = await this.messageService.save(authToken, data);
+    return newMessage.id;
   }
 
   @Patch('/')

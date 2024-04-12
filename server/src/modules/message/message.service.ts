@@ -34,6 +34,9 @@ export class MessageService implements IBaseService<MessageEntity> {
       where: entityParams,
       skip: OffsetUtil.getOffset(pagination),
       take: pagination.pageSize,
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return responseData;
@@ -52,15 +55,19 @@ export class MessageService implements IBaseService<MessageEntity> {
     return responseData;
   }
 
-  async save(authToken: IAuthToken, data: SaveMessageDTO): Promise<string> {
+  async save(
+    authToken: IAuthToken,
+    data: SaveMessageDTO,
+    isBOT = false,
+  ): Promise<MessageEntity> {
     const saveResponse = await this.messageRepo.save({
       conversationID: data.conversationID,
       userID: authToken.id,
       content: data.content,
-      isBOT: '0',
+      isBOT: isBOT,
     });
 
-    return saveResponse.id;
+    return saveResponse;
   }
 
   async update(authToken: IAuthToken, data: UpdateMessageDTO): Promise<string> {

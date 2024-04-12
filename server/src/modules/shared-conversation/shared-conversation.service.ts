@@ -60,7 +60,7 @@ export default class SharedConversationService
   async save(
     authToken: IAuthToken,
     data: SaveSharedConversationDTO,
-  ): Promise<string> {
+  ): Promise<SharedConversationEntity> {
     const { conversationID } = data;
     const { id } = authToken;
 
@@ -80,7 +80,7 @@ export default class SharedConversationService
       conversation,
     });
 
-    return saveResponse.sharedCode;
+    return saveResponse;
   }
 
   async update(

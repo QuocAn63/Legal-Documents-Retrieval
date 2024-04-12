@@ -21,7 +21,7 @@ const DatabaseOptions: TypeOrmModuleAsyncOptions = {
       entities: ['../../src/modules/**/entities/*.entity.ts'],
       synchronize: isOnDev,
       logging: isOnDev,
-      logger: 'advanced-console',
+      logger: 'simple-console',
       requestTimeout: 30000,
       extra: {
         trustServerCertificate: true,

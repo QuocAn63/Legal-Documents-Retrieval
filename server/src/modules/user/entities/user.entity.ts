@@ -63,12 +63,12 @@ export class UserEntity extends BaseEntity {
   @Column({
     type: 'bit',
   })
-  isBOT: string;
+  isBOT: boolean;
 
   @Column({
     type: 'bit',
   })
-  isADMIN: string;
+  isADMIN: boolean;
 
   @Column({
     type: 'varchar',

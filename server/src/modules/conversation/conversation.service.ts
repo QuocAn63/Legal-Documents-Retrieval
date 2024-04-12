@@ -63,10 +63,10 @@ export default class ConversationService
   }
 
   async save(
-    userToken: IAuthToken,
+    authToken: IAuthToken,
     @Body() data: SaveConversationDTO,
-  ): Promise<string> {
-    const { id } = userToken;
+  ): Promise<ConversationEntity> {
+    const { id } = authToken;
 
     const newObj = this.conversationRepo.create({
       ...data,
@@ -75,14 +75,14 @@ export default class ConversationService
 
     const saveResponse = await newObj.save();
 
-    return saveResponse.id;
+    return saveResponse;
   }
 
   async update(
-    userToken: IAuthToken,
+    authToken: IAuthToken,
     data: UpdateConversationDTO,
   ): Promise<string> {
-    const { id } = userToken;
+    const { id } = authToken;
     const { conversationID, ...updateData } = data;
     const updateResponse = await this.conversationRepo.update(
       {
@@ -100,10 +100,10 @@ export default class ConversationService
   }
 
   async delete(
-    userToken: IAuthToken,
+    authToken: IAuthToken,
     data: DeleteConversationDTO,
   ): Promise<string> {
-    const { id } = userToken;
+    const { id } = authToken;
 
     const saveResponse = await this.conversationRepo.delete({
       id: In(data.IDs),

@@ -37,7 +37,8 @@ export default class AuthController {
 
   @Post('/register')
   async register(@Body() data: SaveUserWithUsernameDTO) {
-    return await this.userService.save(data);
+    const newUser = await this.userService.save(data);
+    return newUser.id;
   }
 
   @Get('/oauth/google')

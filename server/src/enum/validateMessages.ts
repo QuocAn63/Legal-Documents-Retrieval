@@ -1,4 +1,7 @@
 export enum ValidateMessages {
+  // Common
+  COMMON_UUID_INVALID = 'Mã không hợp lệ',
+  COMMON_ID_EMPTY = 'Mã không được bỏ trống',
   // User
   USER_USERNAME_LENGTH = 'Tên tài khoản phải từ 6 đến 25 ký tự',
   USER_USERNAME_EMPTY = 'Tên tài khoản không được bỏ trống',
@@ -52,4 +55,16 @@ export enum ValidateMessages {
   DOCUMENT_PATH_EMPTY = 'Đường dẫn tài liệu không được để trống',
   DOCUMENT_PATH_CONFLICT = 'Trùng đường dẫn tài liệu',
   DOCUMENT_FILE_SIZE = 'File tài liệu phải nhỏ hơn 3mb',
+  DOCUMENT_RANK_EMPTY = 'Thứ tự tài liệu không được để trống',
+
+  // Configs
+  CONFIG_ID_EMPTY = 'Mã cấu hình không được để trống',
+  CONFIG_ID_NOT_EXISTS = 'Mã cấu hình không tồn tại',
+  CONFIG_USERID_EMPTY = 'Mã BOT không được để trống',
+  CONFIG_PROMPTCONTENT_EMPTY = 'Nội dung lời nhắc không được để trống',
+  CONFIG_PROMPTCONTENT_LENGTH = 'Nội dung lời nhắc phải từ 1 đến 500 ký tự',
+  // Reasons
+  REASON_ID_EMPTY = 'Mã lý do không được để trống',
+  REASON_DESCRIPTION_EMPTY = 'Mô tả lý do không được để trống',
+  REASON_DESCRIPTION_LENGTH = 'Mô tả lý do không được vượt quá 50 ký tự',
 }

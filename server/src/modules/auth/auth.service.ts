@@ -40,13 +40,14 @@ export default class AuthService {
 
     if ('username' in data) {
       user = await this.userRepo.findOne({
-        where: { username: data.username },
+        where: { username: data.username, isBOT: false },
         select: ['id', 'email', 'isBOT', 'isADMIN', 'password'],
       });
     } else if ('email' in data) {
       user = await this.userRepo.findOneBy({
         email: data.email,
         googleID: data.googleID,
+        isBOT: false,
       });
     }
 
@@ -77,8 +78,8 @@ export default class AuthService {
       await this.userRepo.save({
         email,
         googleID,
-        isBOT: '0',
-        isADMIN: '0',
+        isBOT: false,
+        isADMIN: false,
       });
     }
 

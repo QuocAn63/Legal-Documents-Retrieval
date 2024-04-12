@@ -24,6 +24,9 @@ export class DocumentEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   configID: string;
 
+  @Column({ type: 'smallint' })
+  rank: number;
+
   @CreateDateColumn({
     type: 'datetime',
     default: () => 'GETDATE()',

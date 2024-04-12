@@ -50,14 +50,14 @@ export default class UserService implements IBaseService<UserEntity> {
 
   async save<T extends SaveUserWithUsernameDTO | SaveUserWithEmailDTO>(
     data: T,
-  ): Promise<string> {
+  ): Promise<UserEntity> {
     let userInstance = this.userRepo.create();
-    userInstance.isBOT = '0';
-    userInstance.isADMIN = '0';
+    userInstance.isBOT = false;
+    userInstance.isADMIN = false;
 
     if ('username' in data) {
       if (await this.userRepo.findOneBy({ username: data.username })) {
-        throw new BadGatewayException(ValidateMessages.USER_USERNAME_EXISTS);
+        throw new BadRequestException(ValidateMessages.USER_USERNAME_EXISTS);
       }
 
       const encryptedPassword = await HashUtil.hash(data.password);
@@ -75,14 +75,14 @@ export default class UserService implements IBaseService<UserEntity> {
       throw new InternalServerErrorException();
     }
 
-    return saveUserResponse.id;
+    return saveUserResponse;
   }
 
   async save_bot(data: SaveBOTDTO) {
     const saveResponse = await this.userRepo.save({
       username: data.username,
-      isBOT: '1',
-      isADMIN: '0',
+      isBOT: true,
+      isADMIN: false,
     });
 
     return saveResponse.id;

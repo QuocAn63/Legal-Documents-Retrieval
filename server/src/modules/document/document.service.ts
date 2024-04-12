@@ -1,13 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DocumentEntity } from './entities/document.entity';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Not, Repository } from 'typeorm';
 import IBaseService from 'src/interfaces/baseService.interface';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import OffsetUtil from 'src/utils/offset.util';
-import { SaveDocumentDTO } from './dto/document.dto';
+import {
+  DeleteDocumentDTO,
+  SaveDocumentDTO,
+  UpdateDocumentDTO,
+} from './dto/document.dto';
 import { ConfigService } from '../config';
-// import { SaveDocumentDTO } from './dto/document.dto';
 
 @Injectable()
 export default class DocumentService implements IBaseService<DocumentEntity> {
@@ -51,22 +58,57 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
   async save(
     data: SaveDocumentDTO,
     file: Express.Multer.File,
-  ): Promise<string> {
+  ): Promise<DocumentEntity> {
     const { configID } = data;
 
+    const config = await this.configService.get({ id: configID });
+
     const saveResponse = await this.documentRepo.save({
-      ...data,
+      config,
+      label: data.label,
+      rank: data.rank,
       path: file.path,
     });
 
-    return;
+    if (!saveResponse.id) {
+      throw new BadRequestException('Lưu không thành công');
+    }
+
+    return saveResponse;
   }
 
-  async update(...props: any): Promise<string> {
-    return;
+  async update(data: UpdateDocumentDTO): Promise<string> {
+    const config = await this.configService.get({ id: data.configID });
+
+    if (
+      await this.documentRepo.findOneBy({
+        id: Not(data.documentID),
+        rank: data.rank,
+        config,
+      })
+    ) {
+      throw new BadRequestException('Trùng thứ tự tài liệu');
+    }
+
+    const updateResponse = await this.documentRepo.update(
+      { id: data.documentID },
+      { label: data.label, rank: data.rank },
+    );
+
+    if (!updateResponse.affected) {
+      throw new BadRequestException('Cập nhật không thành công');
+    }
+
+    return 'Cập nhật thành công';
   }
 
-  async delete(...props: any): Promise<string | string[]> {
-    return;
+  async delete(data: DeleteDocumentDTO): Promise<string | string[]> {
+    const deleteResponse = await this.documentRepo.delete({ id: In(data.IDs) });
+
+    if (!deleteResponse.affected) {
+      throw new BadRequestException('Xóa không thành công');
+    }
+
+    return 'Xóa thành công';
   }
 }

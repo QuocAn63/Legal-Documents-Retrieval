@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class SaveReportDTO {
@@ -49,4 +49,11 @@ export class UpdateReportDTO {
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.REPORT_STATUS_EMPTY })
   status: string;
+}
+
+export class DeleteReportDTO {
+  @ApiProperty()
+  @IsArray()
+  @IsNotEmpty({ message: ValidateMessages.COMMON_ID_EMPTY })
+  IDs: string[];
 }
