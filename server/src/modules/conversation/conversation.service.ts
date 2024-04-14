@@ -16,7 +16,6 @@ import {
   SaveConversationDTO,
   UpdateConversationDTO,
 } from './dto/conversation.dto';
-import { Pagination } from 'src/commons/decorators/pagination.decorator';
 
 @Injectable()
 export default class ConversationService

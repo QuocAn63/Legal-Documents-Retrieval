@@ -21,6 +21,7 @@ import {
   SaveReasonDTO,
   UpdateReasonDTO,
 } from './dto/reasons.dto';
+import MessageEntity from '../message/entities/messages.entity';
 
 @Injectable()
 export default class ReportService implements IBaseService<ReportEntity> {
@@ -29,6 +30,8 @@ export default class ReportService implements IBaseService<ReportEntity> {
     private readonly reportRepo: Repository<ReportEntity>,
     @InjectRepository(ReportReasonEntity)
     private readonly reasonRepo: Repository<ReportReasonEntity>,
+    @InjectRepository(MessageEntity)
+    private readonly messageRepo: Repository<MessageEntity>,
   ) {}
 
   async getList(
@@ -53,9 +56,13 @@ export default class ReportService implements IBaseService<ReportEntity> {
   async get(
     entityParams: FindOptionsWhere<ReportEntity>,
   ): Promise<ReportEntity> {
-    let responseData = null;
+    let responseData: ReportEntity = null;
 
-    responseData = await this.reportRepo.findOneBy(entityParams);
+    responseData = await this.reportRepo.findOne({
+      where: entityParams,
+
+      relations: ['message', 'reason'],
+    });
 
     if (responseData === null) {
       throw new NotFoundException('Không tìm thấy báo cáo.');
@@ -77,9 +84,18 @@ export default class ReportService implements IBaseService<ReportEntity> {
       throw new BadRequestException('Bạn đã báo cáo phản hồi này rồi');
     }
 
+    if (
+      await this.messageRepo.findOneBy({
+        id: data.messageID,
+        isBOT: false,
+      })
+    ) {
+      throw new BadRequestException('Đây không phải là tin nhắn phản hồi');
+    }
     const saveReponse = await this.reportRepo.save({
       userID: authToken.id,
       ...data,
+      status: '0',
     });
 
     if (!saveReponse) {

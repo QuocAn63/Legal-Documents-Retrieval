@@ -34,7 +34,7 @@ style="
 >
   <div style="text-align: center">
     <p style="font-size: 24px">Bạn đã yêu cầu tính năng reset mật khẩu</p>
-    <a style="font-size: 40px; margin-top: 20px" href="http://localhost:3001/resetpwd?token=[TOKEN]"
+    <a style="font-size: 40px; margin-top: 20px" href="[$CLIENT_URL$]resetpwd?token=[$TOKEN$]"
       >Click vào đây để đến trang reset mật khẩu.</a
     >
   </div>

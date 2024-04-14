@@ -24,7 +24,12 @@ export default class MailService {
       to,
       subject: 'Reset password',
       text: 'Reset password',
-      html: resetPwdEmailTemplate.replaceAll('[TOKEN]', token),
+      html: resetPwdEmailTemplate
+        .replaceAll('[$TOKEN$]', token)
+        .replaceAll(
+          '[$CLIENT_URL$]',
+          this.configService.getOrThrow('CLIENT_URL'),
+        ),
     });
 
     return info;

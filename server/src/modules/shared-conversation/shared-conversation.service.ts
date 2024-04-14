@@ -16,6 +16,13 @@ import {
 } from './dto/sharedConversation.dto';
 import { ConversationService } from '../conversation';
 import { v4 } from 'uuid';
+import MessageEntity from '../message/entities/messages.entity';
+import { MessageService } from '../message/message.service';
+
+export interface SharedConversationWithMessages
+  extends SharedConversationEntity {
+  messages: MessageEntity[];
+}
 
 @Injectable()
 export default class SharedConversationService
@@ -25,6 +32,7 @@ export default class SharedConversationService
     @InjectRepository(SharedConversationEntity)
     private readonly sharedRepo: Repository<SharedConversationEntity>,
     private readonly conversationService: ConversationService,
+    private readonly messageService: MessageService,
   ) {}
   async getList(
     entityParams: FindOptionsWhere<SharedConversationEntity>,
@@ -43,16 +51,24 @@ export default class SharedConversationService
   async get(
     entityParams: FindOptionsWhere<SharedConversationEntity>,
     ...props: any
-  ): Promise<SharedConversationEntity> {
-    let responseData = null;
+  ): Promise<SharedConversationWithMessages> {
+    let sharedConversation: SharedConversationEntity = null;
+    let responseData: SharedConversationWithMessages;
 
-    responseData = await this.sharedRepo.findOneBy({
+    sharedConversation = await this.sharedRepo.findOneBy({
       ...entityParams,
     });
 
-    if (responseData === null) {
+    if (sharedConversation === null) {
       throw new NotFoundException('Không tìm thấy cuộc hội thoại được chia sẻ');
     }
+
+    responseData.messages = await this.messageService.getList(
+      {
+        conversationID: sharedConversation.conversationID,
+      },
+      {},
+    );
 
     return responseData;
   }

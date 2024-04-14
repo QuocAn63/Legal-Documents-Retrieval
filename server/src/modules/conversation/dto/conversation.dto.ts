@@ -35,13 +35,13 @@ export class UpdateConversationDTO {
   @Length(1, 150, { message: ValidateMessages.CONVERSATION_TITLE_LENGTH })
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: [true, false] })
   @IsString()
   @IsOptional()
-  @IsEnum(['0', '1'], {
+  @IsEnum([true, false], {
     message: ValidateMessages.CONVERSATION_ISARCHIVED_VALUE,
   })
-  isArchived: string;
+  isArchived: boolean;
 }
 
 export class DeleteConversationDTO {

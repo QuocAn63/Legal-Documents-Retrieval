@@ -38,7 +38,7 @@ export default class ConversationEntity extends BaseEntity {
   updatedAt: string;
 
   @Column({ type: 'bit', default: '0' })
-  isArchived: string;
+  isArchived: boolean;
 
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'userID' })
