@@ -22,6 +22,7 @@ import {
   UpdateReasonDTO,
 } from './dto/reasons.dto';
 import MessageEntity from '../message/entities/messages.entity';
+import SystemMessageService from '../system-message/system-message.service';
 
 @Injectable()
 export default class ReportService implements IBaseService<ReportEntity> {
@@ -32,6 +33,7 @@ export default class ReportService implements IBaseService<ReportEntity> {
     private readonly reasonRepo: Repository<ReportReasonEntity>,
     @InjectRepository(MessageEntity)
     private readonly messageRepo: Repository<MessageEntity>,
+    private readonly sysMsgService: SystemMessageService,
   ) {}
 
   async getList(

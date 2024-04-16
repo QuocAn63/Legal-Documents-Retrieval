@@ -14,12 +14,14 @@ import {
   UpdateConfigDTO,
 } from './dto/config.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import SystemMessageService from '../system-message/system-message.service';
 
 @Injectable()
 export default class ConfigService implements IBaseService<ConfigEntity> {
   constructor(
     @InjectRepository(ConfigEntity)
     private readonly configRepo: Repository<ConfigEntity>,
+    private readonly sysMsgService: SystemMessageService,
   ) {}
 
   async getList(
@@ -47,7 +49,10 @@ export default class ConfigService implements IBaseService<ConfigEntity> {
     responseData = await this.configRepo.findOneBy(entityParams);
 
     if (responseData === null) {
-      throw new NotFoundException('Không tìm thấy cấu hình');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'CONFIG_ID_NOT_EXISTS',
+        404,
+      );
     }
 
     return responseData;
@@ -57,7 +62,10 @@ export default class ConfigService implements IBaseService<ConfigEntity> {
     const saveResponse = await this.configRepo.save({ ...data });
 
     if (!saveResponse.id) {
-      throw new BadRequestException('Lưu không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'SAVE_ERROR',
+        500,
+      );
     }
 
     return saveResponse;
@@ -70,10 +78,13 @@ export default class ConfigService implements IBaseService<ConfigEntity> {
     );
 
     if (!updateResponse.affected) {
-      throw new BadRequestException('Cập nhật không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+        500,
+      );
     }
 
-    return 'Cập nhật thành công';
+    return await this.sysMsgService.getSysMessage('UPDATE_SUCCESS');
   }
 
   async delete(data: DeleteConfigDTO): Promise<string | string[]> {
@@ -82,9 +93,12 @@ export default class ConfigService implements IBaseService<ConfigEntity> {
     });
 
     if (!deleteResponse.affected) {
-      throw new BadRequestException('Xóa không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+        500,
+      );
     }
 
-    return 'Xóa thành công';
+    return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
   }
 }

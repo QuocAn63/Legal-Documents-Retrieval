@@ -2,11 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Transporter, createTransport } from 'nodemailer';
 import { resetPwdEmailTemplate } from './templates/resetpwd.template';
+import SystemMessageService from '../system-message/system-message.service';
 @Injectable()
 export default class MailService {
   protected transporter: Transporter;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly sysMsgService: SystemMessageService,
+  ) {
     this.transporter = createTransport({
       service: 'Gmail',
       tls: {
@@ -20,18 +24,26 @@ export default class MailService {
   }
 
   async sendResetPasswordLinkToMails(to: string[], token: string) {
-    const info = await this.transporter.sendMail({
-      to,
-      subject: 'Reset password',
-      text: 'Reset password',
-      html: resetPwdEmailTemplate
-        .replaceAll('[$TOKEN$]', token)
-        .replaceAll(
-          '[$CLIENT_URL$]',
-          this.configService.getOrThrow('CLIENT_URL'),
-        ),
-    });
+    try {
+      const info = await this.transporter.sendMail({
+        to,
+        subject: 'Reset password',
+        text: 'Reset password',
+        html: resetPwdEmailTemplate
+          .replaceAll('[$TOKEN$]', token)
+          .replaceAll(
+            '[$CLIENT_URL$]',
+            this.configService.getOrThrow('CLIENT_URL'),
+          ),
+      });
 
-    return info;
+      return info;
+    } catch (err) {
+      console.log(err);
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'MAIL_SEND_FAILED',
+        500,
+      );
+    }
   }
 }

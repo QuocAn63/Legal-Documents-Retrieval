@@ -67,4 +67,6 @@ export enum ValidateMessages {
   REASON_ID_EMPTY = 'Mã lý do không được để trống',
   REASON_DESCRIPTION_EMPTY = 'Mô tả lý do không được để trống',
   REASON_DESCRIPTION_LENGTH = 'Mô tả lý do không được vượt quá 50 ký tự',
+  ERROR = 'Lỗi',
+  SYS_ERROR = 'Lỗi hệ thống',
 }

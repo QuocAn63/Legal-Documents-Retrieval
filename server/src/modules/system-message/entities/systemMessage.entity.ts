@@ -1,8 +1,14 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity({ name: 'systemMessages' })
 export default class SystemMessageEntity extends BaseEntity {
-  @PrimaryGeneratedColumn('identity')
+  @PrimaryColumn('varchar')
   id: string;
 
   @Column({

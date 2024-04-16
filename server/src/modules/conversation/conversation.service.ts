@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Body, Injectable } from '@nestjs/common';
 import IBaseService from 'src/interfaces/baseService.interface';
 import ConversationEntity from './entities/conversations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,6 +11,7 @@ import {
   SaveConversationDTO,
   UpdateConversationDTO,
 } from './dto/conversation.dto';
+import SystemMessageService from '../system-message/system-message.service';
 
 @Injectable()
 export default class ConversationService
@@ -24,6 +20,7 @@ export default class ConversationService
   constructor(
     @InjectRepository(ConversationEntity)
     private readonly conversationRepo: Repository<ConversationEntity>,
+    private readonly sysMsgService: SystemMessageService,
   ) {}
 
   async getList(
@@ -55,7 +52,10 @@ export default class ConversationService
     });
 
     if (responseData === null) {
-      throw new NotFoundException('Không tìm thấy cuộc trò chuyện');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'CONVERSATION_ID_NOT_EXISTS',
+        404,
+      );
     }
 
     return responseData;
@@ -65,14 +65,17 @@ export default class ConversationService
     authToken: IAuthToken,
     @Body() data: SaveConversationDTO,
   ): Promise<ConversationEntity> {
-    const { id } = authToken;
-
-    const newObj = this.conversationRepo.create({
+    const saveResponse = await this.conversationRepo.save({
+      userID: authToken.id,
       ...data,
-      userID: id,
     });
 
-    const saveResponse = await newObj.save();
+    if (saveResponse === null) {
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'SAVE_ERROR',
+        500,
+      );
+    }
 
     return saveResponse;
   }
@@ -92,7 +95,9 @@ export default class ConversationService
     );
 
     if (!updateResponse.affected) {
-      throw new BadRequestException('Cập nhật không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+      );
     }
 
     return conversationID;
@@ -110,9 +115,11 @@ export default class ConversationService
     });
 
     if (!saveResponse.affected) {
-      throw new BadRequestException('Xóa không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+      );
     }
 
-    return saveResponse.raw;
+    return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
   }
 }
