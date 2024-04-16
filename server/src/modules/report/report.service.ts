@@ -23,6 +23,7 @@ import {
 } from './dto/reasons.dto';
 import MessageEntity from '../message/entities/messages.entity';
 import SystemMessageService from '../system-message/system-message.service';
+import { ValidateMessages } from 'src/enum/validateMessages';
 
 @Injectable()
 export default class ReportService implements IBaseService<ReportEntity> {
@@ -67,7 +68,10 @@ export default class ReportService implements IBaseService<ReportEntity> {
     });
 
     if (responseData === null) {
-      throw new NotFoundException('Không tìm thấy báo cáo.');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        ValidateMessages.REPORT_NOT_EXISTS,
+        404,
+      );
     }
 
     return responseData;
@@ -83,7 +87,10 @@ export default class ReportService implements IBaseService<ReportEntity> {
         userID: authToken.id,
       })
     ) {
-      throw new BadRequestException('Bạn đã báo cáo phản hồi này rồi');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        ValidateMessages.REPORT_ALREADY_SEND,
+        400,
+      );
     }
 
     if (
@@ -92,7 +99,10 @@ export default class ReportService implements IBaseService<ReportEntity> {
         isBOT: false,
       })
     ) {
-      throw new BadRequestException('Đây không phải là tin nhắn phản hồi');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        ValidateMessages.REPORT_MESSAGE_INVALID,
+        400,
+      );
     }
     const saveReponse = await this.reportRepo.save({
       userID: authToken.id,
@@ -101,7 +111,10 @@ export default class ReportService implements IBaseService<ReportEntity> {
     });
 
     if (!saveReponse) {
-      throw new BadRequestException('Không thể lưu');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'SAVE_ERROR',
+        500,
+      );
     }
 
     return saveReponse;
@@ -113,7 +126,10 @@ export default class ReportService implements IBaseService<ReportEntity> {
     });
 
     if (!saveReponse) {
-      throw new BadRequestException('Không thể lưu');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'SAVE_ERROR',
+        500,
+      );
     }
 
     return saveReponse;
@@ -126,10 +142,12 @@ export default class ReportService implements IBaseService<ReportEntity> {
     );
 
     if (!updateResponse.affected) {
-      throw new BadRequestException('Cập nhật không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+      );
     }
 
-    return 'Cập nhật thành công';
+    return await this.sysMsgService.getSysMessage('UPDATE_SUCCESS');
   }
 
   async update_reasons(data: UpdateReasonDTO): Promise<string> {
@@ -139,10 +157,12 @@ export default class ReportService implements IBaseService<ReportEntity> {
     );
 
     if (!updateResponse.affected) {
-      throw new BadRequestException('Cập nhật không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+      );
     }
 
-    return 'Cập nhật thành công';
+    return await this.sysMsgService.getSysMessage('UPDATE_SUCCESS');
   }
 
   async delete(data: DeleteReportDTO): Promise<string> {
@@ -151,10 +171,12 @@ export default class ReportService implements IBaseService<ReportEntity> {
     });
 
     if (!deleteResponse.affected) {
-      throw new BadRequestException('Xóa không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+      );
     }
 
-    return 'Xóa thành công';
+    return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
   }
 
   async delete_reasons(data: DeleteReasonDTO): Promise<string> {
@@ -163,9 +185,11 @@ export default class ReportService implements IBaseService<ReportEntity> {
     });
 
     if (!deleteResponse.affected) {
-      throw new BadRequestException('Xóa không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+      );
     }
 
-    return 'Xóa thành công';
+    return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
   }
 }

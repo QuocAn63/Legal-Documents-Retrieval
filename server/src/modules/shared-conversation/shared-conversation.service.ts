@@ -18,6 +18,8 @@ import { ConversationService } from '../conversation';
 import { v4 } from 'uuid';
 import MessageEntity from '../message/entities/messages.entity';
 import { MessageService } from '../message/message.service';
+import SystemMessageService from '../system-message/system-message.service';
+import { ValidateMessages } from 'src/enum/validateMessages';
 
 export interface SharedConversationWithMessages
   extends SharedConversationEntity {
@@ -33,6 +35,7 @@ export default class SharedConversationService
     private readonly sharedRepo: Repository<SharedConversationEntity>,
     private readonly conversationService: ConversationService,
     private readonly messageService: MessageService,
+    private readonly sysMsgService: SystemMessageService,
   ) {}
   async getList(
     entityParams: FindOptionsWhere<SharedConversationEntity>,
@@ -60,7 +63,10 @@ export default class SharedConversationService
     });
 
     if (sharedConversation === null) {
-      throw new NotFoundException('Không tìm thấy cuộc hội thoại được chia sẻ');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        ValidateMessages.SHAREDCONVERSATION_NOT_EXISTS,
+        404,
+      );
     }
 
     responseData.messages = await this.messageService.getList(
@@ -86,8 +92,9 @@ export default class SharedConversationService
     });
 
     if (await this.sharedRepo.findOneBy({ conversation })) {
-      throw new BadRequestException(
-        'Cuộc hội thoại này đã được chia sẻ từ trước',
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        ValidateMessages.SHAREDCONVERSATION_ALREADY_SHARED,
+        400,
       );
     }
 
@@ -113,10 +120,12 @@ export default class SharedConversationService
     );
 
     if (!updateResponse.affected) {
-      throw new BadRequestException('Cập nhật không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+      );
     }
 
-    return 'Cập nhật thành công';
+    return await this.sysMsgService.getSysMessage('UPDATE_SUCCESS');
   }
 
   async delete(
@@ -128,10 +137,12 @@ export default class SharedConversationService
       userID: authToken.id,
     });
 
-    if (deleteResponse.affected) {
-      throw new BadRequestException('Xóa không thành công');
+    if (!deleteResponse.affected) {
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+      );
     }
 
-    return 'Xóa thành công';
+    return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
   }
 }

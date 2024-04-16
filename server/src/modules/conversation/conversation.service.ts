@@ -44,7 +44,6 @@ export default class ConversationService
     ...props: any
   ): Promise<ConversationEntity> {
     let responseData = null;
-    console.log(entityParams);
 
     responseData = await this.conversationRepo.findOneBy({
       id: entityParams.id,
@@ -100,7 +99,7 @@ export default class ConversationService
       );
     }
 
-    return conversationID;
+    return await this.sysMsgService.getSysMessage('UPDATE_SUCCESS');
   }
 
   async delete(
@@ -109,12 +108,12 @@ export default class ConversationService
   ): Promise<string> {
     const { id } = authToken;
 
-    const saveResponse = await this.conversationRepo.delete({
+    const deleteResponse = await this.conversationRepo.delete({
       id: In(data.IDs),
       userID: id,
     });
 
-    if (!saveResponse.affected) {
+    if (!deleteResponse.affected) {
       await this.sysMsgService.getSysMessageAndThrowHttpException(
         'DELETE_ERROR',
       );

@@ -21,12 +21,14 @@ import HashUtil from 'src/utils/hash.util';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 import { UpdateUserDTO } from './dto/update.dto';
 import { DeleteUserDTO } from './dto/delete.dto';
+import SystemMessageService from '../system-message/system-message.service';
 
 @Injectable()
 export default class UserService implements IBaseService<UserEntity> {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private readonly sysMsgService: SystemMessageService,
   ) {}
 
   async getList(
@@ -57,7 +59,10 @@ export default class UserService implements IBaseService<UserEntity> {
 
     if ('username' in data) {
       if (await this.userRepo.findOneBy({ username: data.username })) {
-        throw new BadRequestException(ValidateMessages.USER_USERNAME_EXISTS);
+        await this.sysMsgService.getSysMessageAndThrowHttpException(
+          ValidateMessages.USER_USERNAME_EXISTS,
+          404,
+        );
       }
 
       const encryptedPassword = await HashUtil.hash(data.password);
@@ -72,7 +77,10 @@ export default class UserService implements IBaseService<UserEntity> {
     const saveUserResponse = await userInstance.save();
 
     if (!saveUserResponse) {
-      throw new InternalServerErrorException();
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        ValidateMessages.SYS_ERROR,
+        500,
+      );
     }
 
     return saveUserResponse;
@@ -84,6 +92,13 @@ export default class UserService implements IBaseService<UserEntity> {
       isBOT: true,
       isADMIN: false,
     });
+
+    if (saveResponse === null) {
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'SAVE_ERROR',
+        500,
+      );
+    }
 
     return saveResponse.id;
   }
@@ -98,41 +113,51 @@ export default class UserService implements IBaseService<UserEntity> {
     });
 
     if (user === null) {
-      throw new NotFoundException('Không tìm thấy người dùng');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        ValidateMessages.USER_NOT_EXISTS,
+        404,
+      );
     }
 
     const isPasswordEquals = await HashUtil.compare(password, user.password);
 
     if (!isPasswordEquals) {
-      throw new BadRequestException('Mật khẩu không chính xác');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        ValidateMessages.USER_PASSWORD_WRONG,
+        403,
+      );
     }
 
     const encryptedPassword = await HashUtil.hash(newPassword);
 
-    const saveUserResponse = await this.userRepo.update(
+    const update = await this.userRepo.update(
       { id },
       { password: encryptedPassword },
     );
 
-    if (!saveUserResponse.affected) {
-      throw new BadRequestException('Cập nhật không thành công');
+    if (!update.affected) {
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+      );
     }
 
-    return 'Cập nhật thành công';
+    return await this.sysMsgService.getSysMessage('UPDATE_SUCCESS');
   }
 
   async delete(userToken: IAuthToken, data: DeleteUserDTO): Promise<string> {
     const { id, isADMIN } = userToken;
-    let deleteResult: DeleteResult;
+    let deleteResponse: DeleteResult;
 
     if ((data.IDs.includes(id) && data.IDs.length == 1) || isADMIN) {
-      deleteResult = await this.userRepo.softDelete({ id: In(data.IDs) });
+      deleteResponse = await this.userRepo.softDelete({ id: In(data.IDs) });
     }
 
-    if (!deleteResult.affected) {
-      throw new BadRequestException('Xóa không thành công');
+    if (!deleteResponse.affected) {
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+      );
     }
 
-    return 'Xóa thành công';
+    return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
   }
 }
