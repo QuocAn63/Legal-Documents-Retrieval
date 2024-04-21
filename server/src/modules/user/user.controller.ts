@@ -16,7 +16,10 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { IQueryParams } from 'src/interfaces/query.interface';
 import { FilterUserDTO } from './dto/filter.dto';
-import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
+import {
+  FilterKeys,
+  QueryTransformPipe,
+} from 'src/commons/pipes/queryTransform.pipe';
 import { SaveBOTDTO } from './dto/save.dto';
 import { UpdateUserDTO } from './dto/update.dto';
 import { AuthToken } from 'src/commons/decorators/auth.decorator';
@@ -36,7 +39,12 @@ export default class UserController {
     @Pagination() pagination: IQueryParams,
     @Query(QueryTransformPipe) queries: FilterUserDTO,
   ) {
-    return await this.userService.getList(queries, pagination);
+    const filteredQueries = FilterKeys<FilterUserDTO>(
+      queries,
+      Object.keys(new FilterUserDTO()),
+    );
+
+    return await this.userService.getList(filteredQueries, pagination);
   }
 
   @Get('/:userID')
