@@ -39,6 +39,16 @@ export class FilterReportDTO {
   toDate: string;
 }
 
+export interface IFilterReportDTO {
+  userID: string;
+
+  reasonID: string;
+
+  description: string;
+
+  status: string;
+}
+
 export class UpdateReportDTO {
   @ApiProperty()
   @IsString()

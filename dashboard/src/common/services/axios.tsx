@@ -1,17 +1,33 @@
-import axios from "axios";
+import axiosLib from "axios";
 import { Navigate } from "react-router-dom";
 
-const axiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_SERVER_URL}/api`,
+const axios = axiosLib.create({
+  baseURL: `${import.meta.env.VITE_SERVER_URL}`,
   headers: {
     "Content-Type": "application/json",
     Authorization: `Bearer ${import.meta.env.VITE_AUTH_TOKEN}`,
   },
+  timeout: 20000,
 });
 
-axiosInstance.interceptors.request.use(
+axios.interceptors.request.use(
   (config) => {
-    // write later
+    if (
+      config.method === "get" &&
+      config.params &&
+      Object.keys(config.params).length > 0
+    ) {
+      let filterdParams = {};
+
+      Object.keys(config.params).forEach((key) => {
+        const value = config.params[key];
+        if (value !== "") {
+          filterdParams = { ...filterdParams, [key]: value };
+        }
+      });
+
+      config.params = filterdParams;
+    }
     return config;
   },
   (error) => {
@@ -19,7 +35,7 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-axiosInstance.interceptors.response.use(
+axios.interceptors.response.use(
   (response) => {
     // write later
     return response.data;
@@ -33,4 +49,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance;
+export default axios;

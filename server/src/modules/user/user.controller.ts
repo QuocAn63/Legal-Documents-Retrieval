@@ -15,10 +15,10 @@ import UserService from './user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { IQueryParams } from 'src/interfaces/query.interface';
-import { FilterUserDTO } from './dto/filter.dto';
+import { FilterUserDTO, IFilterUserDTO } from './dto/filter.dto';
 import {
-  FilterKeys,
   QueryTransformPipe,
+  filterKeys,
 } from 'src/commons/pipes/queryTransform.pipe';
 import { SaveBOTDTO } from './dto/save.dto';
 import { UpdateUserDTO } from './dto/update.dto';
@@ -39,10 +39,10 @@ export default class UserController {
     @Pagination() pagination: IQueryParams,
     @Query(QueryTransformPipe) queries: FilterUserDTO,
   ) {
-    const filteredQueries = FilterKeys<FilterUserDTO>(
-      queries,
-      Object.keys(new FilterUserDTO()),
-    );
+    const filteredQueries = filterKeys<FilterUserDTO>(queries, [
+      'email',
+      'username',
+    ]);
 
     return await this.userService.getList(filteredQueries, pagination);
   }

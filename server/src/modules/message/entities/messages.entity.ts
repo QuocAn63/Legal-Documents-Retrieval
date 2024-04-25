@@ -5,6 +5,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -29,6 +30,12 @@ export default class MessageEntity extends BaseEntity {
   conversationID: string;
 
   @Column({
+    type: 'uuid',
+    nullable: true,
+  })
+  replyToMessageID: string;
+
+  @Column({
     type: 'nvarchar',
     length: 'max',
   })
@@ -51,6 +58,10 @@ export default class MessageEntity extends BaseEntity {
     type: 'bit',
   })
   isBOT: boolean;
+
+  @OneToOne(() => MessageEntity)
+  @JoinColumn({ name: 'replyToMessageID' })
+  replyToMessage: MessageEntity;
 
   @ManyToOne((user) => UserEntity)
   @JoinColumn({ name: 'userID' })

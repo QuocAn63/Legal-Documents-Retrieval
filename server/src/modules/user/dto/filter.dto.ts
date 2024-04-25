@@ -11,12 +11,10 @@ export class FilterUserDTO {
   @ApiProperty({
     required: false,
   })
-  @IsOptional()
-  id: string;
+  email: string;
+}
 
-  @ApiProperty({
-    required: false,
-  })
-  @IsOptional()
+export class IFilterUserDTO {
+  username: string;
   email: string;
 }

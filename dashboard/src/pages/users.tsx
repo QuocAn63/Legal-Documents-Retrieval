@@ -1,9 +1,57 @@
-import { Button, Space, Table, Typography } from "antd";
+import {
+  Button,
+  DatePicker,
+  Flex,
+  Form,
+  Input,
+  Modal,
+  Space,
+  Table,
+  Typography,
+} from "antd";
 import styles from "../styles/manage.module.scss";
 import classNames from "classnames/bind";
 import { IUser } from "../models/users";
+import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import UserService from "../common/services/users.service";
+import UserService from "../common/lib/users.service";
+import { z } from "zod";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormItem } from "react-hook-form-antd";
+import { ToDataSource } from "../common/services/toDataSource";
+
+type ModalType = "SEARCH" | "SAVE" | "DELETE" | "";
+
+type PageStateType = {
+  dataSource: IUser[];
+  user: IUser | null;
+  filter: {
+    pageIndex: number;
+    pageSize: number;
+    username: string;
+    email: string;
+    from: string;
+    to: string;
+  };
+  modal: ModalType;
+  loading: boolean;
+  selectedIDs: string[];
+};
+
+type IUserSearchInput = {
+  email: string;
+  username: string;
+  from: any;
+  to: any;
+};
+
+const searchSchema = z.object({
+  email: z.string().optional(),
+  username: z.string().optional(),
+  from: z.any().optional(),
+  to: z.any().optional(),
+});
 
 const cx = classNames.bind(styles);
 
@@ -34,10 +82,11 @@ const columns = [
     dataIndex: "deletedAt",
   },
   {
-    title: "Thao tác",
-    key: "action",
-    width: 100,
-    render: () => <ActionColumn />,
+    title: "Sửa",
+    key: "edit",
+    render: (_: any, record: any) => {
+      return <Button type="link">Sửa</Button>;
+    },
   },
 ];
 
@@ -56,65 +105,179 @@ type PageState = {
 };
 
 export const UsersPage = () => {
-  const [state, setState] = useState<PageState>({
-    user: null,
+  const [state, setState] = useState<PageStateType>({
     dataSource: [],
-    modal: "",
-    pagination: {
+    user: null,
+    filter: {
       pageIndex: 1,
       pageSize: 20,
+      username: "",
+      email: "",
+      from: "",
+      to: "",
     },
+    loading: false,
+    modal: "",
+    selectedIDs: [],
+  });
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IUserSearchInput>({
+    resolver: zodResolver(searchSchema),
   });
 
   useEffect(() => {
-    const loadDataTable = async () => {
-      const response = await UserService.getList(
-        state.pagination.pageIndex,
-        state.pagination.pageSize
-      );
+    const getDataSource = async () => {
+      setState((prev) => ({ ...prev, loading: true }));
+      let dataSource = [];
 
-      const dataSource = response.data.map((item: any) => ({
-        ...item,
-        key: item.id,
-      }));
+      try {
+        let response = await UserService.getList(
+          state.filter.pageIndex,
+          state.filter.pageSize,
+          {
+            username: state.filter.username,
+            email: state.filter.email,
+            from: state.filter.from,
+            to: state.filter.to,
+          }
+        );
 
-      setState((prev) => ({ ...prev, dataSource }));
+        dataSource = ToDataSource(response.data);
+      } catch (err) {
+        console.log(err);
+      }
+      setState((prev) => ({ ...prev, dataSource, loading: false }));
     };
 
-    loadDataTable();
-  }, [state.pagination.pageIndex, state.pagination.pageSize]);
+    getDataSource();
+  }, [
+    state.filter.email,
+    state.filter.username,
+    state.filter.pageIndex,
+    state.filter.pageSize,
+    state.filter.from,
+    state.filter.to,
+  ]);
 
-  const handleOpenModal = async (userID: string) => {
-    const response = await UserService.get(userID);
-    setState((prev) => ({ ...prev, user: response.data }));
+  const handleOpenModal = (type: ModalType, callback: () => void) => {
+    callback();
+    setState((prev) => ({ ...prev, modal: type }));
+  };
+
+  const handleCloseModal = (callback: () => void) => {
+    callback();
+    setState((prev) => ({ ...prev, modal: "" }));
+  };
+
+  const onSearchSubmit: SubmitHandler<IUserSearchInput> = async (data) => {
+    const from = data.from
+      ? `${data.from["$D"]}/${data.from["$M"]}/${data.from["$y"]}`
+      : "";
+    const to = data.to
+      ? `${data.to["$D"]}/${data.to["$M"]}/${data.to["$y"]}`
+      : "";
+
+    setState((prev) => ({
+      ...prev,
+      filter: { ...prev.filter, ...data, from, to },
+      modal: "",
+    }));
+  };
+
+  const handleDeleteButton = async () => {
+    try {
+      const response = await UserService.delete(state.selectedIDs);
+
+      console.log(response);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
-    <div className={cx("wrapper")}>
-      <div className={cx("section_title")}>
-        <Typography.Title level={4}>Người dùng</Typography.Title>
-      </div>
-      <div className={cx("section_content")}>
-        <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <Space size="large" style={{ width: "100%" }}>
-            <Button>Làm mới</Button>
-            <Button>Lưu</Button>
-            <Button>Xóa</Button>
-          </Space>
+    <>
+      <div className={cx("wrapper")}>
+        <div className={cx("section_title")}>
+          <Typography.Title level={4}>Người dùng</Typography.Title>
+        </div>
+        <div className={cx("section_content")}>
+          <Flex justify="space-between" className="mb-5">
+            <Flex gap={10}>
+              <Button
+                icon={<SearchOutlined />}
+                onClick={() => handleOpenModal("SEARCH", () => {})}
+              >
+                Tìm kiếm
+              </Button>
+            </Flex>
+            <Button
+              icon={<DeleteOutlined />}
+              danger
+              onClick={() => handleOpenModal("DELETE", () => {})}
+            >
+              Xóa
+            </Button>
+          </Flex>
           <Table
-            pagination={{ position: ["bottomCenter"] }}
+            loading={state.loading}
+            pagination={{
+              position: ["bottomCenter"],
+              current: state.filter.pageIndex,
+            }}
             columns={columns}
-            dataSource={state.dataSource}
+            dataSource={state?.dataSource}
             rowSelection={{
               type: "checkbox",
               onChange: (
                 selectedRowKeys: React.Key[],
                 selectedRows: IUser[]
-              ) => {},
+              ) => {
+                setState((prev) => ({
+                  ...prev,
+                  selectedIDs: selectedRows.map((item) => item.id),
+                }));
+              },
             }}
           ></Table>
-        </Space>
+        </div>
       </div>
-    </div>
+      <Modal
+        open={state.modal === "SEARCH"}
+        okText="Tìm"
+        cancelText="Hủy"
+        onOk={handleSubmit(onSearchSubmit)}
+        onCancel={() => handleCloseModal(() => {})}
+        title="Tìm kiếm"
+        destroyOnClose
+      >
+        <Form>
+          <FormItem control={control} name="username">
+            <Input placeholder="Tên tài khoản" />
+          </FormItem>
+          <FormItem control={control} name="email">
+            <Input placeholder="Địa chỉ email" />
+          </FormItem>
+          <Space size="middle">
+            <FormItem control={control} name="from">
+              <DatePicker placeholder="Từ ngày" />
+            </FormItem>
+            <FormItem control={control} name="to">
+              <DatePicker placeholder="Đến ngày" />
+            </FormItem>
+          </Space>
+        </Form>
+      </Modal>
+      <Modal
+        open={state.modal === "DELETE"}
+        okText="Xác nhận"
+        title="Xóa người dùng"
+        cancelText="Hủy"
+        onOk={handleDeleteButton}
+        onCancel={() => handleCloseModal(() => {})}
+      ></Modal>
+    </>
   );
 };

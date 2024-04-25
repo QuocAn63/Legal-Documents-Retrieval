@@ -36,7 +36,11 @@ export default class BotService {
     );
     const newBotMessage = await this.messageService.save(
       { id: '5E17D4A0-ABF8-EE11-9758-7C67A2EE2BB7' },
-      { content: this.randomBotMessage(), conversationID: conversation.id },
+      {
+        content: this.randomBotMessage(),
+        conversationID: conversation.id,
+        replyToMessageID: newUserMessage.id,
+      },
       true,
     );
 
