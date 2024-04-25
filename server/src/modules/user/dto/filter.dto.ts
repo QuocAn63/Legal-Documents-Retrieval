@@ -9,10 +9,10 @@ export class FilterUserDTO {
   @ApiProperty({
     required: false,
   })
-  id: string;
+  email: string;
+}
 
-  @ApiProperty({
-    required: false,
-  })
+export class IFilterUserDTO {
+  username: string;
   email: string;
 }

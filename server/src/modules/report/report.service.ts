@@ -59,13 +59,14 @@ export default class ReportService implements IBaseService<ReportEntity> {
   async get(
     entityParams: FindOptionsWhere<ReportEntity>,
   ): Promise<ReportEntity> {
-    let responseData: ReportEntity = null;
+    let responseData: any;
+    const queryBuilder = this.reportRepo.createQueryBuilder('report');
 
-    responseData = await this.reportRepo.findOne({
-      where: entityParams,
-
-      relations: ['message', 'reason'],
-    });
+    responseData = await queryBuilder
+      .leftJoinAndSelect('report.message', 'message')
+      .leftJoinAndSelect('message.replyToMessage', 'replyToMessage')
+      .where({ id: entityParams.id })
+      .getOne();
 
     if (responseData === null) {
       await this.sysMsgService.getSysMessageAndThrowHttpException(
@@ -73,6 +74,13 @@ export default class ReportService implements IBaseService<ReportEntity> {
         404,
       );
     }
+
+    const { replyToMessage, ...message } = responseData.message;
+
+    responseData = {
+      id: responseData.id,
+      messages: [replyToMessage, message],
+    };
 
     return responseData;
   }

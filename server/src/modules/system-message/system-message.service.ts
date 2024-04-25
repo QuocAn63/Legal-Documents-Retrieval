@@ -17,7 +17,7 @@ export default class SystemMessageService {
 
   async getSysMessage(messageID: string | ValidateMessages): Promise<string> {
     const message =
-      (await this.sysMsgRepo.findOneBy({ id: messageID })).content || 'Lỗi';
+      (await this.sysMsgRepo.findOneBy({ id: messageID }))?.content || 'Lỗi';
 
     return message;
   }

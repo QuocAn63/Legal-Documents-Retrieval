@@ -72,6 +72,7 @@ export class MessageService implements IBaseService<MessageEntity> {
       userID: authToken.id,
       content: data.content,
       isBOT: isBOT,
+      replyToMessageID: data.replyToMessageID || null,
     });
 
     if (saveResponse === null) {

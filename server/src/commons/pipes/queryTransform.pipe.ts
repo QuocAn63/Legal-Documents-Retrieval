@@ -26,3 +26,12 @@ export class QueryTransformPipe implements PipeTransform {
     return value;
   }
 }
+
+export function filterKeys<T>(input: T, allowedKeys: (keyof T)[]): Partial<T> {
+  return Object.keys(input)
+    .filter((key) => allowedKeys.includes(key as any))
+    .reduce((obj, key) => {
+      obj[key] = input[key];
+      return obj;
+    }, {} as Partial<T>);
+}
