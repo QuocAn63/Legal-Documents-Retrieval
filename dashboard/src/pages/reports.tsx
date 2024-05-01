@@ -94,14 +94,12 @@ export const ReportsPage = () => {
       title: "Mã",
       key: "id",
       dataIndex: "id",
-      width: "120px",
       ellipsis: true,
     },
     {
       title: "Mã tin nhắn",
       key: "messageID",
       dataIndex: "messageID",
-      width: "120px",
       ellipsis: true,
       render: (value: string, record: any) => (
         <Link
@@ -124,7 +122,6 @@ export const ReportsPage = () => {
       title: "Mã người dùng",
       key: "userID",
       dataIndex: "userID",
-      width: "120px",
       ellipsis: true,
     },
     {
@@ -141,13 +138,15 @@ export const ReportsPage = () => {
     },
     {
       title: "Ngày tạo",
-      key: "updatedAt",
-      dataIndex: "updatedAt",
+      key: "createdAt",
+      dataIndex: "createdAt",
+      width: "170px",
     },
     {
       title: "Ngày sửa",
       key: "updatedAt",
       dataIndex: "updatedAt",
+      width: "170px",
     },
     {
       title: "Trạng thái",
@@ -328,8 +327,9 @@ export const ReportsPage = () => {
       <Modal
         open={state.modal === "VIEW"}
         onCancel={() => handleCloseModal(() => {})}
+        footer={null}
       >
-        <Space direction="vertical" size="middle">
+        <Space direction="vertical" size="large">
           {state.messages.map((message) => (
             <MessageItem {...message}></MessageItem>
           ))}

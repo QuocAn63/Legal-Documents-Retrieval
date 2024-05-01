@@ -90,20 +90,6 @@ const columns = [
   },
 ];
 
-const ActionColumn = () => {
-  return <Button type="link">Sửa</Button>;
-};
-
-type PageState = {
-  user: IUser | null;
-  dataSource: IUser[];
-  modal: string;
-  pagination: {
-    pageIndex: number;
-    pageSize: number;
-  };
-};
-
 export const UsersPage = () => {
   const [state, setState] = useState<PageStateType>({
     dataSource: [],
