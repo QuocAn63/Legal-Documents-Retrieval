@@ -19,8 +19,8 @@ export class DocumentEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   label: string;
 
-  @Column({ type: 'varchar' })
-  path: string;
+  @Column({ type: 'nvarchar', length: 'MAX' })
+  content: string;
 
   @Column({ type: 'varchar' })
   configID: string;

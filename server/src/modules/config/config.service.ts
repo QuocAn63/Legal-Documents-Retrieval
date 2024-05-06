@@ -26,15 +26,15 @@ export default class ConfigService implements IBaseService<ConfigEntity> {
 
   async getList(
     entityParams: FindOptionsWhere<ConfigEntity>,
-    pagination: IQueryParams,
+    { pageIndex = 1, pageSize = 20 }: IQueryParams,
     ...props: any
   ): Promise<[] | ConfigEntity[]> {
     let responseData = [];
 
     responseData = await this.configRepo.find({
       where: entityParams,
-      skip: OffsetUtil.getOffset(pagination),
-      take: pagination.pageSize,
+      skip: OffsetUtil.getOffset({ pageSize, pageIndex }),
+      take: pageSize,
     });
 
     return responseData;

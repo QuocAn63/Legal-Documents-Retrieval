@@ -60,19 +60,14 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
     return responseData;
   }
 
-  async save(
-    data: SaveDocumentDTO,
-    file: Express.Multer.File,
-  ): Promise<DocumentEntity> {
+  async save(data: SaveDocumentDTO): Promise<DocumentEntity> {
     const { configID } = data;
 
     const config = await this.configService.get({ id: configID });
 
     const saveResponse = await this.documentRepo.save({
       config,
-      label: data.label,
-      rank: data.rank,
-      path: file.path,
+      ...data,
     });
 
     if (saveResponse === null) {
@@ -85,18 +80,6 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
   }
 
   async update(data: UpdateDocumentDTO): Promise<string> {
-    const config = await this.configService.get({ id: data.configID });
-
-    if (
-      await this.documentRepo.findOneBy({
-        id: Not(data.documentID),
-        rank: data.rank,
-        config,
-      })
-    ) {
-      await this.sysMsgServce.getSysMessageAndThrowHttpException('ERROR', 400);
-    }
-
     const updateResponse = await this.documentRepo.update(
       { id: data.documentID },
       { label: data.label, rank: data.rank },

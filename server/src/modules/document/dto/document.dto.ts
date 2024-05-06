@@ -11,17 +11,23 @@ import {
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class FilterDocumentDTO {
-  @ApiProperty()
+  @ApiProperty({
+    required: false,
+  })
   @IsString()
   @IsOptional()
   label: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    required: false,
+  })
   @IsString()
   @IsOptional()
-  description: string;
+  content: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    required: false,
+  })
   @IsString()
   @IsOptional()
   configID: string;
@@ -44,25 +50,21 @@ export class SaveDocumentDTO {
   @IsNotEmpty({ message: ValidateMessages.DOCUMENT_LABEL_EMPTY })
   rank: number;
 
-  @ApiProperty({ type: 'string', format: 'binary' })
-  file: any;
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({ message: ValidateMessages.DOCUMENT_LABEL_EMPTY })
+  content: string;
 }
 
 export class UpdateDocumentDTO {
   @ApiProperty()
-  @IsUUID('4', { message: ValidateMessages.COMMON_UUID_INVALID })
+  @IsUUID('all', { message: ValidateMessages.COMMON_UUID_INVALID })
   @IsNotEmpty({ message: ValidateMessages.DOCUMENT_ID_EMPTY })
   documentID: string;
 
   @ApiProperty()
-  @IsUUID('4', { message: ValidateMessages.COMMON_UUID_INVALID })
-  @IsNotEmpty({ message: ValidateMessages.DOCUMENT_CONFIGID_EMPTY })
-  configID: string;
-
-  @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.DOCUMENT_LABEL_EMPTY })
-  @Length(1, 100, { message: ValidateMessages.DOCUMENT_LABEL_LENGTH })
   label: string;
 
   @ApiProperty()

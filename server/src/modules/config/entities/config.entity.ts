@@ -18,10 +18,10 @@ export class ConfigEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: 'nvarchar', nullable: true })
   description: string;
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: 'nvarchar', length: 'MAX' })
   promptContent: string;
 
   @Column({ type: 'varchar' })

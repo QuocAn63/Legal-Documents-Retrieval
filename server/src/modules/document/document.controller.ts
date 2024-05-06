@@ -48,23 +48,12 @@ export default class DocumentController {
     return this.documentService.get({ id: documentID });
   }
 
-  @ApiConsumes('multipart/form-data')
   @ApiBody({
     type: SaveDocumentDTO,
   })
   @Post('/')
-  @UseInterceptors(FileInterceptor('file'))
-  async save_documents(
-    @Req() request: RequestWithFileValidation,
-    @Body() data: SaveDocumentDTO,
-    @UploadedFile()
-    file: Express.Multer.File,
-  ) {
-    if (request.fileValidation !== undefined) {
-      throw new ForbiddenException(request.fileValidation);
-    }
-
-    const newDocument = await this.documentService.save(data, file);
+  async save_documents(@Body() data: SaveDocumentDTO) {
+    const newDocument = await this.documentService.save(data);
     return newDocument.id;
   }
 

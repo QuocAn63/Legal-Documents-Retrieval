@@ -13,3 +13,21 @@ export class CreateConversationDTO {
   @IsNotEmpty({ message: ValidateMessages.MESSAGE_CONTENT_EMPTY })
   content: string;
 }
+
+export class AskDTO {
+  @ApiProperty()
+  @IsUUID('all', { message: ValidateMessages.COMMON_UUID_INVALID })
+  @IsOptional()
+  conversationID: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({ message: ValidateMessages.MESSAGE_CONTENT_EMPTY })
+  input: string;
+
+  @ApiProperty()
+  chunkSize: number;
+
+  @ApiProperty()
+  chunkOverlap: number;
+}
