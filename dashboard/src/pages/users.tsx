@@ -81,13 +81,6 @@ const columns = [
     key: "deletedAt",
     dataIndex: "deletedAt",
   },
-  {
-    title: "Sửa",
-    key: "edit",
-    render: (_: any, record: any) => {
-      return <Button type="link">Sửa</Button>;
-    },
-  },
 ];
 
 export const UsersPage = () => {
@@ -114,30 +107,30 @@ export const UsersPage = () => {
     resolver: zodResolver(searchSchema),
   });
 
+  const getDataSource = async () => {
+    setState((prev) => ({ ...prev, loading: true }));
+    let dataSource = [];
+
+    try {
+      let response = await UserService.getList(
+        state.filter.pageIndex,
+        state.filter.pageSize,
+        {
+          username: state.filter.username,
+          email: state.filter.email,
+          from: state.filter.from,
+          to: state.filter.to,
+        }
+      );
+
+      dataSource = ToDataSource(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+    setState((prev) => ({ ...prev, dataSource, loading: false }));
+  };
+
   useEffect(() => {
-    const getDataSource = async () => {
-      setState((prev) => ({ ...prev, loading: true }));
-      let dataSource = [];
-
-      try {
-        let response = await UserService.getList(
-          state.filter.pageIndex,
-          state.filter.pageSize,
-          {
-            username: state.filter.username,
-            email: state.filter.email,
-            from: state.filter.from,
-            to: state.filter.to,
-          }
-        );
-
-        dataSource = ToDataSource(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-      setState((prev) => ({ ...prev, dataSource, loading: false }));
-    };
-
     getDataSource();
   }, [
     state.filter.email,
@@ -176,12 +169,14 @@ export const UsersPage = () => {
   const handleDeleteButton = async () => {
     try {
       const response = await UserService.delete(state.selectedIDs);
-
+      await getDataSource();
       console.log(response);
     } catch (err) {
       console.log(err);
     }
   };
+
+  console.log(state.selectedIDs);
 
   return (
     <>

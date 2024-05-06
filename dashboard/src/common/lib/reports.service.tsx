@@ -31,4 +31,11 @@ export default class ReportService {
       },
     });
   }
+
+  static async update(reportID: string, status: string): Promise<string> {
+    return axios.patch("/reports", {
+      reportID,
+      status: status.toString(),
+    });
+  }
 }
