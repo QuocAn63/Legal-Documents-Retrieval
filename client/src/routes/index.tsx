@@ -18,6 +18,14 @@ import { useEffect } from "react";
 // puiblic (login/register)
 // private routes
 
+const TestPages = () => {
+  return (
+    <div>
+      <p>Google Pop Up</p>
+    </div>
+  );
+};
+
 const PublicLayout = () => {
   const userToken = useSelector((state: RootState) => state.user.user?.token);
   const navigate = useNavigate();
@@ -52,6 +60,10 @@ const router = createBrowserRouter([
       {
         path: "resetpwd",
         element: <ResetPassword />,
+      },
+      {
+        path: "login/google",
+        element: <TestPages />,
       },
     ],
   },

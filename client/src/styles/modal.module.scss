@@ -19,4 +19,37 @@
         color: $sidebar-item-title-color;
         font-size: 14px;
     }
+
+    .icon {
+        color: rgb(155, 155, 155);
+        padding: 4px;
+        &:hover{
+            color: white;
+            cursor: pointer;
+        }
+    }
+
+    .page {
+        li {
+          a {
+            color: #fff; 
+            &:focus {
+              color: black; 
+            }
+            span{
+                color:#fff;
+                outline-color: #fff
+            }
+          }
+          span{
+            color:white;
+          }
+          div{
+            color:white;
+
+          }
+        }
+    }
+
+
 }

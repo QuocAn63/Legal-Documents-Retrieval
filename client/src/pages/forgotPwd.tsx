@@ -2,6 +2,7 @@ import classNames from "classnames/bind";
 import styles from "../styles/login.module.scss";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Button, Form, Input, Result, Space } from "antd";
+import type { InputRef } from "antd";
 import Title from "antd/es/typography/Title";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +10,7 @@ import { FormItem } from "react-hook-form-antd";
 import { Link } from "react-router-dom";
 import Paragraph from "antd/es/typography/Paragraph";
 import AuthService from "../services/auth.service";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { loginValidateObjects } from "../helpers/validates";
 
 const cx = classNames.bind(styles);
@@ -27,9 +28,13 @@ export default function ForgotPassword() {
     control,
     handleSubmit,
     setError,
+
     formState: { errors },
   } = useForm<IForgotPwdInput>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      email: "caoan632002@gmail.com",
+    },
   });
   const [isLoading, setIsLoading] = useState(false);
   const [sentStatus, setSentStatus] = useState({ isSent: false, email: "" });
@@ -37,6 +42,7 @@ export default function ForgotPassword() {
   const onSubmit: SubmitHandler<IForgotPwdInput> = async (data) => {
     try {
       setIsLoading(true);
+
       const response = await AuthService.forgotPassword(data);
 
       if (response.status === 200) {
@@ -45,10 +51,12 @@ export default function ForgotPassword() {
       }
     } catch (err: any) {
       const message = err?.message || err?.msg || "Error when";
-
       setIsLoading(false);
       setError("root", { message });
     }
+  };
+  const handleFocus = () => {
+    setError("root", { message: "" });
   };
 
   return (
@@ -62,12 +70,14 @@ export default function ForgotPassword() {
           </Title>
         ) : null}
       </div>
+
       <Form action="post" onFinish={handleSubmit(onSubmit)}>
         <Space direction="vertical" className={cx("contentGroup")} size={20}>
           {!sentStatus.isSent ? (
             <>
               <FormItem control={control} name="email">
                 <Input
+                  onFocus={handleFocus}
                   id="email"
                   variant="outlined"
                   placeholder="Địa chỉ Email"

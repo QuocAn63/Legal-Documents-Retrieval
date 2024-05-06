@@ -8,6 +8,8 @@ const initialState: IAuth = {
     username: null,
     email: null,
     token: null,
+    picture: null,
+    type: "Normal",
   },
 };
 
@@ -22,8 +24,11 @@ const userSlice = createSlice({
     logOutRedux: (state) => {
       state.user = null;
     },
+    loginGoogleRedux: (state, action) => {
+      state.user = action.payload;
+    },
   },
 });
-export const { loginRedux, logOutRedux } = userSlice.actions;
+export const { loginRedux, logOutRedux, loginGoogleRedux } = userSlice.actions;
 
 export default userSlice.reducer;

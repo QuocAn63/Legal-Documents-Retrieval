@@ -41,4 +41,8 @@ export default class AuthService {
   static async forgotPasswordAccepted(data: IResetPasswordInput) {
     return FakeAuthAPI.forgotPasswordAccepted(data);
   }
+
+  static async loginGoogle() {
+    return FakeAuthAPI.loginGoogle();
+  }
 }

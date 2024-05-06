@@ -16,8 +16,6 @@ import UserMenu from "./usermenu";
 import React, { FC, memo, useEffect, useRef, useState } from "react";
 import { ChatService } from "../services/chat.service";
 import { IConversation } from "../interfaces/chat.tsx";
-import ShareModal from "./modals/share.tsx";
-import ArchivedModal from "./modals/archived.tsx";
 
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,6 +25,9 @@ import { FormItem } from "react-hook-form-antd";
 
 // Import Redux
 import { useDispatch, useSelector } from "react-redux";
+
+import ShareModal from "./modals/share.tsx";
+
 import { RootState } from "../redux/store.tsx";
 import {
   getConversationRedux,
@@ -209,7 +210,7 @@ const SidebarItem = ({
         ) : (
           <>
             <CustomLink to={`/c/${conversationID}`} className={cx("link")}>
-              {title.length > 30 ? title.substring(0, 30) + "..." : title}
+              {title.length > 50 ? title.substring(0, 50) + "..." : title}
             </CustomLink>
             <Space className={cx("btnContainer")}>
               <Dropdown
@@ -226,15 +227,14 @@ const SidebarItem = ({
                   <MoreOutlined className={cx("btn")} />
                 </Tooltip>
               </Dropdown>
-              <Tooltip title="Lưu">
+              <Tooltip title="Xóa">
                 <ContainerOutlined className={cx("btn")} />
               </Tooltip>
             </Space>
           </>
         )}
       </div>
-      {/* <ShareModal open={isOpen} onCancel={handleClose} /> */}
-      <ArchivedModal open={isOpen} onCancel={handleClose} />
+      <ShareModal open={isOpen} onCancel={handleClose} />
     </>
   );
 };
@@ -320,20 +320,22 @@ const Sidebar: FC = memo(() => {
 
   return (
     <>
-      {conversation.length > 0 && (
-        <div className={cx("wrapper")}>
-          <Space direction="vertical" size={12} style={{ width: "100%" }}>
-            <NewChatItem />
-            <SidebarItemContainer
-              // items={state.conversations}
-              // Truyền conversation từ redux vào Components
-              items={conversation}
-              shareModalState={state.shareModal}
-            />
-          </Space>
-          <UserMenu />
-        </div>
-      )}
+      <div className={cx("wrapper")}>
+        {conversation.length > 0 && (
+          <>
+            <Space direction="vertical" size={12} style={{ width: "100%" }}>
+              <NewChatItem />
+              <SidebarItemContainer
+                // items={state.conversations}
+                // Truyền conversation từ redux vào Components
+                items={conversation}
+                shareModalState={state.shareModal}
+              />
+            </Space>
+            <UserMenu />
+          </>
+        )}
+      </div>
     </>
   );
 });

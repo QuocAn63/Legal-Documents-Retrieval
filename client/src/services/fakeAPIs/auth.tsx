@@ -41,6 +41,18 @@ export class FakeAuthAPI {
     });
   }
 
+  static async loginGoogle(): Promise<IResponseData> {
+    return new Promise((resolve, reject) => {
+      return setTimeout(() => {
+        console.log("Login success");
+        resolve({
+          status: 200,
+          data: "/login/google",
+        });
+      }, 1000);
+    });
+  }
+
   static async register({
     // email,
     username,
@@ -78,18 +90,17 @@ export class FakeAuthAPI {
     return new Promise((resolve, reject) => {
       if (email === "caoan632002@gmail.com") {
         return setTimeout(() => {
-          console.log("Password forgot failed");
-          reject({
-            status: 400,
-            message: "Địa chỉ email không tồn tại.",
+          console.log("Password forgot success");
+          resolve({
+            status: 200,
           });
         }, 1000);
       } else {
         return setTimeout(() => {
-          console.log("Password forgot success");
-
-          resolve({
-            status: 200,
+          console.log("Password forgot failed");
+          reject({
+            status: 400,
+            message: "Địa chỉ email không tồn tại.",
           });
         }, 1000);
       }
@@ -98,15 +109,29 @@ export class FakeAuthAPI {
 
   static async forgotPasswordAccepted({
     password,
+    passwordConfirm,
+    resetPwdToken,
   }: IResetPasswordInput): Promise<IResponseData> {
-    return new Promise((resolve, reject) => {
-      return setTimeout(() => {
-        console.log("Password reset failed");
+    console.log({ password, passwordConfirm, resetPwdToken });
 
-        resolve({
-          status: 200,
-        });
-      }, 1000);
+    return new Promise((resolve, reject) => {
+      if (password === passwordConfirm) {
+        return setTimeout(() => {
+          console.log("Password reset success");
+
+          resolve({
+            status: 200,
+          });
+        }, 1000);
+      } else {
+        return setTimeout(() => {
+          console.log("Password forgot failed");
+          reject({
+            status: 400,
+            message: "Mật khẩu không trùng khớp",
+          });
+        }, 1000);
+      }
     });
   }
 }

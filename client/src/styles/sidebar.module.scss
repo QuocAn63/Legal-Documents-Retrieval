@@ -15,6 +15,10 @@
         .item {
             position: relative;
             
+            link{
+                overflow: hidden;
+            }
+
             &:hover .link {
                 background-color: $sidebar-item-bg-hover-color;
             }

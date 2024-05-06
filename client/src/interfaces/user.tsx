@@ -4,6 +4,8 @@ export interface IUser {
   username: string | null;
   isAdmin: boolean | null;
   token: string | null;
+  picture: string | null;
+  type: string;
 }
 
 export interface IAuth {

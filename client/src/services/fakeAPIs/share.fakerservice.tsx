@@ -27,6 +27,7 @@ const fakeSharedConversationItems: ISharedConversation1[] = [
   fakeSharedConversationItem,
   fakeSharedConversationItem,
   fakeSharedConversationItem,
+  fakeSharedConversationItem,
 ];
 
 export default class FakeShareService {

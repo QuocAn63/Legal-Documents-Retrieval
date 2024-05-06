@@ -25,8 +25,8 @@
     border: 1px solid $sidebar-item-bg-hover-color;
     border-radius: 8px;
     padding: 8px;
-    width: 200px;
-
+    // width: 200px;
+    width: 100%;
     .btn {
         text-align: left;
     }
@@ -40,7 +40,21 @@
         padding-bottom: 12px;
     }
 
+    .btn{
+        // width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 10px;
+        height: auto;
+        padding: 6px 15px;
+    }
+    .btnContainerLeft{
+        flex:1;
+    }
+
     .btnContainer {
+        flex:4;
         padding-left: 40px;
         .settingItem {
             width: 100%;
