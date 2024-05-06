@@ -24,7 +24,7 @@ import { BotModule } from '../bot';
     UserModule,
     ConfigModule,
     DocumentModule,
-    SystemMessageModule,
+    SystemMessageModule.forRoot(),
     ReportModule,
     BotModule,
   ],

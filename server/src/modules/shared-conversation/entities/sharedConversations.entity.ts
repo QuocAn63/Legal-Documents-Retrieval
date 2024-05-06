@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import ConversationEntity from '../../conversation/entities/conversations.entity';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
+import * as moment from 'moment';
 
 @Entity({ name: 'sharedConversations' })
 export default class SharedConversationEntity extends BaseEntity {
@@ -37,12 +38,22 @@ export default class SharedConversationEntity extends BaseEntity {
     type: 'datetime',
     default: () => 'GETDATE()',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   createdAt: string;
 
   @UpdateDateColumn({
     type: 'datetime',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   updatedAt: string;
 

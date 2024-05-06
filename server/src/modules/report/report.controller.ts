@@ -13,7 +13,10 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import ReportService from './report.service';
 import { AuthGuard, RolesGuard } from 'src/commons/guards';
 import { Roles } from 'src/commons/decorators/roles.decorator';
-import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
+import {
+  QueryTransformPipe,
+  filterKeys,
+} from 'src/commons/pipes/queryTransform.pipe';
 import {
   DeleteReportDTO,
   FilterReportDTO,
@@ -44,7 +47,16 @@ export default class ReportController {
     @Query(QueryTransformPipe) queries: FilterReportDTO,
     @Pagination() pagination: IQueryParams,
   ) {
-    return await this.reportService.getList(queries, pagination);
+    console.log(queries);
+    const filteredQueries = filterKeys<FilterReportDTO>(queries, [
+      'userID',
+      'description',
+      'reasonID',
+      'status',
+    ]);
+
+    console.log(filteredQueries);
+    return await this.reportService.getList(filteredQueries, pagination);
   }
 
   @PublicRoute()

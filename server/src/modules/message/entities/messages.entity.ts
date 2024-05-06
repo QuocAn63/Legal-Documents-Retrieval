@@ -5,11 +5,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import ConversationEntity from '../../conversation/entities/conversations.entity';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
+import * as moment from 'moment';
 
 @Entity({
   name: 'messages',
@@ -29,6 +31,12 @@ export default class MessageEntity extends BaseEntity {
   conversationID: string;
 
   @Column({
+    type: 'uuid',
+    nullable: true,
+  })
+  replyToMessageID: string;
+
+  @Column({
     type: 'nvarchar',
     length: 'max',
   })
@@ -38,12 +46,22 @@ export default class MessageEntity extends BaseEntity {
     type: 'datetime',
     default: () => 'GETDATE()',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   createdAt: string;
 
   @UpdateDateColumn({
     type: 'datetime',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   updatedAt: string;
 
@@ -51,6 +69,10 @@ export default class MessageEntity extends BaseEntity {
     type: 'bit',
   })
   isBOT: boolean;
+
+  @OneToOne(() => MessageEntity)
+  @JoinColumn({ name: 'replyToMessageID' })
+  replyToMessage: MessageEntity;
 
   @ManyToOne((user) => UserEntity)
   @JoinColumn({ name: 'userID' })

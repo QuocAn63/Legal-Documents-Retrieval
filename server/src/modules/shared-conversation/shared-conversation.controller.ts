@@ -32,7 +32,7 @@ export default class SharedConversationController {
   @Get('/')
   async getList_sharedConversations(
     @AuthToken() authToken: IAuthToken,
-    @Pagination(20) pagination: IQueryParams,
+    @Pagination(5) pagination: IQueryParams,
   ) {
     const { id } = authToken;
     const { pageIndex, pageSize } = pagination;
@@ -47,10 +47,11 @@ export default class SharedConversationController {
   async get_sharedConversations(
     @AuthToken() authToken: IAuthToken,
     @Param('sharedConversationCode') sharedCode: string,
+    @Pagination(5) pagination: IQueryParams,
   ) {
     const { id } = authToken;
 
-    return this.sharedService.get({ userID: id, sharedCode }, {});
+    return this.sharedService.get({ userID: id, sharedCode }, pagination);
   }
 
   @Post('/')

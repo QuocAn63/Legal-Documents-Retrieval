@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { ConfigEntity } from 'src/modules/config/entities/config.entity';
 import {
   Entity,
@@ -18,8 +19,8 @@ export class DocumentEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   label: string;
 
-  @Column({ type: 'varchar' })
-  path: string;
+  @Column({ type: 'nvarchar', length: 'MAX' })
+  content: string;
 
   @Column({ type: 'varchar' })
   configID: string;
@@ -31,12 +32,22 @@ export class DocumentEntity extends BaseEntity {
     type: 'datetime',
     default: () => 'GETDATE()',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   createdAt: string;
 
   @UpdateDateColumn({
     type: 'datetime',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   updatedAt: string;
 

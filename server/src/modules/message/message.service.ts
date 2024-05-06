@@ -15,12 +15,14 @@ import {
   UpdateMessageDTO,
 } from './dto/message.dto';
 import { IAuthToken } from 'src/interfaces/auth.interface';
+import SystemMessageService from '../system-message/system-message.service';
 
 @Injectable()
 export class MessageService implements IBaseService<MessageEntity> {
   constructor(
     @InjectRepository(MessageEntity)
     private readonly messageRepo: Repository<MessageEntity>,
+    private readonly sysMsgService: SystemMessageService,
   ) {}
 
   async getList(
@@ -35,7 +37,7 @@ export class MessageService implements IBaseService<MessageEntity> {
       skip: OffsetUtil.getOffset(pagination),
       take: pagination.pageSize,
       order: {
-        createdAt: 'DESC',
+        createdAt: 'ASC',
       },
     });
 
@@ -50,7 +52,12 @@ export class MessageService implements IBaseService<MessageEntity> {
 
     responseData = await this.messageRepo.findOneBy({ ...entityParams });
 
-    if (!responseData) throw new NotFoundException('Không tìm thấy tin nhắn');
+    if (!responseData) {
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'MESSAGE_NOT_EXISTS',
+        404,
+      );
+    }
 
     return responseData;
   }
@@ -65,7 +72,15 @@ export class MessageService implements IBaseService<MessageEntity> {
       userID: authToken.id,
       content: data.content,
       isBOT: isBOT,
+      replyToMessageID: data.replyToMessageID || null,
     });
+
+    if (saveResponse === null) {
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'SAVE_ERROR',
+        500,
+      );
+    }
 
     return saveResponse;
   }
@@ -80,10 +95,13 @@ export class MessageService implements IBaseService<MessageEntity> {
     );
 
     if (!updateResponse.affected) {
-      throw new BadRequestException('Cập nhật không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+        500,
+      );
     }
 
-    return 'Cập nhật thành công';
+    return await this.sysMsgService.getSysMessage('UPDATE_SUCCESS');
   }
 
   async delete(
@@ -93,9 +111,12 @@ export class MessageService implements IBaseService<MessageEntity> {
     const deleteResponse = await this.messageRepo.delete({ id: In(data.IDs) });
 
     if (!deleteResponse.affected) {
-      throw new BadRequestException('Xóa không thành công');
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+        500,
+      );
     }
 
-    return 'Xóa thành công';
+    return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
   }
 }

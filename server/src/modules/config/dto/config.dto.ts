@@ -25,15 +25,19 @@ export class FilterConfigDTO {
 
 export class SaveConfigDTO {
   @ApiProperty()
-  @IsUUID('4', { message: ValidateMessages.COMMON_UUID_INVALID })
+  @IsUUID('all', { message: ValidateMessages.COMMON_UUID_INVALID })
   @IsNotEmpty({ message: ValidateMessages.CONFIG_USERID_EMPTY })
   userID: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.CONFIG_PROMPTCONTENT_EMPTY })
-  @Length(1, 500, { message: ValidateMessages.CONFIG_PROMPTCONTENT_LENGTH })
   promptContent: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  description: string;
 }
 
 export class UpdateConfigDTO {

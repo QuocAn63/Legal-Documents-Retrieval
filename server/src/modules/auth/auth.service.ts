@@ -1,9 +1,6 @@
 import {
-  BadGatewayException,
   BadRequestException,
   Injectable,
-  NotFoundException,
-  Redirect,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,6 +18,7 @@ import { JwtService } from '@nestjs/jwt';
 import OauthService from '../oauth/oauth.service';
 import { SaveUserWithEmailDTO } from '../user/dto/save.dto';
 import MailService from '../mail/mail.service';
+import SystemMessageService from '../system-message/system-message.service';
 
 @Injectable()
 export default class AuthService {
@@ -30,6 +28,7 @@ export default class AuthService {
     private readonly jwtService: JwtService,
     private readonly oauthService: OauthService,
     private readonly mailService: MailService,
+    private readonly sysMessageService: SystemMessageService,
   ) {}
 
   async validateUser<T extends LoginWithUsernameDTO | SaveUserWithEmailDTO>(
@@ -52,14 +51,20 @@ export default class AuthService {
     }
 
     if (user === null) {
-      throw new NotFoundException(ValidateMessages.USER_USERNAME_NOT_EXISTS);
+      await this.sysMessageService.getSysMessageAndThrowHttpException(
+        'USER_USERNAME_NOT_EXISTS',
+        403,
+      );
     }
 
     if (
       'username' in data &&
       !(await HashUtil.compare(data.password, user.password))
     ) {
-      throw new UnauthorizedException(ValidateMessages.USER_PASSWORD_WRONG);
+      await this.sysMessageService.getSysMessageAndThrowHttpException(
+        ValidateMessages.USER_PASSWORD_WRONG,
+        401,
+      );
     }
 
     authTokenPayload = {
@@ -104,7 +109,9 @@ export default class AuthService {
     );
 
     if (!user.affected) {
-      throw new BadRequestException();
+      await this.sysMessageService.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+      );
     }
 
     const info = await this.mailService.sendResetPasswordLinkToMails(
@@ -129,12 +136,16 @@ export default class AuthService {
       );
 
       if (!updateUserResponse.affected) {
-        throw new BadRequestException();
+        await this.sysMessageService.getSysMessageAndThrowHttpException(
+          'UPDATE_ERROR',
+        );
       }
 
       return updateUserResponse.raw.id;
     } catch (err) {
-      throw new Error(err);
+      await this.sysMessageService.getSysMessageAndThrowHttpException(
+        'SYS_ERROR',
+      );
     }
   }
 }

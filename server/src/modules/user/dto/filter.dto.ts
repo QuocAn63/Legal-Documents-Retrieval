@@ -1,18 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 
 export class FilterUserDTO {
   @ApiProperty({
     required: false,
   })
+  @IsOptional()
   username: string;
 
   @ApiProperty({
     required: false,
   })
-  id: string;
+  email: string;
+}
 
-  @ApiProperty({
-    required: false,
-  })
+export class IFilterUserDTO {
+  username: string;
   email: string;
 }

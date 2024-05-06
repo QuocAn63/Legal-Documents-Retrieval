@@ -15,6 +15,7 @@ import {
   UpdateDocumentDTO,
 } from './dto/document.dto';
 import { ConfigService } from '../config';
+import SystemMessageService from '../system-message/system-message.service';
 
 @Injectable()
 export default class DocumentService implements IBaseService<DocumentEntity> {
@@ -22,6 +23,7 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
     @InjectRepository(DocumentEntity)
     private readonly documentRepo: Repository<DocumentEntity>,
     private readonly configService: ConfigService,
+    private readonly sysMsgServce: SystemMessageService,
   ) {}
 
   async getList(
@@ -49,66 +51,58 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
     responseData = await this.documentRepo.findOneBy(entityParams);
 
     if (responseData === null) {
-      throw new NotFoundException('Không tìm thấy tài liệu');
+      await this.sysMsgServce.getSysMessageAndThrowHttpException(
+        'DOCUMENT_NOT_EXISTS',
+        404,
+      );
     }
 
     return responseData;
   }
 
-  async save(
-    data: SaveDocumentDTO,
-    file: Express.Multer.File,
-  ): Promise<DocumentEntity> {
+  async save(data: SaveDocumentDTO): Promise<DocumentEntity> {
     const { configID } = data;
 
     const config = await this.configService.get({ id: configID });
 
     const saveResponse = await this.documentRepo.save({
       config,
-      label: data.label,
-      rank: data.rank,
-      path: file.path,
+      ...data,
     });
 
-    if (!saveResponse.id) {
-      throw new BadRequestException('Lưu không thành công');
+    if (saveResponse === null) {
+      await this.sysMsgServce.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+      );
     }
 
     return saveResponse;
   }
 
   async update(data: UpdateDocumentDTO): Promise<string> {
-    const config = await this.configService.get({ id: data.configID });
-
-    if (
-      await this.documentRepo.findOneBy({
-        id: Not(data.documentID),
-        rank: data.rank,
-        config,
-      })
-    ) {
-      throw new BadRequestException('Trùng thứ tự tài liệu');
-    }
-
     const updateResponse = await this.documentRepo.update(
       { id: data.documentID },
       { label: data.label, rank: data.rank },
     );
 
     if (!updateResponse.affected) {
-      throw new BadRequestException('Cập nhật không thành công');
+      await this.sysMsgServce.getSysMessageAndThrowHttpException(
+        'UPDATE_ERROR',
+      );
     }
 
-    return 'Cập nhật thành công';
+    return await this.sysMsgServce.getSysMessage('UPDATE_SUCCESS');
   }
 
   async delete(data: DeleteDocumentDTO): Promise<string | string[]> {
     const deleteResponse = await this.documentRepo.delete({ id: In(data.IDs) });
 
     if (!deleteResponse.affected) {
-      throw new BadRequestException('Xóa không thành công');
+      await this.sysMsgServce.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+      );
     }
 
-    return 'Xóa thành công';
+    return await this.sysMsgServce.getSysMessage('DELETE_SUCCESS');
   }
 }

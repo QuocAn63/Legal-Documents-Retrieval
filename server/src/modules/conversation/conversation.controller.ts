@@ -44,11 +44,10 @@ export default class ConversationController {
     @Pagination(20) pagination: IQueryParams,
     @Query(QueryTransformPipe) queries: FilterConversationDTO,
   ) {
-    console.log(queries);
     const { id } = authToken;
     const { pageIndex, pageSize } = pagination;
     return await this.conversationService.getList(
-      { userID: id, isArchived: '0', ...queries },
+      { userID: id, isArchived: false, ...queries },
       { pageIndex, pageSize },
     );
   }
@@ -61,7 +60,7 @@ export default class ConversationController {
     const { id } = authToken;
     const { pageIndex, pageSize } = pagination;
     return this.conversationService.getList(
-      { userID: id, isArchived: '1' },
+      { userID: id, isArchived: true },
       { pageIndex, pageSize },
     );
   }

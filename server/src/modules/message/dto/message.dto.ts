@@ -1,4 +1,11 @@
-import { IsArray, IsNotEmpty, IsEnum, IsString, Length } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsEnum,
+  IsString,
+  Length,
+  IsOptional,
+} from 'class-validator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
 export class SaveMessageDTO {
@@ -9,6 +16,10 @@ export class SaveMessageDTO {
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.CONVERSATION_ID_EMPTY })
   conversationID: string;
+
+  @IsString()
+  @IsOptional()
+  replyToMessageID?: string;
 }
 
 export class UpdateMessageDTO {

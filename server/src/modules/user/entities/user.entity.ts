@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import {
   BaseEntity,
   Column,
@@ -45,18 +46,33 @@ export class UserEntity extends BaseEntity {
     type: 'datetime',
     default: () => 'GETDATE()',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   createdAt: string;
 
   @UpdateDateColumn({
     type: 'datetime',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   updatedAt: string;
 
   @DeleteDateColumn({
     type: 'datetime',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   deletedAt: string;
 

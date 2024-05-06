@@ -2,22 +2,35 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthToken } from 'src/commons/decorators/auth.decorator';
 import { AuthGuard } from 'src/commons/guards';
 import { IAuthToken } from 'src/interfaces/auth.interface';
-import { CreateConversationDTO } from './bot.dto';
+import { AskDTO, CreateConversationDTO } from './bot.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import BotService from './fakebot.service';
+import FakeBotService from './fakebot.service';
+import BotService from './bot.service';
 
 @ApiBearerAuth()
 @ApiTags('bot')
 @UseGuards(AuthGuard)
 @Controller('bot')
 export default class BotController {
-  constructor(private readonly botService: BotService) {}
+  constructor(
+    private readonly botService: BotService,
+    private readonly fakeBotService: FakeBotService,
+  ) {}
 
-  @Post('/invoke')
-  async invoke(
+  @Post('/fakeinvoke')
+  async fakeInvoke(
     @AuthToken() authToken: IAuthToken,
     @Body() data: CreateConversationDTO,
   ) {
-    return this.botService.create(authToken, data);
+    return this.fakeBotService.create(authToken, data);
+  }
+
+  @Post('/invoke')
+  async invoke(@AuthToken() authToken: IAuthToken, @Body() data: AskDTO) {
+    return await this.botService.ask(
+      data.chunkSize,
+      data.chunkOverlap,
+      data.input,
+    );
   }
 }

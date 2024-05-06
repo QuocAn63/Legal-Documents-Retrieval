@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
 import {
   BaseEntity,
@@ -28,17 +29,27 @@ export default class ConversationEntity extends BaseEntity {
     type: 'datetime',
     default: () => 'GETDATE()',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   createdAt: string;
 
   @UpdateDateColumn({
     type: 'datetime',
     nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
   })
   updatedAt: string;
 
   @Column({ type: 'bit', default: '0' })
-  isArchived: string;
+  isArchived: boolean;
 
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'userID' })

@@ -3,6 +3,7 @@ export enum ValidateMessages {
   COMMON_UUID_INVALID = 'Mã không hợp lệ',
   COMMON_ID_EMPTY = 'Mã không được bỏ trống',
   // User
+  USER_NOT_EXISTS = 'Tài khoản không tồn tại',
   USER_USERNAME_LENGTH = 'Tên tài khoản phải từ 6 đến 25 ký tự',
   USER_USERNAME_EMPTY = 'Tên tài khoản không được bỏ trống',
   USER_USERNAME_INVALID = 'Tên tài khoản không hợp lệ',
@@ -31,6 +32,8 @@ export enum ValidateMessages {
   CONVERSATION_ID_EMPTY = 'Mã cuộc trò chuyện không được để trống',
 
   // SharedConversations
+  SHAREDCONVERSATION_NOT_EXISTS = 'Không tìm thấy cuộc hội thoại được chia sẻ này',
+  SHAREDCONVERSATION_ALREADY_SHARED = 'Cuộc hội thoại này đã được chia sẻ từ trước',
   SHAREDCONVERSATION_ID_NOT_EXISTS = 'Tiêu đề không được để trống',
   SHAREDCONVERSATION_SHAREDCODE_EMPTY = 'Mã chia sẽ không được để trống',
 
@@ -42,6 +45,9 @@ export enum ValidateMessages {
   TOKEN_EMPTY = 'Token trống',
 
   // Reports
+  REPORT_NOT_EXISTS = 'Báo cáo không tồn tại',
+  REPORT_ALREADY_SEND = 'Bạn đã báo cáo phản hồi này rồi',
+  REPORT_MESSAGE_INVALID = 'Đây không phải là tin nhắn phản hồi',
   REPORT_ID_EMPTY = 'Mã báo cáo không được để trống',
   REPORT_MSGID_EMPTY = 'Mã tin nhắn không được để trống',
   REPORT_REASONID_EMPTY = 'Mã lý do không được để trống',
@@ -67,4 +73,6 @@ export enum ValidateMessages {
   REASON_ID_EMPTY = 'Mã lý do không được để trống',
   REASON_DESCRIPTION_EMPTY = 'Mô tả lý do không được để trống',
   REASON_DESCRIPTION_LENGTH = 'Mô tả lý do không được vượt quá 50 ký tự',
+  ERROR = 'Lỗi',
+  SYS_ERROR = 'Lỗi hệ thống',
 }
