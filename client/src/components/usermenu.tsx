@@ -194,7 +194,7 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
   const { modalOpenHandler } = settingHandlers;
 
   const dispatch = useDispatch();
-  const type = useSelector((state: RootState) => state.user?.user?.type);
+  const type = useSelector((state: RootState) => state.user?.user?.token);
   const handleLogOut = () => {
     if (type === "Google") {
       // googleLogout();
@@ -240,7 +240,7 @@ interface IUserMenu {
 const UserMenu = memo(() => {
   const token = useSelector((state: RootState) => state.user?.user?.token);
 
-  const user = useSelector((state: RootState) => state.user?.user);
+  const user = useSelector((state: RootState) => state.user.user?.token);
   console.log(token);
 
   const [state, setState] = useState<IUserMenu>({

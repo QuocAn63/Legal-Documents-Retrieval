@@ -67,7 +67,7 @@ export default function Chat({ isMain = false }: ChatPageProps) {
 
   // Lấy token từ store redux
 
-  const token = useSelector((state: RootState) => state.user?.user?.token);
+  const token = useSelector((state: RootState) => state.user.user?.token);
 
   const navigate = useNavigate();
 

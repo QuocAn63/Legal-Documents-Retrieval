@@ -1,16 +1,19 @@
 import { IQueryMetaData, IResponseData } from "../interfaces/request";
 import { FakeConversationsAPI } from "./fakeAPIs/conversations.fakeservice";
 import { IConversation } from "../interfaces/chat";
+import axiosInstance from "./axios";
 
 export class ChatService {
-  static async getList_Conversations({
-    pageIndex = 1,
-    pageSize = 20,
-    where = "",
-  }: IQueryMetaData): Promise<IResponseData<IConversation[]>> {
-    console.log(`${pageIndex}, ${pageSize}, ${where}`);
-
-    return FakeConversationsAPI.getList_Conversations();
+  static async getList_Conversations(
+    { pageIndex = 1, pageSize = 20 }: IQueryMetaData,
+    token: string
+  ): Promise<IResponseData<IConversation[]>> {
+    return axiosInstance.get("/conversations", {
+      params: { pageIndex, pageSize },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 
   static async getList_Messages(

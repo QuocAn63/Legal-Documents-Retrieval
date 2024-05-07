@@ -275,12 +275,18 @@ const Sidebar: FC = memo(() => {
   const conversation = useSelector(
     (state: RootState) => state.conversation.conversations
   );
+  const userToken =
+    useSelector((state: RootState) => state.user.user?.token) || "";
 
   const dispatch = useDispatch();
 
   useEffect(() => {
     const getInitialData = async () => {
-      const conversationsData = await ChatService.getList_Conversations({});
+      const conversationsData = await ChatService.getList_Conversations(
+        {},
+        userToken
+      );
+      console.log(conversationsData);
       if (conversationsData) {
         // Lưu conversation vào redux store conversations
         dispatch(getConversationRedux(conversationsData.data));

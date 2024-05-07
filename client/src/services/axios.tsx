@@ -1,5 +1,7 @@
 import axios from "axios";
+import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
+import { RootState } from "../redux/store";
 
 const axiosInstance = axios.create({
   baseURL: `${import.meta.env.VITE_SERVER_URL}/api`,
@@ -11,6 +13,12 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     // write later
+    // const userToken = useSelector((state: RootState) => state.user.user?.token);
+
+    // if (userToken) {
+    //   config.headers.Authorization = `Bearer ${userToken}`;
+    // }
+
     return config;
   },
   (error) => {
@@ -21,7 +29,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     // write later
-    return response;
+    return response.data;
   },
   (error) => {
     if (error.message.status === 401) {

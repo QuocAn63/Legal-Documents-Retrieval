@@ -2,6 +2,7 @@ import { IForgotPwdInput } from "../pages/forgotPwd";
 import { ILoginInput } from "../pages/login";
 import { IRegisterInput } from "../pages/register";
 import { IResetPasswordInput } from "../pages/resetPws";
+import axiosInstance from "./axios";
 import { FakeAuthAPI } from "./fakeAPIs/auth";
 
 export interface AuthState {
@@ -27,7 +28,7 @@ export interface PayloadAction<T> {
 
 export default class AuthService {
   static async login(data: ILoginInput) {
-    return FakeAuthAPI.login(data);
+    return axiosInstance.post("/auth/login", data);
   }
 
   static async register(data: IRegisterInput) {

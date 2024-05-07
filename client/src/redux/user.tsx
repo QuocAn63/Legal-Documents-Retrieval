@@ -3,13 +3,7 @@ import { IAuth } from "../interfaces/user";
 
 const initialState: IAuth = {
   user: {
-    id: null,
-    isAdmin: false,
-    username: null,
-    email: null,
     token: null,
-    picture: null,
-    type: "Normal",
   },
 };
 
@@ -18,14 +12,14 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     loginRedux: (state, action) => {
-      state.user = action.payload;
+      state.user.token = action.payload;
     },
 
     logOutRedux: (state) => {
-      state.user = null;
+      state.user.token = null;
     },
     loginGoogleRedux: (state, action) => {
-      state.user = action.payload;
+      state.user.token = action.payload;
     },
   },
 });

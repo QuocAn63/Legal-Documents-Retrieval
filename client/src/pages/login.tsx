@@ -39,9 +39,8 @@ export default function Login() {
   } = useForm<ILoginInput>({
     defaultValues: {
       username: "caoan632002",
-      password: "123123123",
+      password: "123123",
     },
-    // resolver: zodResolver(schema),
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -52,11 +51,9 @@ export default function Login() {
     try {
       setIsLoading((prev) => true);
       const response = await AuthService.login(data);
-
       if (response.status === 200) {
         setIsLoading((prev) => false);
         dispatch(loginRedux(response.data));
-        console.log("Đăng nhập thành công!");
         navigate("/");
       }
     } catch (err: any) {
