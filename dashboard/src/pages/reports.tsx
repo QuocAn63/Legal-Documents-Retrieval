@@ -24,7 +24,7 @@ import { IReportReason } from "../models/reportReason.model";
 import TextArea from "antd/es/input/TextArea";
 import { IMessage } from "../models/message.model";
 import Link from "antd/es/typography/Link";
-import { ReportStatus } from "../components/reportStatus";
+import { ReportStatusLabel } from "../components/reportStatus";
 import { MessageItem } from "../components/message";
 type ModalType = "SEARCH" | "UPDATE" | "VIEW" | "";
 
@@ -44,6 +44,7 @@ type PageStateType = {
   modal: ModalType;
   loading: boolean;
   selectedIDs: string[];
+  currentStatus: string;
   messages: IMessage[];
 };
 
@@ -80,6 +81,7 @@ export const ReportsPage = () => {
     modal: "",
     selectedIDs: [],
     messages: [],
+    currentStatus: "",
   });
   const {
     control,
@@ -152,45 +154,48 @@ export const ReportsPage = () => {
       title: "Trạng thái",
       key: "status",
       dataIndex: "status",
-      width: "80px",
-      render: (value: number) => {
-        return <ReportStatus status={value}></ReportStatus>;
-      },
-    },
-    {
-      title: "Xử lý",
-      key: "edit",
-      render: (_: any, record: any) => {
-        return <Button type="link">Sửa</Button>;
+      render: (value: number, record: any) => {
+        return (
+          <Button
+            onClick={() => {
+              setState((prev) => ({
+                ...prev,
+                selectedIDs: [record.id],
+                modal: "UPDATE",
+                currentStatus: record.status,
+              }));
+            }}
+          >
+            {ReportStatusLabel[value]}
+          </Button>
+        );
       },
     },
   ];
+  const getDataSource = async () => {
+    setState((prev) => ({ ...prev, loading: true }));
+    let dataSource = [];
+    let reasons = [];
 
+    try {
+      let response = await ReportService.getList(
+        state.filter.pageIndex,
+        state.filter.pageSize,
+        {
+          from: state.filter.from,
+          to: state.filter.to,
+        }
+      );
+      let response1 = await ReportService.getList_reasons();
+
+      dataSource = ToDataSource(response.data);
+      reasons = response1.data;
+    } catch (err) {
+      console.log(err);
+    }
+    setState((prev) => ({ ...prev, dataSource, reasons, loading: false }));
+  };
   useEffect(() => {
-    const getDataSource = async () => {
-      setState((prev) => ({ ...prev, loading: true }));
-      let dataSource = [];
-      let reasons = [];
-
-      try {
-        let response = await ReportService.getList(
-          state.filter.pageIndex,
-          state.filter.pageSize,
-          {
-            from: state.filter.from,
-            to: state.filter.to,
-          }
-        );
-        let response1 = await ReportService.getList_reasons();
-
-        dataSource = ToDataSource(response.data);
-        reasons = response1.data;
-      } catch (err) {
-        console.log(err);
-      }
-      setState((prev) => ({ ...prev, dataSource, reasons, loading: false }));
-    };
-
     getDataSource();
   }, [
     state.filter.pageIndex,
@@ -231,6 +236,15 @@ export const ReportsPage = () => {
     try {
       // const response = await UserService.delete(state.selectedIDs);
       // console.log(response);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleUpdateReport = async (reportID: string, status: string) => {
+    try {
+      const response = await ReportService.update(reportID, status);
+      await getDataSource();
     } catch (err) {
       console.log(err);
     }
@@ -334,6 +348,44 @@ export const ReportsPage = () => {
             <MessageItem {...message}></MessageItem>
           ))}
         </Space>
+      </Modal>
+      <Modal
+        title="Cập nhật trạng thái"
+        open={state.modal === "UPDATE"}
+        onCancel={() =>
+          handleCloseModal(() => {
+            setState((prev) => ({
+              ...prev,
+              currentStatus: "",
+              selectedIDs: [],
+            }));
+          })
+        }
+        onOk={async () => {
+          await handleUpdateReport(state.selectedIDs[0], state.currentStatus);
+          handleCloseModal(() => {
+            setState((prev) => ({
+              ...prev,
+              currentStatus: "",
+              selectedIDs: [],
+              modal: "",
+            }));
+          });
+        }}
+        okText="Lưu"
+        cancelText="Hủy"
+      >
+        <Select
+          defaultValue={state.currentStatus}
+          style={{ width: 200 }}
+          onChange={(value) =>
+            setState((prev) => ({ ...prev, currentStatus: value }))
+          }
+          options={ReportStatusLabel.map((label, index) => ({
+            value: index,
+            label: label,
+          }))}
+        />
       </Modal>
     </>
   );

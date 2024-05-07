@@ -13,7 +13,7 @@ export default class UserService {
   static async delete(IDs: string[]): Promise<string> {
     return axios.delete("/users", {
       data: {
-        IDs: JSON.stringify(IDs),
+        IDs,
       },
     });
   }
