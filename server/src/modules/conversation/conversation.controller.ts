@@ -10,7 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthToken } from 'src/commons/decorators/auth.decorator';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 import { IQueryParams } from 'src/interfaces/query.interface';
@@ -25,7 +25,10 @@ import ConversationService from './conversation.service';
 import { AuthGuard } from 'src/commons/guards';
 import ConversationEntity from './entities/conversations.entity';
 import { FindOptionsWhere } from 'typeorm';
-import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
+import {
+  QueryTransformPipe,
+  filterKeys,
+} from 'src/commons/pipes/queryTransform.pipe';
 import { MessageService } from '../message/message.service';
 
 @ApiBearerAuth()
@@ -45,10 +48,13 @@ export default class ConversationController {
     @Query(QueryTransformPipe) queries: FilterConversationDTO,
   ) {
     const { id } = authToken;
-    const { pageIndex, pageSize } = pagination;
+
+    const filteredQueries = filterKeys<FilterConversationDTO>(queries, [
+      'title',
+    ]);
     return await this.conversationService.getList(
-      { userID: id, isArchived: false, ...queries },
-      { pageIndex, pageSize },
+      { userID: id, isArchived: false, ...filteredQueries },
+      pagination,
     );
   }
 
@@ -90,7 +96,7 @@ export default class ConversationController {
     });
 
     const messages = await this.messageService.getList(
-      { conversation },
+      { conversationID: conversation.id },
       pagination,
     );
 
@@ -121,7 +127,7 @@ export default class ConversationController {
     return await this.conversationService.update(authToken, data);
   }
 
-  @Delete('/conversations')
+  @Delete('/')
   async delete_conversation(
     @AuthToken() authToken: IAuthToken,
     @Body() data: DeleteConversationDTO,

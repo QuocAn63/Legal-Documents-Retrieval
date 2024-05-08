@@ -31,6 +31,8 @@ export default class BotController {
       data.chunkSize,
       data.chunkOverlap,
       data.input,
+      authToken,
+      data.conversationID,
     );
   }
 }

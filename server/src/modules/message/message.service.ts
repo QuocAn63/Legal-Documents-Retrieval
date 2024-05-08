@@ -37,11 +37,11 @@ export class MessageService implements IBaseService<MessageEntity> {
       skip: OffsetUtil.getOffset(pagination),
       take: pagination.pageSize,
       order: {
-        createdAt: 'ASC',
+        createdAt: 'DESC',
       },
     });
 
-    return responseData;
+    return responseData.reverse();
   }
 
   async get(

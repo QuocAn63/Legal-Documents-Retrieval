@@ -12,6 +12,7 @@ import {
   UpdateConversationDTO,
 } from './dto/conversation.dto';
 import SystemMessageService from '../system-message/system-message.service';
+import SharedConversationEntity from '../shared-conversation/entities/sharedConversations.entity';
 
 @Injectable()
 export default class ConversationService
@@ -20,6 +21,8 @@ export default class ConversationService
   constructor(
     @InjectRepository(ConversationEntity)
     private readonly conversationRepo: Repository<ConversationEntity>,
+    @InjectRepository(SharedConversationEntity)
+    private readonly sharedRepo: Repository<SharedConversationEntity>,
     private readonly sysMsgService: SystemMessageService,
   ) {}
 
@@ -108,12 +111,16 @@ export default class ConversationService
   ): Promise<string> {
     const { id } = authToken;
 
-    const deleteResponse = await this.conversationRepo.delete({
+    const deleteResponse = await this.conversationRepo.softDelete({
       id: In(data.IDs),
       userID: id,
     });
 
-    if (!deleteResponse.affected) {
+    const deleteSharedResponse = await this.sharedRepo.delete({
+      conversationID: In(data.IDs),
+    });
+
+    if (!deleteResponse.affected || !deleteResponse.affected) {
       await this.sysMsgService.getSysMessageAndThrowHttpException(
         'DELETE_ERROR',
       );

@@ -4,7 +4,10 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -12,6 +15,7 @@ import {
 import ConversationEntity from '../../conversation/entities/conversations.entity';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
 import * as moment from 'moment';
+import MessageEntity from 'src/modules/message/entities/messages.entity';
 
 @Entity({ name: 'sharedConversations' })
 export default class SharedConversationEntity extends BaseEntity {
@@ -64,4 +68,8 @@ export default class SharedConversationEntity extends BaseEntity {
   @OneToOne((conversation) => ConversationEntity)
   @JoinColumn({ name: 'conversationID' })
   conversation: ConversationEntity;
+
+  @ManyToMany(() => MessageEntity)
+  @JoinTable()
+  messages: MessageEntity[];
 }

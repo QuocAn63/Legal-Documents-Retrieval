@@ -54,12 +54,12 @@ export default class SharedConversationService
   async get(
     entityParams: FindOptionsWhere<SharedConversationEntity>,
     ...props: any
-  ): Promise<SharedConversationWithMessages> {
+  ) {
     let sharedConversation: SharedConversationEntity = null;
-    let responseData: SharedConversationWithMessages;
 
-    sharedConversation = await this.sharedRepo.findOneBy({
-      ...entityParams,
+    sharedConversation = await this.sharedRepo.findOne({
+      where: { ...entityParams },
+      relations: ['messages', 'conversation'],
     });
 
     if (sharedConversation === null) {
@@ -69,14 +69,7 @@ export default class SharedConversationService
       );
     }
 
-    responseData.messages = await this.messageService.getList(
-      {
-        conversationID: sharedConversation.conversationID,
-      },
-      {},
-    );
-
-    return responseData;
+    return sharedConversation;
   }
 
   async save(
@@ -91,16 +84,24 @@ export default class SharedConversationService
       userID: id,
     });
 
-    if (await this.sharedRepo.findOneBy({ conversation })) {
+    if (await this.sharedRepo.findOneBy({ conversationID: conversation.id })) {
       await this.sysMsgService.getSysMessageAndThrowHttpException(
-        ValidateMessages.SHAREDCONVERSATION_ALREADY_SHARED,
+        'SHAREDCONVERSATION_ALREADY_SHARED',
         400,
       );
     }
 
+    const messages = await this.messageService.getList(
+      {
+        conversationID: conversation.id,
+      },
+      { pageIndex: 1, pageSize: 100 },
+    );
+
     const saveResponse = await this.sharedRepo.save({
       userID: id,
       conversation,
+      messages,
     });
 
     return saveResponse;

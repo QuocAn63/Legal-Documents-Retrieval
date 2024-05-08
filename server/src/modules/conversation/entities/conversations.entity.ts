@@ -48,6 +48,17 @@ export default class ConversationEntity extends BaseEntity {
   })
   updatedAt: string;
 
+  @DeleteDateColumn({
+    type: 'datetime',
+    nullable: true,
+    transformer: {
+      from: (value) =>
+        value ? moment(value).format('DD/MM/YYYY hh:mm:ss') : null,
+      to: (value) => value,
+    },
+  })
+  deletedAt: string;
+
   @Column({ type: 'bit', default: '0' })
   isArchived: boolean;
 
