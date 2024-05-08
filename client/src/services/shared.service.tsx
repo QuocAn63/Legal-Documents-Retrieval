@@ -3,31 +3,50 @@ import {
   ISharedConversation1,
   ISharedConversation2,
 } from "../interfaces/shared";
+import axiosInstance from "./axios";
 import FakeShareService from "./fakeAPIs/share.fakerservice";
 
 export default class SharedService {
-  static getList_shared(
-    userToken: string
-  ): Promise<IResponseData<ISharedConversation1[]>> {
-    return FakeShareService.getList_shared();
+  token: string | null;
+  constructor(token: string) {
+    this.token = token;
   }
 
-  static get_shared(
-    sharedID: string
-  ): Promise<IResponseData<ISharedConversation2>> {
-    return FakeShareService.get_shared(sharedID);
+  getList_shared(): Promise<IResponseData<ISharedConversation1[]>> {
+    return axiosInstance.get("/sharedConversations", {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
   }
 
-  static save_shared(data: any): Promise<IResponseData<string>> {
-    console.log(this.name);
-    return FakeShareService.save_shared(data);
+  get_shared(sharedCode: string): Promise<IResponseData<ISharedConversation2>> {
+    return axiosInstance.get(`/sharedConversations/${sharedCode}`, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
   }
 
-  static regenerate_shared(sharedID: string): Promise<IResponseData<string>> {
+  async save_shared(conversationID: string): Promise<IResponseData> {
+    return await axiosInstance.post(
+      "/sharedConversations",
+      {
+        conversationID,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      }
+    );
+  }
+
+  regenerate_shared(sharedID: string): Promise<IResponseData<string>> {
     return FakeShareService.regenerate_shared(sharedID);
   }
 
-  static delete_shared(sharedID: string): Promise<IResponseData<string>> {
+  delete_shared(sharedID: string): Promise<IResponseData<string>> {
     return FakeShareService.delete_shared(sharedID);
   }
 }

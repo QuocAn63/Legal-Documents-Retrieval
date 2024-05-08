@@ -9,7 +9,7 @@ export const formatTime = (time: string) => {
 
   const splitTime = formattedDate.split("/");
 
-  const rsTime = `Ngày ${splitTime[0]}/${splitTime[1]}/${splitTime[2]}`;
+  const rsTime = `${splitTime[0]}/${splitTime[1]}/${splitTime[2]}`;
 
   return rsTime;
 };

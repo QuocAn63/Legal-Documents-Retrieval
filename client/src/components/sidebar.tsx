@@ -1,43 +1,33 @@
 import styles from "../styles/sidebar.module.scss";
 import classNames from "classnames/bind";
-import { Dropdown, Form, Input, InputRef, Space, Tooltip } from "antd";
+import { Dropdown, Space, Tooltip } from "antd";
 import CustomLink from "../components/link.tsx";
 import CustomButton from "./button.tsx";
 import {
   ContainerOutlined,
   DeleteOutlined,
-  EditOutlined,
   MoreOutlined,
   UploadOutlined,
   WechatFilled,
 } from "@ant-design/icons";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import UserMenu from "./usermenu";
-import React, { FC, memo, useEffect, useRef, useState } from "react";
+import React, { FC, memo, useEffect, useState } from "react";
 import { ChatService } from "../services/chat.service";
 import { IConversation } from "../interfaces/chat.tsx";
-
-import { SubmitHandler, useForm } from "react-hook-form";
-import { z } from "zod";
-import { conversationTitleValidate } from "../helpers/validates.tsx";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FormItem } from "react-hook-form-antd";
-
 // Import Redux
 import { useDispatch, useSelector } from "react-redux";
 
 import ShareModal from "./modals/share.tsx";
 
 import { RootState } from "../redux/store.tsx";
-import {
-  getConversationRedux,
-  renameTitleRedux,
-} from "../redux/conversations.tsx";
+import { getConversationRedux } from "../redux/conversations.tsx";
 
 const cx = classNames.bind(styles);
 
 interface SidebarItemProps extends IConversation {
   isSelected?: boolean;
+  handleDelete: (data: any) => void;
   shareModalState: ModalControlsProps;
 }
 
@@ -57,12 +47,13 @@ interface SidebarStateProps {
 interface SidebarItemContainerProps {
   items: IConversation[];
   shareModalState: ModalControlsProps;
+  handleDelete: (data: any) => void;
 }
 
 interface DropdownMenuProps {
   conversationID: string;
   onClickBtnShare: (data: any) => void;
-  onClickBtnRename: (data: any) => void;
+  onClickBtnDelete: (data: any) => void;
 }
 
 interface ModalControlsProps {
@@ -71,17 +62,9 @@ interface ModalControlsProps {
   handleClose: (data: any) => void;
 }
 
-interface IChangeConversationTitleInput {
-  title: string;
-}
-
-const schema = z.object({
-  title: conversationTitleValidate,
-});
-
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onClickBtnShare,
-  onClickBtnRename,
+  onClickBtnDelete,
 }) => {
   return (
     <div className={cx("btnMoreWrapper")}>
@@ -94,15 +77,9 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
       </CustomButton>
       <CustomButton
         className={cx("btn")}
-        icon={<EditOutlined />}
-        onClick={onClickBtnRename}
-      >
-        Đổi tên
-      </CustomButton>
-      <CustomButton
-        className={cx("btn")}
         icon={<DeleteOutlined />}
         status="important"
+        onClick={onClickBtnDelete}
       >
         Xóa
       </CustomButton>
@@ -129,112 +106,42 @@ const NewChatItem = () => {
 
 const SidebarItem = ({
   title,
-  conversationID,
+  id,
   isSelected = false,
+  handleDelete,
   shareModalState,
 }: SidebarItemProps) => {
   const { handleClose, handleOpen, isOpen } = shareModalState;
-  const { control, handleSubmit, setValue } =
-    useForm<IChangeConversationTitleInput>({
-      resolver: zodResolver(schema),
-    });
-
-  // get Conversation from redux
-  const dispatch = useDispatch();
-
-  const [state, setState] = useState<SidebarItemStateProps>({
-    edit: { isEditing: false, value: "" },
-  });
-  const renameInputRef = useRef<InputRef>(null);
-
-  const onSubmit: SubmitHandler<IChangeConversationTitleInput> = async (
-    data
-  ) => {
-    // Handle rename
-
-    const payload = {
-      conversationID: conversationID,
-      title: data.title,
-    };
-
-    // sửa lại rename = useState
-
-    // const renameConversation = await ChatService.update_Conversations(payload);
-    // if (renameConversation.status === 200) {
-    //   renameTitle((prev) => ({
-    //     ...prev,
-    //     conversations: prev.conversations.map((item) => {
-    //       if (item.conversationID === conversationID) {
-    //         return {
-    //           ...item,
-    //           title: data.title,
-    //         };
-    //       }
-    //       return item;
-    //     }),
-    //   }));
-    // }
-
-    dispatch(renameTitleRedux(payload));
-    setState((prev) => ({
-      ...prev,
-      edit: { ...prev.edit, isEditing: false },
-    }));
-  };
-
-  // Khi input không còn focus thì sẽ thoát khỏi trại thái isEditing
-  const handleBlur = () => {
-    setState((prev) => ({
-      ...prev,
-      edit: { ...prev.edit, isEditing: false },
-    }));
-  };
-
-  const handleClickBtnRename = () => {
-    setValue("title", title);
-    setState((prev) => ({
-      ...prev,
-      edit: { ...prev.edit, isEditing: true },
-    }));
-  };
 
   return (
     <>
-      <div className={cx("item", { selected: isSelected })} id={conversationID}>
-        {state.edit.isEditing ? (
-          <Form onFinish={handleSubmit(onSubmit)}>
-            <FormItem control={control} name="title">
-              <Input ref={renameInputRef} autoFocus onBlur={handleBlur} />
-            </FormItem>
-          </Form>
-        ) : (
-          <>
-            <CustomLink to={`/c/${conversationID}`} className={cx("link")}>
-              {title.length > 50 ? title.substring(0, 50) + "..." : title}
-            </CustomLink>
-            <Space className={cx("btnContainer")}>
-              <Dropdown
-                trigger={["click"]}
-                dropdownRender={() => (
-                  <DropdownMenu
-                    conversationID={conversationID}
-                    onClickBtnShare={() => handleOpen(conversationID)}
-                    onClickBtnRename={handleClickBtnRename}
-                  ></DropdownMenu>
-                )}
-              >
-                <Tooltip title="Thêm">
-                  <MoreOutlined className={cx("btn")} />
-                </Tooltip>
-              </Dropdown>
-              <Tooltip title="Xóa">
-                <ContainerOutlined className={cx("btn")} />
+      <div className={cx("item", { selected: isSelected })} id={id}>
+        <>
+          <CustomLink to={`/c/${id}`} className={cx("link")}>
+            {title.length > 50 ? title.substring(0, 50) + "..." : title}
+          </CustomLink>
+          <Space className={cx("btnContainer")}>
+            <Dropdown
+              trigger={["click"]}
+              dropdownRender={() => (
+                <DropdownMenu
+                  conversationID={id}
+                  onClickBtnShare={() => handleOpen(id)}
+                  onClickBtnDelete={() => handleDelete(id)}
+                ></DropdownMenu>
+              )}
+            >
+              <Tooltip title="Thêm">
+                <MoreOutlined className={cx("btn")} />
               </Tooltip>
-            </Space>
-          </>
-        )}
+            </Dropdown>
+            <Tooltip title="Lưu trữ">
+              <ContainerOutlined className={cx("btn")} />
+            </Tooltip>
+          </Space>
+        </>
       </div>
-      <ShareModal open={isOpen} onCancel={handleClose} />
+      <ShareModal open={isOpen} onCancel={handleClose} conversationID={id} />
     </>
   );
 };
@@ -242,6 +149,7 @@ const SidebarItem = ({
 const SidebarItemContainer = ({
   shareModalState,
   items,
+  handleDelete,
 }: SidebarItemContainerProps) => {
   const { conversationID } = useParams();
 
@@ -250,9 +158,10 @@ const SidebarItemContainer = ({
       {items.map((item) => (
         <SidebarItem
           {...item}
-          key={item.conversationID}
+          key={item.id}
           shareModalState={shareModalState}
-          isSelected={item.conversationID === conversationID}
+          isSelected={item.id === conversationID}
+          handleDelete={handleDelete}
         />
       ))}
     </div>
@@ -270,23 +179,19 @@ const Sidebar: FC = memo(() => {
     },
     selectedConversation: undefined,
   });
-
   // get Conversation from redux
   const conversation = useSelector(
     (state: RootState) => state.conversation.conversations
   );
-  const userToken =
-    useSelector((state: RootState) => state.user.user?.token) || "";
-
+  const token = useSelector((state: RootState) => state.user.user?.token) || "";
+  const chatService = new ChatService(token);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const getInitialData = async () => {
-      const conversationsData = await ChatService.getList_Conversations(
-        {},
-        userToken
-      );
-      console.log(conversationsData);
+      const conversationsData = await chatService.getList_Conversations({});
       if (conversationsData) {
         // Lưu conversation vào redux store conversations
         dispatch(getConversationRedux(conversationsData.data));
@@ -305,14 +210,14 @@ const Sidebar: FC = memo(() => {
     };
 
     getInitialData();
-  }, []);
+  }, [location.pathname]);
 
   const handleClickOpenShareModal = (conversationID: string) => {
     setState((prev) => ({
       ...prev,
       shareModal: { ...prev.shareModal, isOpen: true },
       selectedConversation: state.conversations.find(
-        (value) => value.conversationID === conversationID
+        (value) => value.id === conversationID
       ),
     }));
   };
@@ -324,23 +229,26 @@ const Sidebar: FC = memo(() => {
     }));
   };
 
+  const handleClickDelete = async (conversationID: string) => {
+    const response = await chatService.delete_Conversations([conversationID]);
+
+    if (response.status === 200 && conversationID === conversationID) {
+      navigate("/");
+    }
+  };
+
   return (
     <>
       <div className={cx("wrapper")}>
-        {conversation.length > 0 && (
-          <>
-            <Space direction="vertical" size={12} style={{ width: "100%" }}>
-              <NewChatItem />
-              <SidebarItemContainer
-                // items={state.conversations}
-                // Truyền conversation từ redux vào Components
-                items={conversation}
-                shareModalState={state.shareModal}
-              />
-            </Space>
-            <UserMenu />
-          </>
-        )}
+        <Space direction="vertical" size={12} style={{ width: "100%" }}>
+          <NewChatItem />
+          <SidebarItemContainer
+            handleDelete={handleClickDelete}
+            items={conversation}
+            shareModalState={state.shareModal}
+          />
+        </Space>
+        <UserMenu />
       </div>
     </>
   );

@@ -109,14 +109,16 @@ export interface MessageItemProps extends IMessage {
     reason: (messageID: string) => void;
     report: (data: any) => void;
   };
+  preview?: boolean;
 }
 
 export const MessageItem = ({
-  messageID,
+  id,
   content,
   userID,
   onReportClick,
   isBOT,
+  preview = false,
 }: MessageItemProps) => {
   const [state, setState] = useState({
     copyClicked: false,
@@ -141,7 +143,11 @@ export const MessageItem = ({
 
   return (
     <>
-      <Flex align="flex-start" gap={16} className={cx("messageItem")}>
+      <Flex
+        align="flex-start"
+        gap={16}
+        className={cx("messageItem", { preview })}
+      >
         <Image
           src={isBOT ? "/bot-avatar.png" : "/default-avatar.png"}
           className={cx("avatarHolder")}
@@ -153,37 +159,41 @@ export const MessageItem = ({
           </Typography.Text>
           <Typography.Text className={cx("content")}>{content}</Typography.Text>
         </Flex>
-        {isBOT ? (
-          <div className={cx("btnContainer")}>
-            <Tooltip title="Sao chép nội dung" placement="bottom">
-              {state.copyClicked ? (
+        {!preview ? (
+          isBOT ? (
+            <div className={cx("btnContainer")}>
+              <Tooltip title="Sao chép nội dung" placement="bottom">
+                {state.copyClicked ? (
+                  <Button
+                    type="text"
+                    icon={<CheckOutlined />}
+                    className={cx("btn")}
+                  />
+                ) : (
+                  <Button
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={() => handleCopyClick(content)}
+                    className={cx("btn")}
+                  />
+                )}
+              </Tooltip>
+              <Tooltip title="Phản hồi tệ" placement="bottom">
                 <Button
                   type="text"
-                  icon={<CheckOutlined />}
-                  className={cx("btn")}
+                  icon={<DislikeOutlined />}
+                  className={cx("btn", {
+                    disabled: state.reportClicked,
+                  })}
+                  onClick={
+                    !state.reportClicked
+                      ? () => handleReportClick("1")
+                      : () => {}
+                  }
                 />
-              ) : (
-                <Button
-                  type="text"
-                  icon={<CopyOutlined />}
-                  onClick={() => handleCopyClick(content)}
-                  className={cx("btn")}
-                />
-              )}
-            </Tooltip>
-            <Tooltip title="Phản hồi tệ" placement="bottom">
-              <Button
-                type="text"
-                icon={<DislikeOutlined />}
-                className={cx("btn", {
-                  disabled: state.reportClicked,
-                })}
-                onClick={
-                  !state.reportClicked ? () => handleReportClick("1") : () => {}
-                }
-              />
-            </Tooltip>
-          </div>
+              </Tooltip>
+            </div>
+          ) : null
         ) : null}
       </Flex>
     </>
@@ -192,10 +202,12 @@ export const MessageItem = ({
 
 interface MessagesContainerProps {
   messages: IMessage[];
+  preview?: boolean;
 }
 
 export default function MessagesContainer({
   messages,
+  preview = false,
 }: MessagesContainerProps) {
   const [state, setState] = useState<{
     reasonModalOpen: boolean;
@@ -260,8 +272,9 @@ export default function MessagesContainer({
       <div className={cx("wrapper")}>
         {messages.map((message) => (
           <MessageItem
-            key={message.messageID}
+            key={message.id}
             {...message}
+            preview={preview}
             onReportClick={
               message.isBOT
                 ? { reason: handleOpenReasonModal, report: () => {} }
@@ -270,19 +283,21 @@ export default function MessagesContainer({
           />
         ))}
       </div>
-      <ReportModal
-        styles={{
-          content: {
-            backgroundColor: "#2F2F2F",
-          },
-        }}
-        selectedReasonID={state.selectedReasonID}
-        open={state.reasonModalOpen}
-        onOk={handleSaveReport}
-        onCancel={handleCloseReasonModal}
-        handleChangeReasonClick={handleChangeReasonClick}
-        reasons={state.reasons}
-      ></ReportModal>
+      {preview ? null : (
+        <ReportModal
+          styles={{
+            content: {
+              backgroundColor: "#2F2F2F",
+            },
+          }}
+          selectedReasonID={state.selectedReasonID}
+          open={state.reasonModalOpen}
+          onOk={handleSaveReport}
+          onCancel={handleCloseReasonModal}
+          handleChangeReasonClick={handleChangeReasonClick}
+          reasons={state.reasons}
+        ></ReportModal>
+      )}
     </>
   );
 }

@@ -38,10 +38,6 @@ interface ManageHandlersProps {
   getList_Archived: () => Promise<void>;
   getList_Shared: () => Promise<void>;
 }
-interface ManageFunctionsProps<T> {
-  handleDeleteAll: (type: number) => void;
-  handleDelete: (indexToDel: number, type: number) => void;
-}
 
 interface SettingModalProps extends ModalProps {
   manageHandlers: ManageHandlersProps;
@@ -120,11 +116,6 @@ const SettingModal = ({
           <div className={cx("btnContainer")}>
             {selectItem === 0 && (
               <>
-                <SettingModalItem
-                  title="Giao diện"
-                  button={<CustomButton outlined>Tối</CustomButton>}
-                />
-                <span className="horizontal"></span>
                 <SettingModalItem
                   title="Các hội thoại đã lưu"
                   button={
@@ -238,11 +229,9 @@ interface IUserMenu {
 }
 
 const UserMenu = memo(() => {
-  const token = useSelector((state: RootState) => state.user?.user?.token);
-
-  const user = useSelector((state: RootState) => state.user.user?.token);
-  console.log(token);
-
+  const token = useSelector((state: RootState) => state.user.user.token);
+  const chatService = new ChatService(token);
+  const sharedService = new SharedService(token);
   const [state, setState] = useState<IUserMenu>({
     isOpen: false,
     isOpenManage: false,
@@ -277,9 +266,8 @@ const UserMenu = memo(() => {
           setState((prev) => ({ ...prev, isLoading: true }));
         }
         if (state.archived.length <= 0) {
-          const listArchived = await ChatService.getList_archived_Conversations(
-            token as string
-          );
+          const listArchived =
+            await chatService.getList_archived_Conversations();
           if (listArchived.status === 200) {
             setState((prev) => ({
               ...prev,
@@ -299,9 +287,7 @@ const UserMenu = memo(() => {
         }
 
         if (state.shared.length <= 0) {
-          const listShared = await SharedService.getList_shared(
-            token as string
-          );
+          const listShared = await sharedService.getList_shared();
           if (listShared.status === 200) {
             setState((prev) => ({
               ...prev,
@@ -316,9 +302,7 @@ const UserMenu = memo(() => {
     },
   };
 
-  const manageFunction: ManageFunctionsProps<
-    IConversation | ISharedConversation1
-  > = {
+  const manageFunction = {
     handleDeleteAll: (type: number) => {
       setState((prev) => ({
         ...prev,
@@ -398,13 +382,13 @@ const UserMenu = memo(() => {
           <Space size={8}>
             <Image
               // src="/default-avatar.png"
-              src={user?.picture || "/default-avatar.png"}
+              src={"/default-avatar.png"}
               preview={false}
               width={40}
               height={40}
               className={cx("avatarHolder")}
             />
-            <span className={cx("username")}>{user?.username}</span>
+            <span className={cx("username")}>Hello</span>
           </Space>
         </div>
       </Dropdown>

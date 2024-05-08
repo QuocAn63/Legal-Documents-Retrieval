@@ -73,9 +73,7 @@ const renderContent = (
         </Flex>
         <Flex flex="0 0 50%" align="center">
           <Flex flex="0 0 50%">
-            <span className={cx("titleMain")}>
-              {formatTime(item.createdAt)}
-            </span>
+            <span className={cx("titleMain")}>{item.createdAt}</span>
           </Flex>
           <Flex flex="0 0 50%" justify="end">
             {type === 0 ? (
@@ -83,11 +81,11 @@ const renderContent = (
                 <ContainerOutlined className={cx("icon")} />
               </Tooltip>
             ) : (
-              <Tooltip title="Bỏ chia sẻ">
+              <Tooltip title="Xem nguồn">
                 <ShareAltOutlined className={cx("icon")} />
               </Tooltip>
             )}
-            <Tooltip title="Xóa lưu trữ">
+            <Tooltip title="Xóa">
               <DeleteOutlined
                 className={cx("icon")}
                 onClick={() => manageHandlers.handleDelete(index, type)}

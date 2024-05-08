@@ -1,22 +1,25 @@
-import { Modal, ModalProps, Flex } from "antd";
+import { Modal, ModalProps, Flex, message } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import styles from "../../styles/modal.module.scss";
 import classNames from "classnames/bind";
 import Typography from "antd/es/typography";
 import CustomButton from "../button";
 import SharedService from "../../services/shared.service";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 const { Title, Paragraph } = Typography;
 
 const cx = classNames.bind(styles);
 
 interface ShareModalProps extends ModalProps {
-  conversationID?: string;
+  conversationID: string;
 }
 
 interface ShareModalStateProps {
   isLoading: boolean;
+  sharedCode: string;
 }
 
 export default function ShareModal({
@@ -25,19 +28,51 @@ export default function ShareModal({
 }: ShareModalProps) {
   const [state, setState] = useState<ShareModalStateProps>({
     isLoading: false,
+    sharedCode: "",
   });
-  const handleClickPreviewBtn = () => {
-    window.open(`/preview/${conversationID}`, "_blank");
-  };
+  const [messageApi, contextHolder] = message.useMessage();
+  const token = useSelector((state: RootState) => state.user.user.token);
+  const sharedService = new SharedService(token);
+
+  const loadInitialData = async () => {};
+
+  useEffect(() => {
+    loadInitialData();
+    return () => {
+      setState((prev) => ({ ...prev, sharedCode: "", isLoading: false }));
+    };
+  }, []);
 
   const handleClickShareBtn = async () => {
-    if (conversationID) {
-      setState((prev) => ({ ...prev, isLoading: true }));
-      const saveResponse = await SharedService.save_shared(conversationID);
-      console.log(saveResponse);
+    setState((prev) => ({ ...prev, isLoading: true }));
 
-      setState((prev) => ({ ...prev, isLoading: false }));
-    } else return;
+    if (conversationID && token) {
+      setState((prev) => ({ ...prev, isLoading: true }));
+
+      try {
+        const saveResponse = await sharedService.save_shared(conversationID);
+
+        if (saveResponse.status === 201) {
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            sharedCode: saveResponse.data,
+          }));
+        }
+      } catch (err: any) {
+        const message = err.response.data.message;
+        messageApi.error(message);
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+        }));
+      }
+    }
+  };
+
+  const handleClickCopyBtn = async () => {
+    const url = `http://localhost:5173/s/${state.sharedCode}`;
+    await navigator.clipboard.writeText(url);
   };
 
   return (
@@ -47,15 +82,14 @@ export default function ShareModal({
           flex: 1,
           backgroundColor: "#2F2F2F",
         },
-        // mask: {
-        //   opacity: 0.7,
-        // },
       }}
       footer={null}
       className={cx("wrapper")}
       closeIcon={<CloseOutlined className={cx("btnClose")} />}
+      destroyOnClose
       {...props}
     >
+      {contextHolder}
       <Title level={5} className={cx("titleMain")}>
         Chia sẻ liên kết Cuộc trò chuyện
       </Title>
@@ -65,10 +99,15 @@ export default function ShareModal({
         hiển thị.
       </Paragraph>
       <Flex justify="flex-end" gap={20} className={cx("btnGroup")}>
-        <CustomButton onClick={handleClickPreviewBtn}>Xem trước</CustomButton>
-        <CustomButton loading={state.isLoading} onClick={handleClickShareBtn}>
-          Chia sẻ
-        </CustomButton>
+        {state.sharedCode !== "" ? (
+          <CustomButton loading={state.isLoading} onClick={handleClickCopyBtn}>
+            Sao chép
+          </CustomButton>
+        ) : (
+          <CustomButton loading={state.isLoading} onClick={handleClickShareBtn}>
+            Chia sẻ
+          </CustomButton>
+        )}
       </Flex>
     </Modal>
   );

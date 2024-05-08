@@ -30,6 +30,15 @@
         }
     }
 
+    &.preview .pane {
+        .username {
+            color: $usermenu-bg-color !important;
+        }
+        .content {
+            color: $usermenu-bg-color !important;
+        }
+    }
+
     .btnContainer {
         position: absolute;
         bottom: 8px;

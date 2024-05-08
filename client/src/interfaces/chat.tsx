@@ -1,12 +1,12 @@
 export interface IConversation {
-  conversationID: string;
+  id: string;
   title: string;
   createdAt: string;
   isArchived: number;
 }
 
 export interface IMessage {
-  messageID: string;
+  id: string;
   content: string;
   conversationID: string;
   userID: string;

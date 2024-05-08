@@ -24,29 +24,9 @@ const conversationSlice = createSlice({
     addConversationRedux: (state, action) => {
       state.conversations = [action.payload, ...state.conversations];
     },
-    renameTitleRedux: (state, action) => {
-      const indexRename = state.conversations.findIndex(
-        (item) => item.conversationID === action.payload.conversationID
-      );
-      if (indexRename !== -1) {
-        return {
-          ...state,
-          conversations: state.conversations.map((conversation, index) => {
-            if (index === indexRename) {
-              return {
-                ...conversation,
-                title: action.payload.title,
-              };
-            }
-            return conversation;
-          }),
-        };
-      }
-      return state;
-    },
   },
 });
-export const { getConversationRedux, addConversationRedux, renameTitleRedux } =
+export const { getConversationRedux, addConversationRedux } =
   conversationSlice.actions;
 
 export default conversationSlice.reducer;

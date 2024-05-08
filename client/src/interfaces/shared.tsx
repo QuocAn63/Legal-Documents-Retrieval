@@ -1,7 +1,7 @@
-import { IConversation, IConversation1 } from "./chat";
+import { IConversation, IMessage } from "./chat";
 
 export interface ISharedConversation {
-  sharedID: string;
+  id: string;
   sharedCode: string;
   userID: string;
   conversationID: string;
@@ -9,7 +9,7 @@ export interface ISharedConversation {
 }
 
 export interface ISharedConversation1 {
-  sharedID: string;
+  id: string;
   sharedCode: string;
   userID: string;
   createdAt: string;
@@ -17,9 +17,11 @@ export interface ISharedConversation1 {
 }
 
 export interface ISharedConversation2 {
-  sharedID: string;
+  id: string;
   sharedCode: string;
   userID: string;
   createdAt: string;
-  conversation: IConversation1;
+  conversationID: string;
+  conversation: IConversation;
+  messages: IMessage[];
 }

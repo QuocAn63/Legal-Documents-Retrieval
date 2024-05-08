@@ -1,0 +1,14 @@
+@import './variables';
+
+.wrapper {
+    width: 720px;
+    padding: 40px 0;   
+
+    .header {
+
+        .createTime {
+            color: $sidebar-item-title-color;
+            font-size: 15px;
+        }
+    }
+}

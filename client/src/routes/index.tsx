@@ -1,8 +1,4 @@
-import {
-  RouterProvider,
-  createBrowserRouter,
-  useNavigate,
-} from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { PrivateLayout } from "../components/layout";
 import Login from "../pages/login";
 import Register from "../pages/register";
@@ -11,9 +7,7 @@ import Chat from "../pages/chat";
 import { Outlet } from "react-router-dom";
 
 import ResetPassword from "../pages/resetPws";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
-import { useEffect } from "react";
+import { SharedPage } from "../pages/shared";
 
 // puiblic (login/register)
 // private routes
@@ -27,15 +21,6 @@ const TestPages = () => {
 };
 
 const PublicLayout = () => {
-  const userToken = useSelector((state: RootState) => state.user.user?.token);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (userToken) {
-      navigate("/");
-    }
-  }, [navigate, userToken]);
-
   return <Outlet />;
 };
 
@@ -64,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "login/google",
         element: <TestPages />,
+      },
+      {
+        path: "s/:sharedCode",
+        element: <SharedPage />,
       },
     ],
   },

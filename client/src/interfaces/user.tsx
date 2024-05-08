@@ -1,5 +1,5 @@
 export interface IUser {
-  token: string | null;
+  token: string;
 }
 
 export interface IAuth {

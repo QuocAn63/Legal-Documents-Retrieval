@@ -11,23 +11,13 @@ import MessagesContainer from "../components/message";
 import { ChatService } from "../services/chat.service";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
-// Fake Create Conversations
-import { faker } from "@faker-js/faker";
-import { addConversationRedux } from "../redux/conversations";
+import { useSelector } from "react-redux";
 
 import { IMessage } from "../interfaces/chat";
 import { RootState } from "../redux/store";
 import { ArrowDownOutlined } from "@ant-design/icons";
 
-// Validate
-
 const cx = classNames.bind(styles);
-
-// const schema = z.object({
-//   content: chatContentValidate.content,
-// });
 
 interface IChatInput {
   content: string;
@@ -42,6 +32,10 @@ interface IChat {
   messages: IMessage[];
   isSubmitting: boolean;
   scrollToEnd: boolean;
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+  };
 }
 
 export default function Chat({ isMain = false }: ChatPageProps) {
@@ -54,21 +48,19 @@ export default function Chat({ isMain = false }: ChatPageProps) {
     messages: [],
     isSubmitting: false,
     scrollToEnd: true,
+    pagination: {
+      pageIndex: 1,
+      pageSize: 10,
+    },
   });
-
-  // get dispatch từ redux
-  const dispatch = useDispatch();
-
   const chatInputRef = useRef<InputRef>(null);
-
   const { conversationID } = useParams();
-
   const [check, setCheck] = useState<boolean>(false);
 
   // Lấy token từ store redux
 
   const token = useSelector((state: RootState) => state.user.user?.token);
-
+  const chatService = new ChatService(token);
   const navigate = useNavigate();
 
   const messageContainerRef = useRef<HTMLDivElement>(null);
@@ -149,101 +141,23 @@ export default function Chat({ isMain = false }: ChatPageProps) {
         isSubmitting: true,
       }));
 
-      if (data.content !== "") {
-        if (check === true) {
-          const messageData: IMessage = {
-            messageID: faker.string.uuid(),
-            conversationID: conversationID as string,
-            userID: state.messages[0].userID,
-            content: data.content,
-            createdAt: faker.date.recent().toISOString(),
-            updatedAt: faker.date.recent().toISOString(),
-            isBOT: 0,
-          };
+      if (data.content !== "" && token) {
+        const response = await chatService.invoke(data.content, conversationID);
 
-          const message = await ChatService.save_Messages(messageData);
-
-          if (message.status === 201) {
+        if (response.status === 201) {
+          if (check) {
             setState((prev) => ({
               ...prev,
-              messages: [...prev.messages, messageData],
+              pagination: {
+                ...prev.pagination,
+                pageSize: prev.pagination.pageSize + 2,
+              },
             }));
-
             clearControls();
-            handleReplyMessages();
+          } else {
+            navigate(`/c/${response.data.conversationID}`);
           }
-        } else {
-          const payload = {
-            conversationID: faker.string.uuid(),
-            title: data.content,
-            createdAt: faker.string.uuid(),
-            isArchive: 0,
-          };
-
-          // Call API return summary title
-
-          // const summaryTitle =  await summary_Title(payload.title)
-          // Tham số truyền vào API
-          const param = {
-            title: data.content, // summaryTitle
-            token: token,
-          };
-
-          const saveConversation = await ChatService.save_Conversations(param);
-
-          const messageData: IMessage = {
-            messageID: faker.string.uuid(),
-            conversationID: faker.string.uuid(),
-            userID: state.messages[0].userID,
-            content: data.content,
-            createdAt: faker.date.recent().toISOString(),
-            updatedAt: faker.date.recent().toISOString(),
-            isBOT: 0,
-          };
-
-          const message = await ChatService.save_Messages(messageData);
-
-          Promise.all([saveConversation, message]).then(
-            ([saveConversationResult, saveMessageResult]) => {
-              if (
-                saveConversationResult.status === 200 &&
-                saveMessageResult.status === 201
-              ) {
-                dispatch(addConversationRedux(payload));
-                // setState((prev) => ({
-                //   ...prev,
-                //   messages: [messageData],
-                // }));
-
-                setTimeout(() => {
-                  clearControls();
-                  handleReplyMessages();
-                  navigate(`c/${payload.conversationID}`);
-                }, 200);
-              }
-            }
-          );
-
-          // if (saveConversation.status === 200) {
-          //   dispatch(addConversationRedux(payload));
-          //   setTimeout(() => {
-          //     // dispatch(addConversationRedux(payload));
-          //     clearControls();
-          //   }, 200);
-          // }
-
-          // if (message.status === 200) {
-          //   setState((prev) => ({
-          //     ...prev,
-          //     messages: [messageData],
-          //   }));
-
-          //   handleReplyMessages();
-          // }
-          // navigate(`c/${payload.conversationID}`);
-        }
-      } else {
-        console.log("Chua nhap gi ca");
+        } else navigate("/");
       }
     } catch (err: any) {
       const message = err?.message || err?.msg || err || "Error when";
@@ -258,45 +172,25 @@ export default function Chat({ isMain = false }: ChatPageProps) {
     }
   };
 
+  const getInitialData = async () => {
+    if (conversationID && token) {
+      const messagesData = await chatService.getList_Messages(
+        conversationID,
+        state.pagination
+      );
+
+      setState((prev) => ({ ...prev, messages: messagesData.data.messages }));
+    }
+  };
   useEffect(() => {
-    const getInitialData = async () => {
-      console.log("Fetch Again");
-
-      const messagesData = await ChatService.getList_Messages("1");
-
-      console.log(messagesData.data);
-
-      setState((prev) => ({ ...prev, messages: messagesData.data }));
-    };
-
+    clearControls();
     getInitialData();
     initEvents();
 
     return () => {
-      clearState();
       dropEvents();
     };
-  }, [location.pathname]);
-
-  const handleReplyMessages = async () => {
-    setState((prev) => ({
-      ...prev,
-      isLoading: true,
-    }));
-    const replyMessage = await ChatService.getReply_Messages(
-      conversationID as string
-      // ConversationID
-      // UserToken
-    );
-    console.log(replyMessage.data);
-
-    if (replyMessage.status === 200) {
-      setState((prev) => ({
-        ...prev,
-        messages: [...prev.messages, replyMessage.data],
-      }));
-    }
-  };
+  }, [location.pathname, state.pagination.pageSize]);
 
   const bindEnterToSubmit = (e: KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -325,15 +219,6 @@ export default function Chat({ isMain = false }: ChatPageProps) {
       );
       document.removeEventListener("keypress", bindEnterToSubmit);
     }
-  };
-
-  const clearState = () => {
-    setState({
-      isLoading: false,
-      messages: [],
-      isSubmitting: false,
-      scrollToEnd: false,
-    });
   };
 
   return (
