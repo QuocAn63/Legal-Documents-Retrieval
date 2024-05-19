@@ -19,25 +19,24 @@ import {
 import styles from "../../styles/modal.module.scss";
 import classNames from "classnames/bind";
 import Typography from "antd/es/typography";
-// import CustomButton from "../button";
 import { useEffect, useState } from "react";
 import CustomButton from "../button";
 import { IConversation } from "../../interfaces/chat";
-import { ISharedConversation1 } from "../../interfaces/shared";
-import { formatTime } from "../../helpers/formatTIme";
+import { ISharedConversation2 } from "../../interfaces/shared";
+import { Link } from "react-router-dom";
 
 const { Title } = Typography;
 
 const cx = classNames.bind(styles);
 
 interface ManageHandlersProps {
-  handleDeleteAll: (type: number) => void;
-  handleDelete: (indexToDel: number, type: number) => void;
+  handleDelete: (IDs: string[], type: number) => void;
+  handleUnarchive?: (id: string) => void;
 }
 
 interface ShareModalProps extends ModalProps {
   type: number;
-  manage: (IConversation | ISharedConversation1)[];
+  manage: (IConversation | ISharedConversation2)[];
   manageHandlers: ManageHandlersProps;
   isLoading: boolean;
   onCancel: () => void;
@@ -50,13 +49,12 @@ interface ShareModalStateProps {
 }
 
 const renderContent = (
-  item: IConversation | ISharedConversation1,
+  item: IConversation | ISharedConversation2,
   type: number,
-  index: number,
   manageHandlers: ManageHandlersProps
 ) => {
   return (
-    <Col style={{ gap: 10, padding: "5px 0 5px 0" }}>
+    <Col style={{ gap: 10, padding: "5px 0 5px 0" }} key={item.id}>
       <Row>
         <Flex align="center" style={{ paddingRight: "24px", width: "50%" }}>
           <a
@@ -67,8 +65,12 @@ const renderContent = (
               textOverflow: "ellipsis",
               maxWidth: "90%",
             }}
+            target="_blank"
+            href={
+              "sharedCode" in item ? `/s/${item.sharedCode}` : `/c/${item.id}`
+            }
           >
-            {"title" in item ? item.title : item.sharedCode}
+            {"title" in item ? item.title : item.conversation.title}
           </a>
         </Flex>
         <Flex flex="0 0 50%" align="center">
@@ -76,19 +78,28 @@ const renderContent = (
             <span className={cx("titleMain")}>{item.createdAt}</span>
           </Flex>
           <Flex flex="0 0 50%" justify="end">
-            {type === 0 ? (
-              <Tooltip title="Bỏ lưu trữ">
-                <ContainerOutlined className={cx("icon")} />
-              </Tooltip>
+            {"conversationID" in item ? (
+              <Link to={`/c/${item.conversationID}`} target="_blank">
+                <Tooltip title="Xem nguồn">
+                  <ShareAltOutlined className={cx("icon")} />
+                </Tooltip>
+              </Link>
             ) : (
-              <Tooltip title="Xem nguồn">
-                <ShareAltOutlined className={cx("icon")} />
+              <Tooltip title="Bỏ lưu trữ">
+                <ContainerOutlined
+                  className={cx("icon")}
+                  onClick={() =>
+                    manageHandlers.handleUnarchive
+                      ? manageHandlers.handleUnarchive(item.id)
+                      : undefined
+                  }
+                />
               </Tooltip>
             )}
             <Tooltip title="Xóa">
               <DeleteOutlined
                 className={cx("icon")}
-                onClick={() => manageHandlers.handleDelete(index, type)}
+                onClick={() => manageHandlers.handleDelete([item.id], type)}
               />
             </Tooltip>
           </Flex>
@@ -177,17 +188,22 @@ export default function ManageModal({
           <Flex flex={1} align="center">
             <span className={cx("titleMain")}>Ngày</span>
           </Flex>
-          <Flex flex={1} justify="end" align="center">
-            <CustomButton
-              status={"important"}
-              onClick={() => {
-                manageHandlers.handleDeleteAll(type);
-                setState((prev) => ({ ...prev, isLoading: false }));
-              }}
-            >
-              Xóa tất cả
-            </CustomButton>
-          </Flex>
+          {type === 1 ? (
+            <Flex flex={1} justify="end" align="center">
+              <CustomButton
+                status={"important"}
+                onClick={() => {
+                  manageHandlers.handleDelete(
+                    manage.map((item) => item.id),
+                    type
+                  );
+                  setState((prev) => ({ ...prev, isLoading: false }));
+                }}
+              >
+                Xóa tất cả
+              </CustomButton>
+            </Flex>
+          ) : null}
         </Flex>
       </Row>
       <span className="horizontal"></span>
@@ -195,9 +211,7 @@ export default function ManageModal({
         !isLoading &&
         manage
           .slice(state.currentIndex, state.currentIndex + TOTAL_ITEM_PAGE)
-          .map((item, index) =>
-            renderContent(item, type, index, manageHandlers)
-          )}
+          .map((item) => renderContent(item, type, manageHandlers))}
       {isLoading && (
         <Flex justify="center">
           <Spin />

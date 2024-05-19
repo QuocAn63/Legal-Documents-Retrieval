@@ -1,20 +1,17 @@
 import { IQueryMetaData, IResponseData } from "../interfaces/request";
 import { FakeConversationsAPI } from "./fakeAPIs/conversations.fakeservice";
 import { IConversation } from "../interfaces/chat";
-import axiosInstance from "./axios";
+import { AxiosInstance } from "axios";
 
 export class ChatService {
-  constructor(private readonly token: string) {}
+  constructor(private readonly instance: AxiosInstance) {}
 
   async getList_Conversations({
     pageIndex = 1,
     pageSize = 20,
   }: IQueryMetaData): Promise<IResponseData<IConversation[]>> {
-    return axiosInstance.get("/conversations", {
+    return this.instance.get("/conversations", {
       params: { pageIndex, pageSize },
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
     });
   }
 
@@ -22,10 +19,7 @@ export class ChatService {
     conversationID: string,
     { pageIndex = 1, pageSize = 6 }
   ): Promise<IResponseData> {
-    return axiosInstance.get(`/conversations/${conversationID}/messages`, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
+    return this.instance.get(`/conversations/${conversationID}/messages`, {
       params: {
         pageIndex,
         pageSize,
@@ -54,46 +48,41 @@ export class ChatService {
   async delete_Conversations(
     conversationID: string[]
   ): Promise<IResponseData<string>> {
-    return axiosInstance.delete("/conversations", {
+    return this.instance.delete("/conversations", {
       data: {
         IDs: conversationID,
       },
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
     });
+  }
+
+  async deleteAll_Conversations(): Promise<IResponseData<string>> {
+    return this.instance.delete("/conversations/all");
   }
 
   async getList_archived_Conversations(): Promise<
     IResponseData<IConversation[]>
   > {
-    return FakeConversationsAPI.getList_archived_Conversations();
+    return this.instance.get("/conversations/archived", {});
   }
 
-  async archive_Conversations(
-    conversationID: string
-  ): Promise<IResponseData<string>> {
-    return FakeConversationsAPI.archive_Conversations(conversationID);
+  async archive_Conversations(id: string): Promise<IResponseData<string>> {
+    return this.instance.patch("/conversations", {
+      conversationID: id,
+      isArchived: true,
+    });
   }
 
-  async unarchive_Conversations(
-    conversationID: string
-  ): Promise<IResponseData<string>> {
-    return FakeConversationsAPI.archive_Conversations(conversationID);
+  async unarchive_Conversations(id: string): Promise<IResponseData<string>> {
+    return this.instance.patch("/conversations", {
+      conversationID: id,
+      isArchived: false,
+    });
   }
 
   async invoke(input: string, conversationID?: string): Promise<IResponseData> {
-    return await axiosInstance.post(
-      "/bot/invoke",
-      {
-        conversationID,
-        input,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      }
-    );
+    return await this.instance.post("/bot/invoke", {
+      conversationID,
+      input,
+    });
   }
 }

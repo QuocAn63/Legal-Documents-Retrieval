@@ -13,6 +13,7 @@ export interface ISharedConversation1 {
   sharedCode: string;
   userID: string;
   createdAt: string;
+  conversationID: string;
   conversation: IConversation;
 }
 

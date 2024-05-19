@@ -3,19 +3,14 @@ import styles from "../styles/chat.module.scss";
 import classNames from "classnames/bind";
 import { FormItem } from "react-hook-form-antd";
 import { SubmitHandler, useForm } from "react-hook-form";
-// import { z } from "zod";
-// import { chatContentValidate } from "../helpers/validates";
-// import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import MessagesContainer from "../components/message";
 import { ChatService } from "../services/chat.service";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import { useSelector } from "react-redux";
-
 import { IMessage } from "../interfaces/chat";
-import { RootState } from "../redux/store";
 import { ArrowDownOutlined } from "@ant-design/icons";
+import useAxios from "../hooks/axios";
 
 const cx = classNames.bind(styles);
 
@@ -58,9 +53,8 @@ export default function Chat({ isMain = false }: ChatPageProps) {
   const [check, setCheck] = useState<boolean>(false);
 
   // Lấy token từ store redux
-
-  const token = useSelector((state: RootState) => state.user.user?.token);
-  const chatService = new ChatService(token);
+  const { instance } = useAxios();
+  const chatService = new ChatService(instance);
   const navigate = useNavigate();
 
   const messageContainerRef = useRef<HTMLDivElement>(null);
@@ -141,7 +135,7 @@ export default function Chat({ isMain = false }: ChatPageProps) {
         isSubmitting: true,
       }));
 
-      if (data.content !== "" && token) {
+      if (data.content !== "") {
         const response = await chatService.invoke(data.content, conversationID);
 
         if (response.status === 201) {
@@ -173,7 +167,7 @@ export default function Chat({ isMain = false }: ChatPageProps) {
   };
 
   const getInitialData = async () => {
-    if (conversationID && token) {
+    if (conversationID) {
       const messagesData = await chatService.getList_Messages(
         conversationID,
         state.pagination
@@ -188,9 +182,23 @@ export default function Chat({ isMain = false }: ChatPageProps) {
     initEvents();
 
     return () => {
+      clearState();
       dropEvents();
     };
-  }, [location.pathname, state.pagination.pageSize]);
+  }, [location.pathname, state.pagination.pageSize, conversationID]);
+
+  const clearState = () => {
+    setState({
+      isLoading: false,
+      isSubmitting: false,
+      messages: [],
+      pagination: {
+        pageIndex: 1,
+        pageSize: 20,
+      },
+      scrollToEnd: true,
+    });
+  };
 
   const bindEnterToSubmit = (e: KeyboardEvent) => {
     if (e.key === "Enter") {

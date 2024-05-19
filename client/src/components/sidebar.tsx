@@ -15,13 +15,9 @@ import UserMenu from "./usermenu";
 import React, { FC, memo, useEffect, useState } from "react";
 import { ChatService } from "../services/chat.service";
 import { IConversation } from "../interfaces/chat.tsx";
-// Import Redux
-import { useDispatch, useSelector } from "react-redux";
-
 import ShareModal from "./modals/share.tsx";
 
-import { RootState } from "../redux/store.tsx";
-import { getConversationRedux } from "../redux/conversations.tsx";
+import useAxios from "../hooks/axios.tsx";
 
 const cx = classNames.bind(styles);
 
@@ -29,14 +25,8 @@ interface SidebarItemProps extends IConversation {
   isSelected?: boolean;
   handleDelete: (data: any) => void;
   shareModalState: ModalControlsProps;
+  handleArchive: (data: any) => void;
 }
-
-type SidebarItemStateProps = {
-  edit: {
-    isEditing: boolean;
-    value: string;
-  };
-};
 
 interface SidebarStateProps {
   conversations: IConversation[];
@@ -48,6 +38,7 @@ interface SidebarItemContainerProps {
   items: IConversation[];
   shareModalState: ModalControlsProps;
   handleDelete: (data: any) => void;
+  handleArchive: (data: any) => void;
 }
 
 interface DropdownMenuProps {
@@ -109,6 +100,7 @@ const SidebarItem = ({
   id,
   isSelected = false,
   handleDelete,
+  handleArchive,
   shareModalState,
 }: SidebarItemProps) => {
   const { handleClose, handleOpen, isOpen } = shareModalState;
@@ -136,7 +128,10 @@ const SidebarItem = ({
               </Tooltip>
             </Dropdown>
             <Tooltip title="Lưu trữ">
-              <ContainerOutlined className={cx("btn")} />
+              <ContainerOutlined
+                className={cx("btn")}
+                onClick={handleArchive}
+              />
             </Tooltip>
           </Space>
         </>
@@ -150,6 +145,7 @@ const SidebarItemContainer = ({
   shareModalState,
   items,
   handleDelete,
+  handleArchive,
 }: SidebarItemContainerProps) => {
   const { conversationID } = useParams();
 
@@ -158,6 +154,7 @@ const SidebarItemContainer = ({
       {items.map((item) => (
         <SidebarItem
           {...item}
+          handleArchive={() => handleArchive(item.id)}
           key={item.id}
           shareModalState={shareModalState}
           isSelected={item.id === conversationID}
@@ -179,36 +176,29 @@ const Sidebar: FC = memo(() => {
     },
     selectedConversation: undefined,
   });
-  // get Conversation from redux
-  const conversation = useSelector(
-    (state: RootState) => state.conversation.conversations
-  );
-  const token = useSelector((state: RootState) => state.user.user?.token) || "";
-  const chatService = new ChatService(token);
-  const dispatch = useDispatch();
+
+  const { instance } = useAxios();
+  const chatService = new ChatService(instance);
   const navigate = useNavigate();
   const location = useLocation();
+  const { conversationID } = useParams();
+  const getInitialData = async () => {
+    const conversationsData = await chatService.getList_Conversations({});
+
+    if (conversationsData.status === 200) {
+      setState((prev) => ({
+        ...prev,
+        shareModal: {
+          ...prev.shareModal,
+          handleOpen: handleClickOpenShareModal,
+          handleClose: handleClickCloseShareModal,
+        },
+        conversations: conversationsData.data || [],
+      }));
+    }
+  };
 
   useEffect(() => {
-    const getInitialData = async () => {
-      const conversationsData = await chatService.getList_Conversations({});
-      if (conversationsData) {
-        // Lưu conversation vào redux store conversations
-        dispatch(getConversationRedux(conversationsData.data));
-
-        setState((prev) => ({
-          ...prev,
-          // conversations: conversationsData.data || [],
-          shareModal: {
-            ...prev.shareModal,
-            handleOpen: handleClickOpenShareModal,
-            handleClose: handleClickCloseShareModal,
-          },
-        }));
-      }
-      // }
-    };
-
     getInitialData();
   }, [location.pathname]);
 
@@ -229,11 +219,27 @@ const Sidebar: FC = memo(() => {
     }));
   };
 
-  const handleClickDelete = async (conversationID: string) => {
-    const response = await chatService.delete_Conversations([conversationID]);
+  const handleClickDelete = async (id: string) => {
+    const response = await chatService.delete_Conversations([id]);
 
-    if (response.status === 200 && conversationID === conversationID) {
+    if (response.status === 200 && conversationID === id) {
       navigate("/");
+    } else {
+      await getInitialData();
+    }
+  };
+
+  const handleClickArchive = async (conversationID: string) => {
+    const response = await chatService.archive_Conversations(conversationID);
+
+    if (response.status === 200) {
+      const newConvs = state.conversations.filter(
+        (conv) => conversationID !== conv.id
+      );
+      setState((prev) => ({
+        ...prev,
+        conversations: newConvs,
+      }));
     }
   };
 
@@ -243,12 +249,13 @@ const Sidebar: FC = memo(() => {
         <Space direction="vertical" size={12} style={{ width: "100%" }}>
           <NewChatItem />
           <SidebarItemContainer
+            handleArchive={handleClickArchive}
             handleDelete={handleClickDelete}
-            items={conversation}
+            items={state.conversations}
             shareModalState={state.shareModal}
           />
         </Space>
-        <UserMenu />
+        <UserMenu loadData={getInitialData} />
       </div>
     </>
   );

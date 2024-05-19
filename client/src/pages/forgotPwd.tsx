@@ -2,7 +2,6 @@ import classNames from "classnames/bind";
 import styles from "../styles/login.module.scss";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Button, Form, Input, Result, Space } from "antd";
-import type { InputRef } from "antd";
 import Title from "antd/es/typography/Title";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +9,7 @@ import { FormItem } from "react-hook-form-antd";
 import { Link } from "react-router-dom";
 import Paragraph from "antd/es/typography/Paragraph";
 import AuthService from "../services/auth.service";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { loginValidateObjects } from "../helpers/validates";
 
 const cx = classNames.bind(styles);

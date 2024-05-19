@@ -8,6 +8,7 @@ import SharedService from "../../services/shared.service";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import useAxios from "../../hooks/axios";
 
 const { Title, Paragraph } = Typography;
 
@@ -31,8 +32,8 @@ export default function ShareModal({
     sharedCode: "",
   });
   const [messageApi, contextHolder] = message.useMessage();
-  const token = useSelector((state: RootState) => state.user.user.token);
-  const sharedService = new SharedService(token);
+  const { instance } = useAxios();
+  const sharedService = new SharedService(instance);
 
   const loadInitialData = async () => {};
 
@@ -41,12 +42,12 @@ export default function ShareModal({
     return () => {
       setState((prev) => ({ ...prev, sharedCode: "", isLoading: false }));
     };
-  }, []);
+  }, [props.open]);
 
   const handleClickShareBtn = async () => {
     setState((prev) => ({ ...prev, isLoading: true }));
 
-    if (conversationID && token) {
+    if (conversationID) {
       setState((prev) => ({ ...prev, isLoading: true }));
 
       try {

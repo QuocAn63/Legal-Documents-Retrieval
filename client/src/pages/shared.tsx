@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ISharedConversation2 } from "../interfaces/shared";
 import SharedService from "../services/shared.service";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
 import { Col, Flex, Row, Typography } from "antd";
 import styles from "../styles/shared.module.scss";
 import classNames from "classnames/bind";
 import MessagesContainer from "../components/message";
 import { IMessage } from "../interfaces/chat";
+import useAxios from "../hooks/axios";
 
 const cx = classNames.bind(styles);
 
@@ -35,9 +34,8 @@ export const SharedPage = () => {
     },
   });
   const navigate = useNavigate();
-  const token = useSelector((state: RootState) => state.user.user?.token);
-
-  const sharedService = new SharedService(token);
+  const { instance } = useAxios();
+  const sharedService = new SharedService(instance);
   const loadInitialData = async () => {
     if (sharedCode) {
       const response = (await sharedService.get_shared(sharedCode)) as any;

@@ -22,7 +22,9 @@ import { ChatService } from "../services/chat.service.tsx";
 import { RootState } from "../redux/store.tsx";
 import { IConversation } from "../interfaces/chat.tsx";
 import SharedService from "../services/shared.service.tsx";
-import { ISharedConversation1 } from "../interfaces/shared.tsx";
+import { ISharedConversation2 } from "../interfaces/shared.tsx";
+import useAxios from "../hooks/axios.tsx";
+import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 const cx = classNames.bind(styles);
@@ -78,9 +80,10 @@ const SettingModal = ({
     manageHandlers;
   const { modalCloseHandler } = settingHandlers;
   const { modalType } = setTypeHandlers;
-
   const [selectItem, setSelectItem] = useState<number>(0);
-
+  const { instance } = useAxios();
+  const chatService = new ChatService(instance);
+  const navigate = useNavigate();
   const handleSelectItem = (index: number) => {
     setSelectItem(index);
   };
@@ -137,7 +140,19 @@ const SettingModal = ({
                 <SettingModalItem
                   title="Xóa tất cả hội thoại"
                   button={
-                    <CustomButton outlined status="important" background>
+                    <CustomButton
+                      outlined
+                      status="important"
+                      background
+                      onClick={async () => {
+                        const response =
+                          await chatService.deleteAll_Conversations();
+
+                        if (response.status === 200) {
+                          navigate("/", { replace: true });
+                        }
+                      }}
+                    >
                       Xóa tất cả
                     </CustomButton>
                   }
@@ -218,21 +233,25 @@ const MenuSelections = ({ settingHandlers }: MenuSelectionsProps) => {
   );
 };
 
-interface IUserMenu {
+interface StateProps {
   isOpen: boolean;
   isOpenManage: boolean;
   type: number;
   archived: IConversation[];
-  shared: ISharedConversation1[];
+  shared: ISharedConversation2[];
   isLoading: boolean;
   firstCall: boolean;
 }
 
-const UserMenu = memo(() => {
-  const token = useSelector((state: RootState) => state.user.user.token);
-  const chatService = new ChatService(token);
-  const sharedService = new SharedService(token);
-  const [state, setState] = useState<IUserMenu>({
+type UserMenuProps = {
+  loadData: (data?: any) => Promise<void>;
+};
+
+const UserMenu = memo(({ loadData }: UserMenuProps) => {
+  const { instance } = useAxios();
+  const chatService = new ChatService(instance);
+  const sharedService = new SharedService(instance);
+  const [state, setState] = useState<StateProps>({
     isOpen: false,
     isOpenManage: false,
     type: 0,
@@ -262,19 +281,16 @@ const UserMenu = memo(() => {
     },
     getList_Archived: async () => {
       try {
-        if (state.archived.length <= 0 && !state.isLoading) {
-          setState((prev) => ({ ...prev, isLoading: true }));
-        }
-        if (state.archived.length <= 0) {
-          const listArchived =
-            await chatService.getList_archived_Conversations();
-          if (listArchived.status === 200) {
-            setState((prev) => ({
-              ...prev,
-              archived: listArchived.data || [],
-              isLoading: false,
-            }));
-          }
+        setState((prev) => ({ ...prev, isLoading: true }));
+
+        const listArchived = await chatService.getList_archived_Conversations();
+
+        if (listArchived.status === 200) {
+          setState((prev) => ({
+            ...prev,
+            archived: listArchived.data || [],
+            isLoading: false,
+          }));
         }
       } catch (error) {
         console.log(error);
@@ -282,19 +298,15 @@ const UserMenu = memo(() => {
     },
     getList_Shared: async () => {
       try {
-        if (state.shared.length <= 0 && !state.isLoading) {
-          setState((prev) => ({ ...prev, isLoading: true }));
-        }
+        setState((prev) => ({ ...prev, isLoading: true }));
 
-        if (state.shared.length <= 0) {
-          const listShared = await sharedService.getList_shared();
-          if (listShared.status === 200) {
-            setState((prev) => ({
-              ...prev,
-              shared: listShared.data || [],
-              isLoading: false,
-            }));
-          }
+        const listShared = await sharedService.getList_shared();
+        if (listShared.status === 200) {
+          setState((prev) => ({
+            ...prev,
+            shared: listShared.data || [],
+            isLoading: false,
+          }));
         }
       } catch (error) {
         console.log(error);
@@ -303,29 +315,43 @@ const UserMenu = memo(() => {
   };
 
   const manageFunction = {
-    handleDeleteAll: (type: number) => {
-      setState((prev) => ({
-        ...prev,
-        archived: type === 0 ? [] : prev.archived,
-        shared: type === 1 ? [] : prev.shared,
-      }));
-    },
-    handleDelete: (indexToDel: number, type: number) => {
-      const newData =
-        type === 0
-          ? state.archived.filter((_, index) => index !== indexToDel)
-          : state.shared.filter((_, index) => index !== indexToDel);
-
+    handleDelete: async (IDs: string[], type: number) => {
+      let response;
       if (type === 0) {
-        setState((prev) => ({
-          ...prev,
-          archived: newData as IConversation[],
-        }));
+        response = await chatService.delete_Conversations(IDs);
       } else {
+        response = await sharedService.delete_shared(IDs);
+      }
+
+      if (response.status === 200) {
+        await loadData();
+        const newData =
+          type === 0
+            ? state.archived.filter((record) => !IDs.includes(record.id))
+            : state.shared.filter((record) => !IDs.includes(record.id));
+
+        if (type === 0) {
+          setState((prev) => ({
+            ...prev,
+            archived: newData as IConversation[],
+          }));
+        } else {
+          setState((prev) => ({
+            ...prev,
+            shared: newData as ISharedConversation2[],
+          }));
+        }
+      }
+    },
+    handleUnarchive: async (id: string) => {
+      const response = await chatService.unarchive_Conversations(id);
+
+      if (response.status === 200) {
         setState((prev) => ({
           ...prev,
-          shared: newData as ISharedConversation1[],
+          archived: prev.archived.filter((item) => item.id !== id),
         }));
+        await loadData();
       }
     },
   };

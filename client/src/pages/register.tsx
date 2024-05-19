@@ -40,16 +40,16 @@ export default function Register() {
 
   const onSubmit: SubmitHandler<IRegisterInput> = async (data) => {
     try {
-      setIsLoading((prev) => true);
+      setIsLoading(() => true);
       const response = await AuthService.register(data);
 
       if (response.status === 200) {
-        setIsLoading((prev) => false);
+        setIsLoading(() => false);
       }
     } catch (err: any) {
       const message = err?.message || err?.msg || "Error when";
 
-      setIsLoading((prev) => false);
+      setIsLoading(() => false);
       setError("root", { message });
     }
   };

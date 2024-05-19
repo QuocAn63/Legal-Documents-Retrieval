@@ -1,15 +1,14 @@
-import FakeReportAPI from "./fakeAPIs/report.fakeservice";
+import { AxiosInstance } from "axios";
+import { IResponseData } from "../interfaces/request";
 
 export class ReportService {
-  static async getListReasons() {
-    return FakeReportAPI.getListReasons();
+  constructor(private readonly instance: AxiosInstance) {}
+
+  async getListReasons() {
+    return this.instance.get("/reports/reasons");
   }
 
-  static async saveReport(data: any) {
-    return FakeReportAPI.saveReport(data);
-  }
-
-  static async updateReport() {
-    return FakeReportAPI.updateReport("");
+  async saveReport(data: any): Promise<IResponseData> {
+    return this.instance.post("/reports", data, {});
   }
 }

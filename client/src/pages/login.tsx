@@ -4,19 +4,15 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import AuthService from "../services/auth.service";
 import { Button, Form, Input, Space } from "antd";
 import Title from "antd/es/typography/Title";
-import { z } from "zod";
-// import { zodResolver } from "@hookform/resolvers/zod";
 import { FormItem } from "react-hook-form-antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Paragraph from "antd/es/typography/Paragraph";
 // import { loginValidateObjects } from "../helpers/validates";
 import { useDispatch } from "react-redux";
-import { loginGoogleRedux, loginRedux } from "../redux/user";
+import { loginRedux } from "../redux/user";
 import { GoogleCircleFilled } from "@ant-design/icons";
-
-import { redirect } from "react-router-dom";
-
+import useAxios from "../hooks/axios";
 const cx = classNames.bind(styles);
 
 // const schema = z.object({
@@ -46,33 +42,30 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const { instance } = useAxios();
+  const authService = new AuthService(instance);
   const onSubmit: SubmitHandler<ILoginInput> = async (data) => {
     try {
-      setIsLoading((prev) => true);
-      const response = await AuthService.login(data);
+      setIsLoading(() => true);
+      const response = await authService.login(data);
+      console.log(response);
       if (response.status === 200) {
-        setIsLoading((prev) => false);
+        setIsLoading(() => false);
         dispatch(loginRedux(response.data));
         navigate("/");
       }
     } catch (err: any) {
       const message = err?.message || err?.msg || "Error when";
 
-      setIsLoading((prev) => false);
+      setIsLoading(() => false);
       setError("root", { message });
     }
   };
-
-  // const handleLoginGoogle = useGoogleLogin({
-  //   onSuccess: (tokenResponse) => getUserInfoGoogle(tokenResponse.access_token),
-  // });
 
   const handleLoginGoogle = async () => {
     const loginGoogle = await AuthService.loginGoogle();
     if (loginGoogle.status === 200) {
       const googlePopUp = window.open();
-      // return redirect(`/${loginGoogle.data}`);
       googlePopUp!.location.href = loginGoogle.data;
     }
   };

@@ -1,52 +1,34 @@
 import { IResponseData } from "../interfaces/request";
-import {
-  ISharedConversation1,
-  ISharedConversation2,
-} from "../interfaces/shared";
-import axiosInstance from "./axios";
+import { ISharedConversation2 } from "../interfaces/shared";
+import { AxiosInstance } from "axios";
 import FakeShareService from "./fakeAPIs/share.fakerservice";
 
 export default class SharedService {
-  token: string | null;
-  constructor(token: string) {
-    this.token = token;
-  }
+  constructor(private readonly instance: AxiosInstance) {}
 
-  getList_shared(): Promise<IResponseData<ISharedConversation1[]>> {
-    return axiosInstance.get("/sharedConversations", {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
+  getList_shared(): Promise<IResponseData<ISharedConversation2[]>> {
+    return this.instance.get("/sharedConversations", {});
   }
 
   get_shared(sharedCode: string): Promise<IResponseData<ISharedConversation2>> {
-    return axiosInstance.get(`/sharedConversations/${sharedCode}`, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
+    return this.instance.get(`/sharedConversations/${sharedCode}`, {});
   }
 
   async save_shared(conversationID: string): Promise<IResponseData> {
-    return await axiosInstance.post(
-      "/sharedConversations",
-      {
-        conversationID,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      }
-    );
+    return await this.instance.post("/sharedConversations", {
+      conversationID,
+    });
   }
 
   regenerate_shared(sharedID: string): Promise<IResponseData<string>> {
     return FakeShareService.regenerate_shared(sharedID);
   }
 
-  delete_shared(sharedID: string): Promise<IResponseData<string>> {
-    return FakeShareService.delete_shared(sharedID);
+  delete_shared(IDs: string[]): Promise<IResponseData<string>> {
+    return this.instance.delete("/sharedConversations", {
+      data: {
+        IDs,
+      },
+    });
   }
 }

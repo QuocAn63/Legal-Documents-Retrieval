@@ -1,4 +1,8 @@
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  RouterProvider,
+  createBrowserRouter,
+  useNavigate,
+} from "react-router-dom";
 import { PrivateLayout } from "../components/layout";
 import Login from "../pages/login";
 import Register from "../pages/register";
@@ -8,9 +12,6 @@ import { Outlet } from "react-router-dom";
 
 import ResetPassword from "../pages/resetPws";
 import { SharedPage } from "../pages/shared";
-
-// puiblic (login/register)
-// private routes
 
 const TestPages = () => {
   return (

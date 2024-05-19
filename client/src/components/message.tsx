@@ -9,6 +9,7 @@ import {
   ModalProps,
   Form,
   Input,
+  message,
 } from "antd";
 import styles from "../styles/message.module.scss";
 import classNames from "classnames/bind";
@@ -25,7 +26,7 @@ import { ReportService } from "../services/report.service";
 import Title from "antd/es/typography/Title";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { IMessage } from "../interfaces/chat";
-const {} = Typography;
+import useAxios from "../hooks/axios";
 
 const cx = classNames.bind(styles);
 
@@ -33,10 +34,11 @@ interface ReportModalProps extends ModalProps {
   reasons: ReasonProps[];
   selectedReasonID?: string;
   handleChangeReasonClick: (reasonID: string) => void;
+  handleReportClick: (data: any) => Promise<void>;
 }
 
 interface ReasonProps {
-  reasonID: string;
+  id: string;
   description: string;
 }
 
@@ -48,11 +50,16 @@ const ReportModal = ({
   reasons = [],
   selectedReasonID,
   handleChangeReasonClick,
+  handleReportClick,
   ...props
 }: ReportModalProps) => {
-  const { control, handleSubmit } = useForm<IReportDescriptionInput>();
+  const { control, handleSubmit, setValue } =
+    useForm<IReportDescriptionInput>();
 
-  const onSubmit: SubmitHandler<IReportDescriptionInput> = (data: any) => {};
+  const onSubmit: SubmitHandler<IReportDescriptionInput> = async (data) => {
+    await handleReportClick(data);
+    setValue("description", "");
+  };
 
   return (
     <Modal
@@ -70,19 +77,17 @@ const ReportModal = ({
           <Space wrap>
             {reasons.map((item) => (
               <CustomButton
-                type={
-                  item.reasonID === selectedReasonID ? "primary" : "default"
-                }
-                key={item.reasonID}
+                type={item.id === selectedReasonID ? "primary" : "default"}
+                key={item.id}
                 outlined
                 onClick={
-                  item.reasonID !== selectedReasonID
-                    ? () => handleChangeReasonClick(item.reasonID)
+                  item.id !== selectedReasonID
+                    ? () => handleChangeReasonClick(item.id)
                     : () => {}
                 }
-                selected={item.reasonID === selectedReasonID}
+                selected={item.id === selectedReasonID}
               >
-                {item.reasonID}
+                {item.description}
               </CustomButton>
             ))}
           </Space>
@@ -105,17 +110,13 @@ const ReportModal = ({
 };
 
 export interface MessageItemProps extends IMessage {
-  onReportClick?: {
-    reason: (messageID: string) => void;
-    report: (data: any) => void;
-  };
+  onReportClick?: (messageID: string) => void;
   preview?: boolean;
 }
 
 export const MessageItem = ({
   id,
   content,
-  userID,
   onReportClick,
   isBOT,
   preview = false,
@@ -136,67 +137,62 @@ export const MessageItem = ({
   };
 
   const handleReportClick = async (messageID: string) => {
-    setState((prev) => ({ ...prev, reportClicked: true }));
-
-    onReportClick?.reason(messageID);
+    if (onReportClick) {
+      onReportClick(messageID);
+    }
   };
 
   return (
-    <>
-      <Flex
-        align="flex-start"
-        gap={16}
-        className={cx("messageItem", { preview })}
-      >
-        <Image
-          src={isBOT ? "/bot-avatar.png" : "/default-avatar.png"}
-          className={cx("avatarHolder")}
-          preview={false}
-        />
-        <Flex gap={8} vertical className={cx("pane")}>
-          <Typography.Text strong className={cx("username")}>
-            {isBOT ? "BOT" : "Bạn"}
-          </Typography.Text>
-          <Typography.Text className={cx("content")}>{content}</Typography.Text>
-        </Flex>
-        {!preview ? (
-          isBOT ? (
-            <div className={cx("btnContainer")}>
-              <Tooltip title="Sao chép nội dung" placement="bottom">
-                {state.copyClicked ? (
-                  <Button
-                    type="text"
-                    icon={<CheckOutlined />}
-                    className={cx("btn")}
-                  />
-                ) : (
-                  <Button
-                    type="text"
-                    icon={<CopyOutlined />}
-                    onClick={() => handleCopyClick(content)}
-                    className={cx("btn")}
-                  />
-                )}
-              </Tooltip>
-              <Tooltip title="Phản hồi tệ" placement="bottom">
+    <Flex
+      key={id}
+      align="flex-start"
+      gap={16}
+      className={cx("messageItem", { preview })}
+    >
+      <Image
+        src={isBOT ? "/bot-avatar.png" : "/default-avatar.png"}
+        className={cx("avatarHolder")}
+        preview={false}
+      />
+      <Flex gap={8} vertical className={cx("pane")}>
+        <Typography.Text strong className={cx("username")}>
+          {isBOT ? "BOT" : "Bạn"}
+        </Typography.Text>
+        <Typography.Text className={cx("content")}>{content}</Typography.Text>
+      </Flex>
+      {!preview ? (
+        isBOT ? (
+          <div className={cx("btnContainer")}>
+            <Tooltip title="Sao chép nội dung" placement="bottom">
+              {state.copyClicked ? (
                 <Button
                   type="text"
-                  icon={<DislikeOutlined />}
-                  className={cx("btn", {
-                    disabled: state.reportClicked,
-                  })}
-                  onClick={
-                    !state.reportClicked
-                      ? () => handleReportClick("1")
-                      : () => {}
-                  }
+                  icon={<CheckOutlined />}
+                  className={cx("btn")}
                 />
-              </Tooltip>
-            </div>
-          ) : null
-        ) : null}
-      </Flex>
-    </>
+              ) : (
+                <Button
+                  type="text"
+                  icon={<CopyOutlined />}
+                  onClick={() => handleCopyClick(content)}
+                  className={cx("btn")}
+                />
+              )}
+            </Tooltip>
+            <Tooltip title="Phản hồi tệ" placement="bottom">
+              <Button
+                type="text"
+                icon={<DislikeOutlined />}
+                className={cx("btn", {
+                  disabled: state.reportClicked,
+                })}
+                onClick={() => handleReportClick(id)}
+              />
+            </Tooltip>
+          </div>
+        ) : null
+      ) : null}
+    </Flex>
   );
 };
 
@@ -220,10 +216,14 @@ export default function MessagesContainer({
     selectedReasonID: "",
     selectedMessageID: "",
   });
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const { instance } = useAxios();
+  const reportService = new ReportService(instance);
 
   useEffect(() => {
     const getInitialData = async () => {
-      const reasonData = await ReportService.getListReasons();
+      const reasonData = await reportService.getListReasons();
 
       setState((prev) => ({ ...prev, reasons: reasonData.data }));
     };
@@ -250,7 +250,12 @@ export default function MessagesContainer({
   };
 
   const handleCloseReasonModal = () => {
-    setState((prev) => ({ ...prev, reasonModalOpen: false }));
+    setState((prev) => ({
+      ...prev,
+      reasonModalOpen: false,
+      selectedReasonID: "",
+      selectedMessageID: "",
+    }));
   };
 
   const handleOpenReasonModal = (messageID: string) => {
@@ -261,25 +266,37 @@ export default function MessagesContainer({
     }));
   };
 
-  const handleSaveReport = async () => {
-    await ReportService.saveReport({});
+  const handleSaveReport = async (data: any) => {
+    try {
+      const response = await reportService.saveReport({
+        messageID: state.selectedMessageID,
+        reasonID: state.selectedReasonID,
+        description: data.description || "",
+      });
+
+      if (response.status === 201) {
+        messageApi.success(response.data);
+      } else {
+        messageApi.info(response.data);
+      }
+    } catch (err: any) {
+      const message = err.response.data.message || err.message || err;
+      messageApi.error(message);
+    }
 
     handleCloseReasonModal();
   };
 
   return (
     <>
+      {contextHolder}
       <div className={cx("wrapper")}>
         {messages.map((message) => (
           <MessageItem
             key={message.id}
             {...message}
             preview={preview}
-            onReportClick={
-              message.isBOT
-                ? { reason: handleOpenReasonModal, report: () => {} }
-                : undefined
-            }
+            onReportClick={message.isBOT ? handleOpenReasonModal : undefined}
           />
         ))}
       </div>
@@ -296,6 +313,7 @@ export default function MessagesContainer({
           onCancel={handleCloseReasonModal}
           handleChangeReasonClick={handleChangeReasonClick}
           reasons={state.reasons}
+          handleReportClick={handleSaveReport}
         ></ReportModal>
       )}
     </>
