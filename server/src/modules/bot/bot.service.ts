@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DocumentService } from '../document';
-import { CharacterTextSplitter } from 'langchain/text_splitter';
+import {
+  CharacterTextSplitter,
+  RecursiveCharacterTextSplitter,
+} from 'langchain/text_splitter';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { AttributeInfo } from 'langchain/schema/query_constructor';
 import { OpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { HttpResponseOutputParser } from 'langchain/output_parsers';
 import {
   FunctionalTranslator,
   SelfQueryRetriever,
@@ -13,6 +17,13 @@ import { ConversationService } from '../conversation';
 import { MessageService } from '../message/message.service';
 import { IAuthToken } from 'src/interfaces/auth.interface';
 import ConversationEntity from '../conversation/entities/conversations.entity';
+import { ConfigService } from '../config';
+import { PromptTemplate } from '@langchain/core/prompts';
+import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
+import { createRetrievalChain } from 'langchain/chains/retrieval';
+import { IMessage } from 'src/interfaces/chat.interface';
+import { join } from 'path';
+import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 
 @Injectable()
 export default class BotService {
@@ -20,6 +31,7 @@ export default class BotService {
     private readonly documentService: DocumentService,
     private readonly conversationService: ConversationService,
     private readonly messageService: MessageService,
+    private readonly configService: ConfigService,
   ) {}
 
   async ask(
@@ -150,5 +162,110 @@ export default class BotService {
     } catch (err) {
       throw new err();
     }
+  }
+
+  async bot(
+    input: string,
+    authToken: IAuthToken,
+    messages: IMessage[],
+    conversationID?: string,
+  ) {
+    const config = await this.configService.get({
+      id: '9DD530E3-3908-EF11-9765-7C67A2EE2BB7',
+    });
+    const documentsResponse = await this.documentService.getList(
+      {
+        configID: config.id,
+      },
+      { pageIndex: 1, pageSize: 500 },
+    );
+    let documents = documentsResponse.map(
+      (doc) =>
+        new Document({
+          pageContent: doc.content,
+          metadata: {
+            id: doc.id,
+            label: doc.label,
+          },
+        }),
+    );
+    const prompt = PromptTemplate.fromTemplate(config.promptContent);
+    const llm = new OpenAI({
+      model: 'gpt-3.5-turbo-0125',
+      temperature: 0,
+      streaming: true,
+      verbose: true,
+    });
+    const embedding = new OpenAIEmbeddings({ model: 'text-embedding-3-small' });
+    let processedDocs: Document[] = documents;
+
+    // Splitting
+    if (config.splitted) {
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkOverlap: Number.parseInt(config.chunkOverlap),
+        chunkSize: Number.parseInt(config.chunkSize),
+      });
+
+      processedDocs = await splitter.splitDocuments(documents);
+    }
+
+    // Storing as vector
+    const vectorStore = await MemoryVectorStore.fromDocuments(
+      processedDocs,
+      embedding,
+    );
+
+    // Creating retriever instance
+    const retriever = vectorStore.asRetriever({
+      k: Number.parseInt(config.k),
+    });
+
+    // Creating chains
+    const combineDocsChain = await createStuffDocumentsChain({
+      llm,
+      prompt,
+    });
+
+    const retrieverChain = await createRetrievalChain({
+      combineDocsChain,
+      retriever,
+    });
+
+    const response = await retrieverChain.invoke({
+      input,
+      chat_history: messages
+        .map((message) => `${message.role}: ${message.content}`)
+        .join('\n'),
+    });
+
+    const saveMessageResponse = await this.saveMessages(
+      input,
+      response.answer,
+      authToken,
+      conversationID,
+    );
+
+    return {
+      response,
+      ...saveMessageResponse,
+    };
+  }
+
+  async load() {
+    const dir = join(__dirname, '../../../db/documents/luatdatdai2013.pdf');
+    const loader = new PDFLoader(dir, {
+      splitPages: false,
+    });
+
+    const docs = await loader.load();
+
+    const response = await this.documentService.save({
+      configID: '9DD530E3-3908-EF11-9765-7C67A2EE2BB7',
+      content: docs[0].pageContent,
+      label: '',
+      rank: 0,
+    });
+
+    return response.id;
   }
 }

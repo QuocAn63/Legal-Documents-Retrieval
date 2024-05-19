@@ -83,7 +83,9 @@ export default class ReportController {
     @Body() data: SaveReportDTO,
   ) {
     const newReport = await this.reportService.save(authToken, data);
-    return newReport.id;
+    if (newReport.id) {
+      return 'Báo cáo thành công';
+    }
   }
 
   @Roles('ADMIN')

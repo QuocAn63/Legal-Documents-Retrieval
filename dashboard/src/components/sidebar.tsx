@@ -1,4 +1,5 @@
 import {
+  FileOutlined,
   FlagOutlined,
   HomeFilled,
   RobotOutlined,
@@ -15,6 +16,11 @@ const items: MenuProps["items"] = [
     label: "BOTs",
     key: "/bots",
     icon: <RobotOutlined />,
+  },
+  {
+    label: "Tài liệu",
+    key: "/documents",
+    icon: <FileOutlined />,
   },
 ];
 

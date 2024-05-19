@@ -71,7 +71,7 @@ export default class SharedConversationController {
     return await this.sharedService.update(authToken, data);
   }
 
-  @Delete('/conversations')
+  @Delete('/')
   async delete_conversation(
     @AuthToken() authToken: IAuthToken,
     @Body() data: DeleteSharedConversationDTO,

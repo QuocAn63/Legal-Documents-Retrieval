@@ -15,23 +15,19 @@ import {
   Table,
   Typography,
 } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import { FormItem } from "react-hook-form-antd";
 import { ToDataSource } from "../common/services/toDataSource";
 import ReportService from "../common/lib/reports.service";
 import { IReport } from "../models/reports.model";
-import { IReportReason } from "../models/reportReason.model";
 import TextArea from "antd/es/input/TextArea";
-import { IMessage } from "../models/message.model";
-import Link from "antd/es/typography/Link";
-import { ReportStatusLabel } from "../components/reportStatus";
-import { MessageItem } from "../components/message";
-type ModalType = "SEARCH" | "UPDATE" | "VIEW" | "";
+import { DocumentService } from "../common/services/document.service";
+import { Editor } from "../components/editor";
+import { IDocument } from "../common/interfaces/document";
+type ModalType = "SEARCH" | "UPDATE" | "VIEW" | "" | "DELETE";
 
 type PageStateType = {
   dataSource: IReport[];
-  report: IReport | null;
-  reasons: IReportReason[];
   filter: {
     pageIndex: number;
     pageSize: number;
@@ -44,14 +40,12 @@ type PageStateType = {
   modal: ModalType;
   loading: boolean;
   selectedIDs: string[];
-  currentStatus: string;
-  messages: IMessage[];
+  document?: IDocument;
 };
 
-type IReportSearchInput = {
-  reasonID: string;
-  description: string;
-  status: string;
+export type IDocumentInput = {
+  label: string;
+  content: string;
   from: any;
   to: any;
 };
@@ -63,11 +57,9 @@ const searchSchema = z.object({
   to: z.any().optional(),
 });
 
-export const ReportsPage = () => {
+export const DocumentPage = () => {
   const [state, setState] = useState<PageStateType>({
     dataSource: [],
-    report: null,
-    reasons: [],
     filter: {
       pageIndex: 1,
       pageSize: 20,
@@ -80,14 +72,13 @@ export const ReportsPage = () => {
     loading: false,
     modal: "",
     selectedIDs: [],
-    messages: [],
-    currentStatus: "",
+    document: undefined,
   });
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<IReportSearchInput>({
+  } = useForm<IDocumentInput>({
     resolver: zodResolver(searchSchema),
   });
 
@@ -96,45 +87,46 @@ export const ReportsPage = () => {
       title: "Mã",
       key: "id",
       dataIndex: "id",
+      width: 200,
     },
     {
-      title: "Mã tin nhắn",
-      key: "messageID",
-      dataIndex: "messageID",
-      render: (value: string, record: any) => (
-        <Link
-          onClick={() =>
-            handleOpenModal("VIEW", async () => {
-              const response = await ReportService.getList_messages(record.id);
+      title: "Nhãn",
+      key: "label",
+      dataIndex: "label",
+      width: 250,
+    },
+    {
+      title: "Nội dung",
+      key: "content",
+      dataIndex: "content",
+      ellipsis: true,
+      render: (value: string, record: any) => {
+        return (
+          <Button
+            type="link"
+            onClick={async () => {
+              const response = await documentService.get_documents(record.id);
 
-              setState((prev) => ({
-                ...prev,
-                messages: response.data.messages,
-              }));
-            })
-          }
-        >
-          {value}
-        </Link>
-      ),
+              if (response.status === 200) {
+                setState((prev) => ({
+                  ...prev,
+                  modal: "VIEW",
+                  document: response.data,
+                }));
+              } else {
+              }
+            }}
+          >
+            {value}
+          </Button>
+        );
+      },
     },
     {
-      title: "Mã người dùng",
-      key: "userID",
-      dataIndex: "userID",
-    },
-    {
-      title: "Lý do",
-      key: "reasonID",
-      dataIndex: "reasonID",
-      render: (value: string) =>
-        state.reasons.find((record) => record.id === value)?.description ||
-        "Khác",
-    },
-    {
-      title: "Mô tả",
-      key: "description",
-      dataIndex: "description",
+      title: "Thứ tự",
+      key: "rank",
+      dataIndex: "rank",
+      width: 80,
     },
     {
       title: "Ngày tạo",
@@ -149,49 +141,44 @@ export const ReportsPage = () => {
       width: "170px",
     },
     {
-      title: "Trạng thái",
-      key: "status",
-      dataIndex: "status",
-      render: (value: number, record: any) => {
-        return (
-          <Button
-            onClick={() => {
+      title: "Sửa",
+      width: 120,
+      render: (_: string, record: any) => (
+        <Button
+          onClick={async () => {
+            const response = await documentService.get_documents(record.id);
+
+            if (response.status === 200) {
               setState((prev) => ({
                 ...prev,
-                selectedIDs: [record.id],
                 modal: "UPDATE",
-                currentStatus: record.status,
+                document: response.data,
               }));
-            }}
-          >
-            {ReportStatusLabel[value]}
-          </Button>
-        );
-      },
+            } else {
+            }
+          }}
+        >
+          Sửa
+        </Button>
+      ),
     },
   ];
+
+  const token = import.meta.env.VITE_AUTH_TOKEN as string;
+  const documentService = new DocumentService(token);
+
   const getDataSource = async () => {
     setState((prev) => ({ ...prev, loading: true }));
     let dataSource = [];
-    let reasons = [];
 
     try {
-      let response = await ReportService.getList(
-        state.filter.pageIndex,
-        state.filter.pageSize,
-        {
-          from: state.filter.from,
-          to: state.filter.to,
-        }
-      );
-      let response1 = await ReportService.getList_reasons();
+      let response = await documentService.getList_documents();
 
       dataSource = ToDataSource(response.data);
-      reasons = response1.data;
     } catch (err) {
       console.log(err);
     }
-    setState((prev) => ({ ...prev, dataSource, reasons, loading: false }));
+    setState((prev) => ({ ...prev, dataSource, loading: false }));
   };
   useEffect(() => {
     getDataSource();
@@ -215,7 +202,7 @@ export const ReportsPage = () => {
     setState((prev) => ({ ...prev, modal: "" }));
   };
 
-  const onSearchSubmit: SubmitHandler<IReportSearchInput> = async (data) => {
+  const onSearchSubmit: SubmitHandler<IDocumentInput> = async (data) => {
     const from = data.from
       ? `${data.from["$D"]}/${data.from["$M"]}/${data.from["$y"]}`
       : "";
@@ -252,7 +239,7 @@ export const ReportsPage = () => {
     <>
       <div className={cx("wrapper")}>
         <div className={cx("section_title")}>
-          <Typography.Title level={4}>Quản lý báo cáo</Typography.Title>
+          <Typography.Title level={4}>Quản lý tài liệu</Typography.Title>
         </div>
         <div className={cx("section_content")}>
           <Flex justify="space-between" className="mb-5">
@@ -264,6 +251,13 @@ export const ReportsPage = () => {
                 Tìm kiếm
               </Button>
             </Flex>
+            <Button
+              icon={<DeleteOutlined />}
+              danger
+              onClick={() => handleOpenModal("DELETE", () => {})}
+            >
+              Xóa
+            </Button>
           </Flex>
           <Table
             loading={state.loading}
@@ -296,35 +290,12 @@ export const ReportsPage = () => {
       >
         <Form>
           <Space size="small" direction="vertical" style={{ width: "100%" }}>
-            <FormItem control={control} name="description">
-              <TextArea placeholder="Mô tả" />
+            <FormItem control={control} name="label">
+              <TextArea placeholder="Nhãn" />
             </FormItem>
-            <Space
-              style={{ width: "100%" }}
-              // styles={{ item: { width: "100%" } }}
-            >
-              <FormItem control={control} name="reasonID">
-                <Select
-                  options={state.reasons.map((record) => ({
-                    label: record.description,
-                    value: record.id,
-                  }))}
-                  dropdownStyle={{ width: "250px" }}
-                  placeholder="Lý do"
-                />
-              </FormItem>
-              <FormItem control={control} name="status">
-                <Select
-                  options={[
-                    { label: "Chưa xử lý", value: 0 },
-                    { label: "Đang xử lý", value: 1 },
-                    { label: "Đã xử lý", value: 2 },
-                  ]}
-                  dropdownStyle={{ width: "250px" }}
-                  placeholder="Tình trạng"
-                />
-              </FormItem>
-            </Space>
+            <FormItem control={control} name="content">
+              <TextArea placeholder="Nội dung" style={{ minHeight: "150px" }} />
+            </FormItem>
             <Space style={{ width: "100%" }}>
               <FormItem control={control} name="from">
                 <DatePicker placeholder="Từ ngày" />
@@ -340,15 +311,12 @@ export const ReportsPage = () => {
         open={state.modal === "VIEW"}
         onCancel={() => handleCloseModal(() => {})}
         footer={null}
+        width={960}
       >
-        <Space direction="vertical" size="large">
-          {state.messages.map((message) => (
-            <MessageItem {...message}></MessageItem>
-          ))}
-        </Space>
+        <Editor document={state.document} />
       </Modal>
       <Modal
-        title="Cập nhật trạng thái"
+        title="Sửa tài liệu"
         open={state.modal === "UPDATE"}
         onCancel={() =>
           handleCloseModal(() => {
@@ -359,31 +327,23 @@ export const ReportsPage = () => {
             }));
           })
         }
-        onOk={async () => {
-          await handleUpdateReport(state.selectedIDs[0], state.currentStatus);
-          handleCloseModal(() => {
-            setState((prev) => ({
-              ...prev,
-              currentStatus: "",
-              selectedIDs: [],
-              modal: "",
-            }));
-          });
-        }}
+        width={960}
+        // onOk={async () => {
+        //   await handleUpdateReport(state.selectedIDs[0], state.currentStatus);
+        //   handleCloseModal(() => {
+        //     setState((prev) => ({
+        //       ...prev,
+        //       currentStatus: "",
+        //       selectedIDs: [],
+        //       modal: "",
+        //     }));
+        //   });
+        // }}
         okText="Lưu"
         cancelText="Hủy"
+        destroyOnClose
       >
-        <Select
-          defaultValue={state.currentStatus}
-          style={{ width: 200 }}
-          onChange={(value) =>
-            setState((prev) => ({ ...prev, currentStatus: value }))
-          }
-          options={ReportStatusLabel.map((label, index) => ({
-            value: index,
-            label: label,
-          }))}
-        />
+        <Editor state="UPDATE" control={control} />
       </Modal>
     </>
   );

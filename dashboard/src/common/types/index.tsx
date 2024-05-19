@@ -1,4 +1,4 @@
-export type ResponseDataType = {
+export type IResponseData = {
   status: number;
   message?: string;
   data?: any;

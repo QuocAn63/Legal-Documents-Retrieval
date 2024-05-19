@@ -24,6 +24,18 @@ export class ConfigEntity extends BaseEntity {
   @Column({ type: 'nvarchar', length: 'MAX' })
   promptContent: string;
 
+  @Column({ type: 'bit', default: false })
+  splitted: boolean;
+
+  @Column({ type: 'integer', default: 256 })
+  chunkSize: string;
+
+  @Column({ type: 'integer', default: 10 })
+  chunkOverlap: string;
+
+  @Column({ type: 'integer', default: 5 })
+  k: string;
+
   @Column({ type: 'varchar' })
   userID: string;
 

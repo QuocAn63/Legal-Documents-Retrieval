@@ -46,6 +46,7 @@ export default class SharedConversationService
 
     responseData = await this.sharedRepo.find({
       where: { userID, ...params },
+      relations: ['conversation'],
     });
 
     return responseData;

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthToken } from 'src/commons/decorators/auth.decorator';
 import { AuthGuard } from 'src/commons/guards';
 import { IAuthToken } from 'src/interfaces/auth.interface';
@@ -17,22 +17,18 @@ export default class BotController {
     private readonly fakeBotService: FakeBotService,
   ) {}
 
-  @Post('/fakeinvoke')
-  async fakeInvoke(
-    @AuthToken() authToken: IAuthToken,
-    @Body() data: CreateConversationDTO,
-  ) {
-    return this.fakeBotService.create(authToken, data);
-  }
-
   @Post('/invoke')
   async invoke(@AuthToken() authToken: IAuthToken, @Body() data: AskDTO) {
-    return await this.botService.ask(
-      data.chunkSize,
-      data.chunkOverlap,
+    return await this.botService.bot(
       data.input,
       authToken,
+      [],
       data.conversationID,
     );
+  }
+
+  @Get('/load')
+  async load() {
+    return await this.botService.load();
   }
 }

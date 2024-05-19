@@ -96,7 +96,7 @@ export default class ReportService implements IBaseService<ReportEntity> {
       })
     ) {
       await this.sysMsgService.getSysMessageAndThrowHttpException(
-        ValidateMessages.REPORT_ALREADY_SEND,
+        'REPORT_ALREADY_SEND',
         400,
       );
     }

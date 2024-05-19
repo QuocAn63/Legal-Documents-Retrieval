@@ -30,13 +30,16 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
     entityParams: FindOptionsWhere<DocumentEntity>,
     pagination: IQueryParams,
     ...props: any
-  ): Promise<[] | DocumentEntity[]> {
+  ): Promise<DocumentEntity[]> {
     let responseData = [];
 
     responseData = await this.documentRepo.find({
       where: entityParams,
       skip: OffsetUtil.getOffset(pagination),
       take: pagination.pageSize,
+      order: {
+        rank: 'asc',
+      },
     });
 
     return responseData;

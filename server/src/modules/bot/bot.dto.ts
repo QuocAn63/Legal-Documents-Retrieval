@@ -25,9 +25,6 @@ export class AskDTO {
   @IsNotEmpty({ message: ValidateMessages.MESSAGE_CONTENT_EMPTY })
   input: string;
 
-  @ApiProperty()
-  chunkSize: number;
-
-  @ApiProperty()
-  chunkOverlap: number;
+  @ApiProperty({ required: false })
+  messages: any;
 }

@@ -182,7 +182,7 @@ export const UsersPage = () => {
     <>
       <div className={cx("wrapper")}>
         <div className={cx("section_title")}>
-          <Typography.Title level={4}>Người dùng</Typography.Title>
+          <Typography.Title level={4}>Quản lý người dùng</Typography.Title>
         </div>
         <div className={cx("section_content")}>
           <Flex justify="space-between" className="mb-5">

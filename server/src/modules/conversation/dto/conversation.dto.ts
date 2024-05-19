@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -36,7 +37,7 @@ export class UpdateConversationDTO {
   title: string;
 
   @ApiProperty({ enum: [true, false] })
-  @IsString()
+  @IsBoolean()
   @IsOptional()
   @IsEnum([true, false], {
     message: ValidateMessages.CONVERSATION_ISARCHIVED_VALUE,

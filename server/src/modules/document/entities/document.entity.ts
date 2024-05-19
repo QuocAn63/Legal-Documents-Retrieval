@@ -16,7 +16,7 @@ export class DocumentEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'nvarchar' })
   label: string;
 
   @Column({ type: 'nvarchar', length: 'MAX' })
