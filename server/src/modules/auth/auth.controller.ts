@@ -7,14 +7,13 @@ import {
   Patch,
   Post,
   Query,
-  Redirect,
 } from '@nestjs/common';
 import AuthService from './auth.service';
-import { SaveUserWithUsernameDTO } from '../user/dto/save.dto';
+import { SaveUserWithPasswordDTO } from '../user/dto/save.dto';
 import { UserService } from '../user';
 import {
   ForgotPwdDTO,
-  LoginWithUsernameDTO,
+  LoginWithPasswordDTO,
   ResetPwdDTO,
 } from './dto/auth.dto';
 import OauthService from '../oauth/oauth.service';
@@ -31,12 +30,12 @@ export default class AuthController {
 
   @HttpCode(200)
   @Post('/login')
-  async login(@Body() data: LoginWithUsernameDTO) {
+  async login(@Body() data: LoginWithPasswordDTO) {
     return await this.authService.validateUser(data);
   }
 
   @Post('/register')
-  async register(@Body() data: SaveUserWithUsernameDTO) {
+  async register(@Body() data: SaveUserWithPasswordDTO) {
     const newUser = await this.userService.save(data);
     return newUser.id;
   }

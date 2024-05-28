@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import {
   ForgotPwdDTO,
-  LoginWithUsernameDTO,
+  LoginWithPasswordDTO,
   ResetPwdDTO,
 } from './dto/auth.dto';
 import { IAuthToken } from 'src/interfaces/auth.interface';
@@ -16,7 +16,7 @@ import HashUtil from 'src/utils/hash.util';
 import { ValidateMessages } from 'src/enum/validateMessages';
 import { JwtService } from '@nestjs/jwt';
 import OauthService from '../oauth/oauth.service';
-import { SaveUserWithEmailDTO } from '../user/dto/save.dto';
+import { SaveUserWithGoogleIDDTO } from '../user/dto/save.dto';
 import MailService from '../mail/mail.service';
 import SystemMessageService from '../system-message/system-message.service';
 
@@ -31,18 +31,18 @@ export default class AuthService {
     private readonly sysMessageService: SystemMessageService,
   ) {}
 
-  async validateUser<T extends LoginWithUsernameDTO | SaveUserWithEmailDTO>(
+  async validateUser<T extends LoginWithPasswordDTO | SaveUserWithGoogleIDDTO>(
     data: T,
   ): Promise<string> {
     let user: UserEntity;
     let authTokenPayload: IAuthToken;
 
-    if ('username' in data) {
+    if ('password' in data) {
       user = await this.userRepo.findOne({
-        where: { username: data.username, isBOT: false },
+        where: { email: data.email, isBOT: false, password: Not(IsNull()) },
         select: ['id', 'email', 'isBOT', 'isADMIN', 'password'],
       });
-    } else if ('email' in data) {
+    } else {
       user = await this.userRepo.findOneBy({
         email: data.email,
         googleID: data.googleID,
@@ -58,7 +58,7 @@ export default class AuthService {
     }
 
     if (
-      'username' in data &&
+      'password' in data &&
       !(await HashUtil.compare(data.password, user.password))
     ) {
       await this.sysMessageService.getSysMessageAndThrowHttpException(

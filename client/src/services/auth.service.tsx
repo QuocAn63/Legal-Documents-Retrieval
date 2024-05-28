@@ -3,7 +3,7 @@ import { IForgotPwdInput } from "../pages/forgotPwd";
 import { ILoginInput } from "../pages/login";
 import { IRegisterInput } from "../pages/register";
 import { IResetPasswordInput } from "../pages/resetPws";
-import { FakeAuthAPI } from "./fakeAPIs/auth";
+import { IResponseData } from "../interfaces/request";
 
 export interface AuthState {
   isAuthenticated?: boolean;
@@ -29,23 +29,23 @@ export interface PayloadAction<T> {
 export default class AuthService {
   constructor(private readonly instance: AxiosInstance) {}
 
-  async login(data: ILoginInput) {
+  async login(data: ILoginInput): Promise<IResponseData> {
     return this.instance.post("/auth/login", data);
   }
 
-  static async register(data: IRegisterInput) {
-    return FakeAuthAPI.register(data);
+  async register(data: IRegisterInput): Promise<IResponseData> {
+    return this.instance.post("/auth/register", data);
   }
 
   static async forgotPassword(data: IForgotPwdInput) {
-    return FakeAuthAPI.forgotPassword(data);
+    return;
   }
 
   static async forgotPasswordAccepted(data: IResetPasswordInput) {
-    return FakeAuthAPI.forgotPasswordAccepted(data);
+    return;
   }
 
   static async loginGoogle() {
-    return FakeAuthAPI.loginGoogle();
+    return;
   }
 }

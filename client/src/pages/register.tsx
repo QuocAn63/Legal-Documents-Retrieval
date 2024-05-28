@@ -11,6 +11,7 @@ import { useState } from "react";
 import AuthService from "../services/auth.service";
 import Paragraph from "antd/es/typography/Paragraph";
 import { loginValidateObjects } from "../helpers/validates";
+import useAxios from "../hooks/axios";
 
 const cx = classNames.bind(styles);
 
@@ -23,8 +24,7 @@ const schema = z.object({
 export interface IRegisterInput {
   password: string;
   passwordConfirm: string;
-  // email: string;
-  username: string;
+  email: string;
 }
 
 export default function Register() {
@@ -37,17 +37,21 @@ export default function Register() {
     resolver: zodResolver(schema),
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { instance } = useAxios();
+  const authService = new AuthService(instance);
 
   const onSubmit: SubmitHandler<IRegisterInput> = async (data) => {
     try {
       setIsLoading(() => true);
-      const response = await AuthService.register(data);
+      const response = await authService.register(data);
 
       if (response.status === 200) {
         setIsLoading(() => false);
       }
     } catch (err: any) {
-      const message = err?.message || err?.msg || "Error when";
+      console.log(err);
+      const message =
+        err?.message || err?.msg || err?.data?.message || "Error when";
 
       setIsLoading(() => false);
       setError("root", { message });

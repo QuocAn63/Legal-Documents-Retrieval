@@ -1,5 +1,4 @@
 import { IQueryMetaData, IResponseData } from "../interfaces/request";
-import { FakeConversationsAPI } from "./fakeAPIs/conversations.fakeservice";
 import { IConversation } from "../interfaces/chat";
 import { AxiosInstance } from "axios";
 
@@ -27,23 +26,23 @@ export class ChatService {
     });
   }
 
-  // Get Reply Message API
-  async getReply_Messages(conversationID: string): Promise<IResponseData> {
-    return FakeConversationsAPI.getReply_Messages(conversationID);
-  }
+  // // Get Reply Message API
+  // async getReply_Messages(conversationID: string): Promise<IResponseData> {
+  //   return FakeConversationsAPI.getReply_Messages(conversationID);
+  // }
 
-  async save_Conversations(data: any): Promise<IResponseData<string>> {
-    return FakeConversationsAPI.save_Conversations(data);
-  }
+  // async save_Conversations(data: any): Promise<IResponseData<string>> {
+  //   return FakeConversationsAPI.save_Conversations(data);
+  // }
 
-  // Thêm save message
-  async save_Messages(data: any): Promise<IResponseData<string>> {
-    return FakeConversationsAPI.save_Messages(data);
-  }
+  // // Thêm save message
+  // async save_Messages(data: any): Promise<IResponseData<string>> {
+  //   return FakeConversationsAPI.save_Messages(data);
+  // }
 
-  async update_Conversations(data: any): Promise<IResponseData<string>> {
-    return FakeConversationsAPI.update_Conversations(data);
-  }
+  // async update_Conversations(data: any): Promise<IResponseData<string>> {
+  //   return FakeConversationsAPI.update_Conversations(data);
+  // }
 
   async delete_Conversations(
     conversationID: string[]

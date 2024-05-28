@@ -1,10 +1,4 @@
-import {
-  BadGatewayException,
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import IBaseService from 'src/interfaces/baseService.interface';
 import { UserEntity } from './entities/user.entity';
 import { IQueryParams } from 'src/interfaces/query.interface';
@@ -13,8 +7,8 @@ import { DeleteResult, FindOptionsWhere, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   SaveBOTDTO,
-  SaveUserWithEmailDTO,
-  SaveUserWithUsernameDTO,
+  SaveUserWithPasswordDTO,
+  SaveUserWithGoogleIDDTO,
 } from './dto/save.dto';
 import { ValidateMessages } from 'src/enum/validateMessages';
 import HashUtil from 'src/utils/hash.util';
@@ -50,35 +44,34 @@ export default class UserService implements IBaseService<UserEntity> {
     return await this.userRepo.findOneBy(entityParams);
   }
 
-  async save<T extends SaveUserWithUsernameDTO | SaveUserWithEmailDTO>(
+  async save<T extends SaveUserWithPasswordDTO | SaveUserWithGoogleIDDTO>(
     data: T,
   ): Promise<UserEntity> {
     let userInstance = this.userRepo.create();
     userInstance.isBOT = false;
     userInstance.isADMIN = false;
 
-    if ('username' in data) {
-      if (await this.userRepo.findOneBy({ username: data.username })) {
+    if ('password' in data) {
+      if (await this.userRepo.findOneBy({ email: data.email })) {
         await this.sysMsgService.getSysMessageAndThrowHttpException(
-          ValidateMessages.USER_USERNAME_EXISTS,
-          404,
+          'USER_EMAIL_EXISTS',
+          403,
         );
       }
 
       const encryptedPassword = await HashUtil.hash(data.password);
 
-      userInstance.username = data.username;
       userInstance.password = encryptedPassword;
     } else if ('email' in data) {
-      userInstance.email = data.email;
       userInstance.googleID = data.googleID;
     }
+    userInstance.email = data.email;
 
     const saveUserResponse = await userInstance.save();
 
     if (!saveUserResponse) {
       await this.sysMsgService.getSysMessageAndThrowHttpException(
-        ValidateMessages.SYS_ERROR,
+        'SYS_ERROR',
         500,
       );
     }

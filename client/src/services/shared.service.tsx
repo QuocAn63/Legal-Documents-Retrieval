@@ -1,7 +1,6 @@
 import { IResponseData } from "../interfaces/request";
 import { ISharedConversation2 } from "../interfaces/shared";
 import { AxiosInstance } from "axios";
-import FakeShareService from "./fakeAPIs/share.fakerservice";
 
 export default class SharedService {
   constructor(private readonly instance: AxiosInstance) {}
@@ -20,9 +19,9 @@ export default class SharedService {
     });
   }
 
-  regenerate_shared(sharedID: string): Promise<IResponseData<string>> {
-    return FakeShareService.regenerate_shared(sharedID);
-  }
+  // regenerate_shared(sharedID: string): Promise<IResponseData<string>> {
+  //   return FakeShareService.regenerate_shared(sharedID);
+  // }
 
   delete_shared(IDs: string[]): Promise<IResponseData<string>> {
     return this.instance.delete("/sharedConversations", {

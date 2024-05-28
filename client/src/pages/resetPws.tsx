@@ -138,7 +138,7 @@ export default function ResetPassword() {
           )}
           <div style={{ textAlign: "center" }}>
             <p>
-              <Link to="/login">Trở lại trang đăng nhập</Link>
+              <Link to="/login">Trở lại trang Đăng nhập</Link>
             </p>
           </div>
         </Space>

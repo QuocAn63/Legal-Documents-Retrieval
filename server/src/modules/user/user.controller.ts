@@ -15,7 +15,7 @@ import UserService from './user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { IQueryParams } from 'src/interfaces/query.interface';
-import { FilterUserDTO, IFilterUserDTO } from './dto/filter.dto';
+import { FilterUserDTO } from './dto/filter.dto';
 import {
   QueryTransformPipe,
   filterKeys,

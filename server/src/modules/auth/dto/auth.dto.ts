@@ -1,24 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  Length,
-  Matches,
-  ValidateIf,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 import { Match } from 'src/commons/decorators/match.decorator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
-export class LoginWithUsernameDTO {
+export class LoginWithPasswordDTO {
   @ApiProperty()
-  @IsString()
-  @IsNotEmpty({ message: ValidateMessages.USER_USERNAME_EMPTY })
-  @Matches(/[$&+,:;=?@#|'<>.-^*()%!A-Z]/g, {
-    message: ValidateMessages.USER_USERNAME_INVALID,
-  })
-  @Length(6, 25, { message: ValidateMessages.USER_USERNAME_LENGTH })
-  username: string;
+  @IsNotEmpty({ message: ValidateMessages.USER_EMAIL_EMPTY })
+  @IsEmail({}, { message: ValidateMessages.USER_EMAIL_INVALID })
+  email: string;
 
   @ApiProperty()
   @IsString()

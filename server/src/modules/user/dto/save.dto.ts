@@ -10,15 +10,10 @@ import {
 import { Match } from 'src/commons/decorators/match.decorator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
-export class SaveUserWithUsernameDTO {
+export class SaveUserWithPasswordDTO {
   @ApiProperty()
-  @IsString()
-  @IsNotEmpty({ message: ValidateMessages.USER_USERNAME_EMPTY })
-  @Matches(/[$&+,:;=?@#|'<>.-^*()%!A-Z]/g, {
-    message: ValidateMessages.USER_USERNAME_INVALID,
-  })
-  @Length(6, 25, { message: ValidateMessages.USER_USERNAME_LENGTH })
-  username: string;
+  @IsEmail({}, { message: ValidateMessages.USER_EMAIL_INVALID })
+  email: string;
 
   @ApiProperty()
   @IsString()
@@ -35,7 +30,7 @@ export class SaveUserWithUsernameDTO {
   passwordConfirm: string;
 }
 
-export class SaveUserWithEmailDTO {
+export class SaveUserWithGoogleIDDTO {
   @ApiProperty()
   @IsEmail({}, { message: ValidateMessages.USER_EMAIL_INVALID })
   email: string;

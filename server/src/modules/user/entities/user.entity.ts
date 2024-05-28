@@ -18,13 +18,6 @@ export class UserEntity extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    length: 25,
-    nullable: true,
-  })
-  username: string;
-
-  @Column({
-    type: 'varchar',
     nullable: true,
     select: false,
   })

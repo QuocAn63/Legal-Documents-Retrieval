@@ -8,21 +8,14 @@ import { FormItem } from "react-hook-form-antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Paragraph from "antd/es/typography/Paragraph";
-// import { loginValidateObjects } from "../helpers/validates";
 import { useDispatch } from "react-redux";
 import { loginRedux } from "../redux/user";
 import { GoogleCircleFilled } from "@ant-design/icons";
 import useAxios from "../hooks/axios";
 const cx = classNames.bind(styles);
 
-// const schema = z.object({
-//   // email: loginValidateObjects.email,
-//   username: loginValidateObjects.username,
-//   password: loginValidateObjects.password,
-// });
-
 export interface ILoginInput {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -34,7 +27,7 @@ export default function Login() {
     formState: { errors },
   } = useForm<ILoginInput>({
     defaultValues: {
-      username: "caoan632002",
+      email: "caoan632002@gmail.com",
       password: "123123",
     },
   });
@@ -48,7 +41,6 @@ export default function Login() {
     try {
       setIsLoading(() => true);
       const response = await authService.login(data);
-      console.log(response);
       if (response.status === 200) {
         setIsLoading(() => false);
         dispatch(loginRedux(response.data));
@@ -62,13 +54,13 @@ export default function Login() {
     }
   };
 
-  const handleLoginGoogle = async () => {
-    const loginGoogle = await AuthService.loginGoogle();
-    if (loginGoogle.status === 200) {
-      const googlePopUp = window.open();
-      googlePopUp!.location.href = loginGoogle.data;
-    }
-  };
+  // const handleLoginGoogle = async () => {
+  //   const loginGoogle = await AuthService.loginGoogle();
+  //   if (loginGoogle.status === 200) {
+  //     const googlePopUp = window.open();
+  //     googlePopUp!.location.href = loginGoogle.data;
+  //   }
+  // };
 
   return (
     <div className={cx("wrapper")}>
@@ -77,11 +69,10 @@ export default function Login() {
       </div>
       <Form action="post" onFinish={handleSubmit(onSubmit)}>
         <Space direction="vertical" className={cx("contentGroup")} size={20}>
-          <FormItem control={control} name="username">
+          <FormItem control={control} name="email">
             <Input
-              id="username"
+              id="email"
               variant="outlined"
-              // placeholder="Địa chỉ Email"
               placeholder="Tên tài khoản"
               className={cx("textBox")}
             />
@@ -92,8 +83,6 @@ export default function Login() {
               variant="outlined"
               placeholder="Mật khẩu"
               className={cx("textBox")}
-              // set default value
-
               type="password"
             />
           </FormItem>
@@ -129,7 +118,7 @@ export default function Login() {
         <Button
           className={cx("btn")}
           icon={<GoogleCircleFilled />}
-          onClick={handleLoginGoogle}
+          // onClick={handleLoginGoogle}
         >
           Đăng nhập bằng Google
         </Button>
