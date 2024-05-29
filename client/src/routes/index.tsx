@@ -10,7 +10,7 @@ import ForgotPassword from "../pages/forgotPwd";
 import Chat from "../pages/chat";
 import { Outlet } from "react-router-dom";
 
-import ResetPassword from "../pages/resetPws";
+import ResetPassword from "../pages/resetPwd";
 import { SharedPage } from "../pages/shared";
 
 const TestPages = () => {

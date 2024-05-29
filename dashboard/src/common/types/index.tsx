@@ -1,7 +1,7 @@
-export type IResponseData = {
+export type IResponseData<T = any> = {
   status: number;
-  message?: string;
-  data?: any;
+  message: string;
+  data: T;
   metadata?: {
     pageIndex: number;
     pageSize: number;

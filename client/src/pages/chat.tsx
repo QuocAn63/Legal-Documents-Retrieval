@@ -11,6 +11,7 @@ import { useRef } from "react";
 import { IMessage } from "../interfaces/chat";
 import { ArrowDownOutlined } from "@ant-design/icons";
 import useAxios from "../hooks/axios";
+import useMessage from "antd/es/message/useMessage";
 
 const cx = classNames.bind(styles);
 
@@ -37,6 +38,7 @@ export default function Chat({ isMain = false }: ChatPageProps) {
   const { control, handleSubmit, setValue } = useForm<IChatInput>({
     // resolver: zodResolver(schema),
   });
+  const [api, contextHolder] = useMessage();
   const location = useLocation();
   const [state, setState] = useState<IChat>({
     isLoading: false,
@@ -154,9 +156,9 @@ export default function Chat({ isMain = false }: ChatPageProps) {
         } else navigate("/");
       }
     } catch (err: any) {
-      const message = err?.message || err?.msg || err || "Error when";
-      console.error(message);
+      const message = err?.message || err?.msg || err;
       setState((prev) => ({ ...prev, isLoading: false }));
+      api.error(message);
     } finally {
       setState((prev) => ({
         ...prev,
@@ -230,72 +232,75 @@ export default function Chat({ isMain = false }: ChatPageProps) {
   };
 
   return (
-    <Flex justify="center" className={cx("wrapper")}>
-      <Flex justify="center" vertical className={cx("contentGroup")}>
-        <div
-          className={cx("messageContainer")}
-          ref={messageContainerRef}
-          style={{ position: "relative" }}
-          // onScroll={handleScroll}
-        >
-          {!isMain ? (
-            <>
-              <MessagesContainer messages={state.messages} />
+    <>
+      {contextHolder}
+      <Flex justify="center" className={cx("wrapper")}>
+        <Flex justify="center" vertical className={cx("contentGroup")}>
+          <div
+            className={cx("messageContainer")}
+            ref={messageContainerRef}
+            style={{ position: "relative" }}
+            // onScroll={handleScroll}
+          >
+            {!isMain ? (
+              <>
+                <MessagesContainer messages={state.messages} />
 
-              {state.scrollToEnd && (
-                <Flex
-                  onClick={handleScrollToEnd}
-                  className={cx("btnDown")}
-                  justify="center"
-                  style={{
-                    position: "sticky",
-                    bottom: "30px",
-                  }}
-                >
+                {state.scrollToEnd && (
                   <Flex
+                    onClick={handleScrollToEnd}
+                    className={cx("btnDown")}
+                    justify="center"
                     style={{
-                      borderRadius: "360px",
-                      borderColor: "rgba(255, 255, 255, 0.1)",
-                      borderWidth: "2px",
-                      backgroundColor: "rgb(33, 33, 33)",
-                      borderStyle: "solid",
-                      display: "inline-flex",
-                      padding: "5px",
+                      position: "sticky",
+                      bottom: "30px",
                     }}
                   >
-                    <ArrowDownOutlined
+                    <Flex
                       style={{
-                        fontSize: "20px",
-                        color: "rgb(277, 277, 277)",
-                        zIndex: 1,
+                        borderRadius: "360px",
+                        borderColor: "rgba(255, 255, 255, 0.1)",
+                        borderWidth: "2px",
+                        backgroundColor: "rgb(33, 33, 33)",
+                        borderStyle: "solid",
+                        display: "inline-flex",
+                        padding: "5px",
                       }}
-                    />
+                    >
+                      <ArrowDownOutlined
+                        style={{
+                          fontSize: "20px",
+                          color: "rgb(277, 277, 277)",
+                          zIndex: 1,
+                        }}
+                      />
+                    </Flex>
                   </Flex>
-                </Flex>
-              )}
-            </>
-          ) : null}
-          {state.isLoading && (
-            <Flex justify="center" className={cx("wrapSpin")}>
-              <Spin className={cx("spin")} />
-            </Flex>
-          )}
-        </div>
-        <Form onFinish={handleSubmit(onSubmit)}>
-          <FormItem control={control} name="content">
-            <Input
-              autoComplete="off"
-              id="content"
-              variant="outlined"
-              placeholder="Hỏi gì đó đi..."
-              className={cx("textBox")}
-              ref={chatInputRef}
-              autoFocus
-              disabled={state.isLoading || state.isSubmitting ? true : false}
-            ></Input>
-          </FormItem>
-        </Form>
+                )}
+              </>
+            ) : null}
+            {state.isLoading && (
+              <Flex justify="center" className={cx("wrapSpin")}>
+                <Spin className={cx("spin")} />
+              </Flex>
+            )}
+          </div>
+          <Form onFinish={handleSubmit(onSubmit)}>
+            <FormItem control={control} name="content">
+              <Input
+                autoComplete="off"
+                id="content"
+                variant="outlined"
+                placeholder="Hỏi gì đó đi..."
+                className={cx("textBox")}
+                ref={chatInputRef}
+                autoFocus
+                disabled={state.isLoading || state.isSubmitting ? true : false}
+              ></Input>
+            </FormItem>
+          </Form>
+        </Flex>
       </Flex>
-    </Flex>
+    </>
   );
 }

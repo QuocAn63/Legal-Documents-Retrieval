@@ -1,14 +1,10 @@
 import { IResponseData } from "../types";
-import axios from "./axios";
+import { AxiosInstance } from "axios";
 
 export class ConfigService {
-  constructor(private readonly token: string) {}
+  constructor(private readonly instance: AxiosInstance) {}
 
   async get_configs(configID: string): Promise<IResponseData> {
-    return axios.get(`/configs/${configID}`, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
+    return this.instance.get(`/configs/${configID}`);
   }
 }

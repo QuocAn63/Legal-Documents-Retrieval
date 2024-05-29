@@ -2,7 +2,7 @@ import { AxiosInstance } from "axios";
 import { IForgotPwdInput } from "../pages/forgotPwd";
 import { ILoginInput } from "../pages/login";
 import { IRegisterInput } from "../pages/register";
-import { IResetPasswordInput } from "../pages/resetPws";
+import { IResetPasswordInput } from "../pages/resetPwd";
 import { IResponseData } from "../interfaces/request";
 
 export interface AuthState {
@@ -37,15 +37,19 @@ export default class AuthService {
     return this.instance.post("/auth/register", data);
   }
 
-  static async forgotPassword(data: IForgotPwdInput) {
-    return;
+  async forgotPassword(data: IForgotPwdInput) {
+    return this.instance.post("/auth/pwdforgot", data);
   }
 
-  static async forgotPasswordAccepted(data: IResetPasswordInput) {
-    return;
+  async forgotPasswordAccepted(data: IResetPasswordInput) {
+    return this.instance.patch("/auth/pwdreset", data);
   }
 
-  static async loginGoogle() {
-    return;
+  async getLoginGoogleUrl() {
+    return this.instance.get("/auth/oauth/google");
+  }
+
+  async googleLogin(code: string): Promise<IResponseData> {
+    return this.instance.post("/auth/oauth/google/callback", { code });
   }
 }

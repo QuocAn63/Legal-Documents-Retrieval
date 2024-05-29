@@ -62,7 +62,7 @@ export default class AuthService {
       !(await HashUtil.compare(data.password, user.password))
     ) {
       await this.sysMessageService.getSysMessageAndThrowHttpException(
-        ValidateMessages.USER_PASSWORD_WRONG,
+        'USER_PASSWORD_WRONG',
         401,
       );
     }
@@ -141,8 +141,9 @@ export default class AuthService {
         );
       }
 
-      return updateUserResponse.raw.id;
+      return 'Cập nhật mật khẩu thành công';
     } catch (err) {
+      console.log(err);
       await this.sysMessageService.getSysMessageAndThrowHttpException(
         'SYS_ERROR',
       );

@@ -45,8 +45,8 @@ export default class AuthController {
     return this.oauthService.getRedirectURL();
   }
 
-  @Get('/oauth/google/callback')
-  async handleGoogleOauthCallback(@Query('code') code: string) {
+  @Post('/oauth/google/callback')
+  async handleGoogleOauthCallback(@Body('code') code: string) {
     if (!code) {
       throw new BadRequestException();
     }
@@ -59,7 +59,6 @@ export default class AuthController {
     return await this.authService.handleResetPwdRequest(data);
   }
 
-  @HttpCode(204)
   @Patch('/pwdreset')
   async auth_pwd_reset(@Body() data: ResetPwdDTO) {
     return await this.authService.resetUserPassword(data);

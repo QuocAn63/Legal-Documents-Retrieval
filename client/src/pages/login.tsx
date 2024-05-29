@@ -5,8 +5,8 @@ import AuthService from "../services/auth.service";
 import { Button, Form, Input, Space } from "antd";
 import Title from "antd/es/typography/Title";
 import { FormItem } from "react-hook-form-antd";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Paragraph from "antd/es/typography/Paragraph";
 import { useDispatch } from "react-redux";
 import { loginRedux } from "../redux/user";
@@ -18,6 +18,11 @@ export interface ILoginInput {
   email: string;
   password: string;
 }
+
+type StateProps = {
+  isLoading: boolean;
+  oauthURL: string;
+};
 
 export default function Login() {
   const {
@@ -32,35 +37,96 @@ export default function Login() {
     },
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, setState] = useState<StateProps>({
+    isLoading: false,
+    oauthURL: "",
+  });
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { instance } = useAxios();
   const authService = new AuthService(instance);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const code = searchParams.get("code");
+    loadInitialData();
+
+    if (code) {
+      handleGoogleLogin(code);
+    }
+
+    return clearState;
+  }, []);
+
+  const loadInitialData = async () => {
+    const response = await authService.getLoginGoogleUrl();
+
+    if (response.status === 200) {
+      setState((prev) => ({
+        ...prev,
+        oauthURL: response.data,
+      }));
+    }
+  };
+
+  const clearState = () => {
+    setState({
+      isLoading: false,
+      oauthURL: "",
+    });
+  };
+
   const onSubmit: SubmitHandler<ILoginInput> = async (data) => {
     try {
-      setIsLoading(() => true);
+      setState((prev) => ({ ...prev, isLoading: true }));
       const response = await authService.login(data);
+
       if (response.status === 200) {
-        setIsLoading(() => false);
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+        }));
         dispatch(loginRedux(response.data));
         navigate("/");
       }
     } catch (err: any) {
       const message = err?.message || err?.msg || "Error when";
 
-      setIsLoading(() => false);
+      setState((prev) => ({ ...prev, isLoading: false }));
+
       setError("root", { message });
     }
   };
 
-  // const handleLoginGoogle = async () => {
-  //   const loginGoogle = await AuthService.loginGoogle();
-  //   if (loginGoogle.status === 200) {
-  //     const googlePopUp = window.open();
-  //     googlePopUp!.location.href = loginGoogle.data;
-  //   }
-  // };
+  const onGoogleLoginClick = () => {
+    try {
+      window.open(state.oauthURL, "_self");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleGoogleLogin = async (code: string) => {
+    try {
+      setState((prev) => ({ ...prev, isLoading: true }));
+      const response = await authService.googleLogin(code);
+
+      if (response.status === 201 || response.status === 200) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+        }));
+        dispatch(loginRedux(response.data));
+        navigate("/", { replace: true });
+      }
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+      }));
+      setError("root", { message: "Đăng nhập không thành công" });
+    }
+  };
 
   return (
     <div className={cx("wrapper")}>
@@ -96,7 +162,7 @@ export default function Login() {
             size="large"
             htmlType="submit"
             className={cx("btn")}
-            loading={isLoading}
+            loading={state.isLoading}
           >
             Đăng nhập
           </Button>
@@ -118,7 +184,7 @@ export default function Login() {
         <Button
           className={cx("btn")}
           icon={<GoogleCircleFilled />}
-          // onClick={handleLoginGoogle}
+          onClick={onGoogleLoginClick}
         >
           Đăng nhập bằng Google
         </Button>

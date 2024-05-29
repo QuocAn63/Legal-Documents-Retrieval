@@ -1,22 +1,14 @@
 import { IResponseData } from "../types";
-import axios from "./axios";
+import { AxiosInstance } from "axios";
 
 export class DocumentService {
-  constructor(private readonly token: string) {}
+  constructor(private readonly instance: AxiosInstance) {}
 
   async getList_documents(): Promise<IResponseData> {
-    return axios.get(`/documents`, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
+    return this.instance.get(`/documents`);
   }
 
   async get_documents(documentID: string): Promise<IResponseData> {
-    return axios.get(`/documents/${documentID}`, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
+    return this.instance.get(`/documents/${documentID}`);
   }
 }

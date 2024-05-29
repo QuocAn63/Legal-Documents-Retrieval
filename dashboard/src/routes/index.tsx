@@ -1,6 +1,6 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { BotsPage, LoginPage, MainPage } from "../pages";
-import DefaultLayout from "../components/layout";
+import DefaultLayout, { PublicLayout } from "../components/layout";
 import { UsersPage } from "../pages/users";
 import { ReportsPage } from "../pages/reports";
 import { DocumentPage } from "../pages/documents";
@@ -9,7 +9,7 @@ const router = createBrowserRouter([
   {
     path: "",
     // errorElement:
-    element: <DefaultLayout />,
+    element: <PublicLayout />,
     children: [
       {
         path: "login",

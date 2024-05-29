@@ -11,6 +11,7 @@ import Paragraph from "antd/es/typography/Paragraph";
 import AuthService from "../services/auth.service";
 import { useState } from "react";
 import { loginValidateObjects } from "../helpers/validates";
+import useAxios from "../hooks/axios";
 
 const cx = classNames.bind(styles);
 
@@ -37,14 +38,15 @@ export default function ForgotPassword() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [sentStatus, setSentStatus] = useState({ isSent: false, email: "" });
-
+  const { instance } = useAxios();
+  const authService = new AuthService(instance);
   const onSubmit: SubmitHandler<IForgotPwdInput> = async (data) => {
     try {
       setIsLoading(true);
 
-      const response = await AuthService.forgotPassword(data);
+      const response = await authService.forgotPassword(data);
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         setSentStatus((prev) => ({ ...prev, isSent: true, email: data.email }));
         setIsLoading(false);
       }

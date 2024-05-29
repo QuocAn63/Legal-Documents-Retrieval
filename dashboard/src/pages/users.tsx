@@ -7,19 +7,29 @@ import {
   Modal,
   Space,
   Table,
+  Tag,
   Typography,
 } from "antd";
 import styles from "../styles/manage.module.scss";
 import classNames from "classnames/bind";
 import { IUser } from "../models/users";
-import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  CloseCircleOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import UserService from "../common/lib/users.service";
+import UserService from "../common/services/users.service";
 import { z } from "zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormItem } from "react-hook-form-antd";
 import { ToDataSource } from "../common/services/toDataSource";
+import useAxios from "../common/hooks/axios";
+import useMessage from "antd/es/message/useMessage";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { clear, update } from "../redux/slices/user";
 
 type ModalType = "SEARCH" | "SAVE" | "DELETE" | "";
 
@@ -29,7 +39,6 @@ type PageStateType = {
   filter: {
     pageIndex: number;
     pageSize: number;
-    username: string;
     email: string;
     from: string;
     to: string;
@@ -41,7 +50,6 @@ type PageStateType = {
 
 type IUserSearchInput = {
   email: string;
-  username: string;
   from: any;
   to: any;
 };
@@ -84,39 +92,38 @@ const columns = [
 ];
 
 export const UsersPage = () => {
+  const filterRedux = useSelector((state: RootState) => state.user.user);
   const [state, setState] = useState<PageStateType>({
     dataSource: [],
     user: null,
     filter: {
       pageIndex: 1,
       pageSize: 20,
-      username: "",
-      email: "",
-      from: "",
-      to: "",
+      email: filterRedux.email,
+      from: filterRedux.from,
+      to: filterRedux.to,
     },
     loading: false,
     modal: "",
     selectedIDs: [],
   });
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IUserSearchInput>({
+  const [api, contextHolder] = useMessage();
+  const { control, handleSubmit } = useForm<IUserSearchInput>({
     resolver: zodResolver(searchSchema),
   });
+  const { instance } = useAxios();
+  const userService = new UserService(instance);
+  const dispatch = useDispatch();
 
   const getDataSource = async () => {
     setState((prev) => ({ ...prev, loading: true }));
     let dataSource = [];
 
     try {
-      let response = await UserService.getList(
+      let response = await userService.getList(
         state.filter.pageIndex,
         state.filter.pageSize,
         {
-          username: state.filter.username,
           email: state.filter.email,
           from: state.filter.from,
           to: state.filter.to,
@@ -132,9 +139,12 @@ export const UsersPage = () => {
 
   useEffect(() => {
     getDataSource();
+
+    return () => {
+      dispatch(clear());
+    };
   }, [
     state.filter.email,
-    state.filter.username,
     state.filter.pageIndex,
     state.filter.pageSize,
     state.filter.from,
@@ -159,6 +169,13 @@ export const UsersPage = () => {
       ? `${data.to["$D"]}/${data.to["$M"]}/${data.to["$y"]}`
       : "";
 
+    dispatch(
+      update({
+        from,
+        to,
+        email: data.email,
+      })
+    );
     setState((prev) => ({
       ...prev,
       filter: { ...prev.filter, ...data, from, to },
@@ -168,31 +185,74 @@ export const UsersPage = () => {
 
   const handleDeleteButton = async () => {
     try {
-      const response = await UserService.delete(state.selectedIDs);
+      const response = await userService.delete(state.selectedIDs);
       await getDataSource();
       console.log(response);
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      const message = err.message || err.response?.message || "Lỗi";
+
+      api.error(message);
     }
   };
 
-  console.log(state.selectedIDs);
-
   return (
     <>
+      {contextHolder}
       <div className={cx("wrapper")}>
         <div className={cx("section_title")}>
           <Typography.Title level={4}>Quản lý người dùng</Typography.Title>
         </div>
         <div className={cx("section_content")}>
           <Flex justify="space-between" className="mb-5">
-            <Flex gap={10}>
+            <Flex gap={10} align="center">
               <Button
                 icon={<SearchOutlined />}
                 onClick={() => handleOpenModal("SEARCH", () => {})}
               >
                 Tìm kiếm
               </Button>
+              {state.filter.email ? (
+                <Tag
+                  className="text-sm leading-8"
+                  closeIcon={<CloseCircleOutlined />}
+                  onClose={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      filter: { ...prev.filter, email: "" },
+                    }))
+                  }
+                >
+                  Email: {state.filter.email}
+                </Tag>
+              ) : null}
+              {state.filter.from ? (
+                <Tag
+                  className="text-sm leading-8"
+                  closeIcon={<CloseCircleOutlined />}
+                  onClose={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      filter: { ...prev.filter, from: "" },
+                    }))
+                  }
+                >
+                  From: {state.filter.from}
+                </Tag>
+              ) : null}
+              {state.filter.to ? (
+                <Tag
+                  className="text-sm leading-8"
+                  closeIcon={<CloseCircleOutlined />}
+                  onClose={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      filter: { ...prev.filter, to: "" },
+                    }))
+                  }
+                >
+                  To: {state.filter.to}
+                </Tag>
+              ) : null}
             </Flex>
             <Button
               icon={<DeleteOutlined />}
@@ -206,7 +266,8 @@ export const UsersPage = () => {
             loading={state.loading}
             pagination={{
               position: ["bottomCenter"],
-              current: state.filter.pageIndex,
+              defaultCurrent: state.filter.pageIndex,
+              defaultPageSize: state.filter.pageSize,
             }}
             columns={columns}
             dataSource={state?.dataSource}
@@ -235,9 +296,6 @@ export const UsersPage = () => {
         destroyOnClose
       >
         <Form>
-          <FormItem control={control} name="username">
-            <Input placeholder="Tên tài khoản" />
-          </FormItem>
           <FormItem control={control} name="email">
             <Input placeholder="Địa chỉ email" />
           </FormItem>

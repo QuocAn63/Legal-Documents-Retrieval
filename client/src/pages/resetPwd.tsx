@@ -12,6 +12,7 @@ import AuthService from "../services/auth.service";
 import { useState } from "react";
 import { ResultStatusType } from "antd/es/result";
 import { loginValidateObjects } from "../helpers/validates";
+import useAxios from "../hooks/axios";
 
 const cx = classNames.bind(styles);
 
@@ -33,7 +34,7 @@ const schema = z
 export interface IResetPasswordInput {
   password: string;
   passwordConfirm: string;
-  resetPwdToken: string;
+  token: string;
 }
 
 export default function ResetPassword() {
@@ -54,19 +55,20 @@ export default function ResetPassword() {
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-
+  const { instance } = useAxios();
+  const authService = new AuthService(instance);
   const token = searchParams.get("token");
 
   const onSubmit: SubmitHandler<IResetPasswordInput> = async (data) => {
     try {
       if (token) {
         const reqData = {
-          resetPwdToken: token,
+          token,
           password: data.password,
           passwordConfirm: data.passwordConfirm,
         };
         setIsLoading(true);
-        const response = await AuthService.forgotPasswordAccepted(reqData);
+        const response = await authService.forgotPasswordAccepted(reqData);
 
         if (response.status === 200) {
           setSentStatus((prev) => ({

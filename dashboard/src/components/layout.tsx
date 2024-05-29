@@ -16,4 +16,8 @@ const DefaultLayout = () => {
   );
 };
 
+export const PublicLayout = () => {
+  return <Outlet />;
+};
+
 export default DefaultLayout;

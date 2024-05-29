@@ -18,7 +18,7 @@ import {
 import { SearchOutlined } from "@ant-design/icons";
 import { FormItem } from "react-hook-form-antd";
 import { ToDataSource } from "../common/services/toDataSource";
-import ReportService from "../common/lib/reports.service";
+import ReportService from "../common/services/reports.service";
 import { IReport } from "../models/reports.model";
 import { IReportReason } from "../models/reportReason.model";
 import TextArea from "antd/es/input/TextArea";
