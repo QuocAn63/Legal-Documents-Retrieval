@@ -16,6 +16,9 @@ import {
 } from './dto/document.dto';
 import { ConfigService } from '../config';
 import SystemMessageService from '../system-message/system-message.service';
+import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
+import { join } from 'path';
+import { unlinkSync, writeFileSync } from 'fs';
 
 @Injectable()
 export default class DocumentService implements IBaseService<DocumentEntity> {
@@ -107,5 +110,25 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
     }
 
     return await this.sysMsgServce.getSysMessage('DELETE_SUCCESS');
+  }
+
+  async extractText(file: Express.Multer.File): Promise<string> {
+    console.log(file);
+    const tempFilePath = join(
+      __dirname,
+      '../../../',
+      'db/documents/',
+      file.originalname,
+    );
+    writeFileSync(tempFilePath, file.buffer);
+
+    const loader = new PDFLoader(tempFilePath);
+    const docs = await loader.load();
+
+    unlinkSync(tempFilePath);
+
+    const text = docs.map((doc) => doc.pageContent).join('\n');
+
+    return text;
   }
 }

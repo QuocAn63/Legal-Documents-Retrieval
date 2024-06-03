@@ -74,7 +74,14 @@ export default class ConfigService implements IBaseService<ConfigEntity> {
   async update(data: UpdateConfigDTO): Promise<string> {
     const updateResponse = await this.configRepo.update(
       { id: data.configID },
-      { promptContent: data.promptContent },
+      {
+        promptContent: data.promptContent,
+        chunkOverlap: data.chunkOverlap,
+        chunkSize: data.chunkSize,
+        k: data.k,
+        description: data.description,
+        splitted: data.splitted,
+      },
     );
 
     if (!updateResponse.affected) {

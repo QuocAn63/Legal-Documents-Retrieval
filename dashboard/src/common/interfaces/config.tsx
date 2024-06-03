@@ -7,17 +7,28 @@ export interface IConfig {
 
   promptContent: string;
 
-  spliited: boolean;
+  splitted: boolean;
 
-  chunkSize: string;
+  chunkSize: number;
 
-  chunkOverlap: string;
+  chunkOverlap: number;
 
-  k: string;
+  k: number;
 
   createdAt: string;
 
   updatedAt: string;
 
   documents: [];
+}
+
+export interface IUpdateConfig {
+  configID: string;
+  userID: string;
+  promptContent: string;
+  description: string;
+  k: number;
+  chunkSize: number;
+  chunkOverlap: number;
+  splitted: boolean;
 }

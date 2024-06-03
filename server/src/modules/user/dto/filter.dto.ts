@@ -17,4 +17,5 @@ export class FilterUserDTO {
 export class IFilterUserDTO {
   username: string;
   email: string;
+  createdAt: string;
 }

@@ -10,21 +10,37 @@ import {
   Flex,
   Form,
   Modal,
-  Select,
   Space,
   Table,
   Typography,
 } from "antd";
-import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  PlusCircleOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { FormItem } from "react-hook-form-antd";
 import { ToDataSource } from "../common/services/toDataSource";
-import ReportService from "../common/services/reports.service";
 import { IReport } from "../models/reports.model";
 import TextArea from "antd/es/input/TextArea";
 import { DocumentService } from "../common/services/document.service";
-import { Editor } from "../components/editor";
+import {
+  IUpdateDocumentProps,
+  UpdateDocument,
+  updateSchema,
+} from "../components/documents/updateDocument";
 import { IDocument } from "../common/interfaces/document";
-type ModalType = "SEARCH" | "UPDATE" | "VIEW" | "" | "DELETE";
+import useAxios from "../common/hooks/axios";
+import { ViewDocument } from "../components/documents/viewDocument";
+import {
+  AddDocument,
+  IAddDocumentProps,
+  addSchema,
+} from "../components/documents/addDocument";
+import useMessage from "antd/es/message/useMessage";
+import { ShowMessagesFromError } from "../common/helpers/GetMessageFromError";
+
+type ModalType = "SEARCH" | "UPDATE" | "VIEW" | "" | "DELETE" | "ADD";
 
 type PageStateType = {
   dataSource: IReport[];
@@ -40,10 +56,10 @@ type PageStateType = {
   modal: ModalType;
   loading: boolean;
   selectedIDs: string[];
-  document?: IDocument;
+  document: IDocument;
 };
 
-export type IDocumentInput = {
+export type ISearchDocumentProps = {
   label: string;
   content: string;
   from: any;
@@ -53,11 +69,25 @@ export type IDocumentInput = {
 const cx = classNames.bind(styles);
 
 const searchSchema = z.object({
+  label: z.string().optional(),
+  content: z.string().optional(),
+  rank: z.any().optional(),
   from: z.any().optional(),
   to: z.any().optional(),
 });
 
+export const BaseDocument: IDocument = {
+  id: "",
+  configID: "",
+  content: "",
+  createdAt: "",
+  label: "",
+  rank: 0,
+  updatedAt: "",
+};
+
 export const DocumentPage = () => {
+  const [api, contextHolder] = useMessage();
   const [state, setState] = useState<PageStateType>({
     dataSource: [],
     filter: {
@@ -72,16 +102,35 @@ export const DocumentPage = () => {
     loading: false,
     modal: "",
     selectedIDs: [],
-    document: undefined,
+    document: BaseDocument,
   });
   const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IDocumentInput>({
+    control: searchControl,
+    handleSubmit: searchHandleSubmit,
+    setValue: searchSetValue,
+  } = useForm<ISearchDocumentProps>({
     resolver: zodResolver(searchSchema),
   });
-
+  const {
+    control: addControl,
+    handleSubmit: addHandleSubmit,
+    setValue: addSetValue,
+  } = useForm<IAddDocumentProps>({
+    resolver: zodResolver(addSchema),
+    defaultValues: {
+      rank: "0",
+    },
+  });
+  const {
+    control: updateControl,
+    handleSubmit: updateHandleSubmit,
+    setValue: updateSetValue,
+  } = useForm<IUpdateDocumentProps>({
+    resolver: zodResolver(updateSchema),
+    defaultValues: {
+      rank: "0",
+    },
+  });
   const columns = [
     {
       title: "Mã",
@@ -164,10 +213,10 @@ export const DocumentPage = () => {
     },
   ];
 
-  const token = import.meta.env.VITE_AUTH_TOKEN as string;
-  const documentService = new DocumentService(token);
+  const { instance } = useAxios();
+  const documentService = new DocumentService(instance);
 
-  const getDataSource = async () => {
+  const loadInitialData = async () => {
     setState((prev) => ({ ...prev, loading: true }));
     let dataSource = [];
 
@@ -180,8 +229,9 @@ export const DocumentPage = () => {
     }
     setState((prev) => ({ ...prev, dataSource, loading: false }));
   };
+
   useEffect(() => {
-    getDataSource();
+    loadInitialData();
   }, [
     state.filter.pageIndex,
     state.filter.pageSize,
@@ -202,13 +252,9 @@ export const DocumentPage = () => {
     setState((prev) => ({ ...prev, modal: "" }));
   };
 
-  const onSearchSubmit: SubmitHandler<IDocumentInput> = async (data) => {
-    const from = data.from
-      ? `${data.from["$D"]}/${data.from["$M"]}/${data.from["$y"]}`
-      : "";
-    const to = data.to
-      ? `${data.to["$D"]}/${data.to["$M"]}/${data.to["$y"]}`
-      : "";
+  const onSearchSubmit: SubmitHandler<ISearchDocumentProps> = async (data) => {
+    const from = data.from ? data.from["$d"].toISOString() : "";
+    const to = data.to ? data.to["$d"].toISOString() : "";
 
     setState((prev) => ({
       ...prev,
@@ -217,26 +263,52 @@ export const DocumentPage = () => {
     }));
   };
 
-  const handleDeleteButton = async () => {
+  const onAddSubmit: SubmitHandler<IAddDocumentProps> = async (data) => {
     try {
-      // const response = await UserService.delete(state.selectedIDs);
-      // console.log(response);
+      const response = await documentService.add_documents({
+        ...data,
+        content: JSON.stringify(data.content),
+        rank: Number.parseInt(data.rank),
+        configID: "45C6BE2C-EE1F-EF11-B3C3-E0D464DFA281",
+      });
+
+      if (response.status === 201) {
+        api.success(response.message);
+        await loadInitialData();
+        setState((prev) => ({ ...prev, modal: "" }));
+      }
     } catch (err) {
-      console.log(err);
+      ShowMessagesFromError(err, api);
     }
   };
 
-  const handleUpdateReport = async (reportID: string, status: string) => {
+  const onUpdateSubmit: SubmitHandler<IAddDocumentProps> = async (data) => {
     try {
-      const response = await ReportService.update(reportID, status);
-      await getDataSource();
+      const response = await documentService.update_documents({
+        ...data,
+        content: JSON.stringify(data.content),
+        rank: Number.parseInt(data.rank),
+        configID: "45C6BE2C-EE1F-EF11-B3C3-E0D464DFA281",
+      });
+
+      if (response.status === 201) {
+        api.success(response.message);
+        await loadInitialData();
+        setState((prev) => ({ ...prev, modal: "" }));
+      }
     } catch (err) {
-      console.log(err);
+      ShowMessagesFromError(err, api);
     }
   };
+
+
+  const onDeleteSubmit = () => {
+    
+  }
 
   return (
     <>
+      {contextHolder}
       <div className={cx("wrapper")}>
         <div className={cx("section_title")}>
           <Typography.Title level={4}>Quản lý tài liệu</Typography.Title>
@@ -251,13 +323,22 @@ export const DocumentPage = () => {
                 Tìm kiếm
               </Button>
             </Flex>
-            <Button
-              icon={<DeleteOutlined />}
-              danger
-              onClick={() => handleOpenModal("DELETE", () => {})}
-            >
-              Xóa
-            </Button>
+            <Space>
+              <Button
+                icon={<PlusCircleOutlined />}
+                className="btn-save"
+                onClick={() => handleOpenModal("ADD", () => {})}
+              >
+                Thêm
+              </Button>
+              <Button
+                icon={<DeleteOutlined />}
+                danger
+                onClick={() => handleOpenModal("DELETE", () => {})}
+              >
+                Xóa
+              </Button>
+            </Space>
           </Flex>
           <Table
             loading={state.loading}
@@ -269,7 +350,7 @@ export const DocumentPage = () => {
             dataSource={state?.dataSource}
             rowSelection={{
               type: "checkbox",
-              onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+              onChange: (_: React.Key[], selectedRows: any[]) => {
                 setState((prev) => ({
                   ...prev,
                   selectedIDs: selectedRows.map((item) => item.id),
@@ -283,24 +364,24 @@ export const DocumentPage = () => {
         open={state.modal === "SEARCH"}
         okText="Tìm"
         cancelText="Hủy"
-        onOk={handleSubmit(onSearchSubmit)}
+        onOk={searchHandleSubmit(onSearchSubmit)}
         onCancel={() => handleCloseModal(() => {})}
         title="Tìm kiếm"
         destroyOnClose
       >
         <Form>
           <Space size="small" direction="vertical" style={{ width: "100%" }}>
-            <FormItem control={control} name="label">
+            <FormItem control={searchControl} name="label">
               <TextArea placeholder="Nhãn" />
             </FormItem>
-            <FormItem control={control} name="content">
+            <FormItem control={searchControl} name="content">
               <TextArea placeholder="Nội dung" style={{ minHeight: "150px" }} />
             </FormItem>
             <Space style={{ width: "100%" }}>
-              <FormItem control={control} name="from">
+              <FormItem control={searchControl} name="from">
                 <DatePicker placeholder="Từ ngày" />
               </FormItem>
-              <FormItem control={control} name="to">
+              <FormItem control={searchControl} name="to">
                 <DatePicker placeholder="Đến ngày" />
               </FormItem>
             </Space>
@@ -308,12 +389,27 @@ export const DocumentPage = () => {
         </Form>
       </Modal>
       <Modal
+        open={state.modal === "ADD"}
+        onCancel={() => handleCloseModal(() => {})}
+        width={960}
+        title="Thêm tài liệu"
+        okText="Thêm"
+        onOk={() => addHandleSubmit(onAddSubmit)()}
+        destroyOnClose
+      >
+        <AddDocument
+          document={state.document}
+          control={addControl}
+          setValue={addSetValue}
+        />
+      </Modal>
+      <Modal
         open={state.modal === "VIEW"}
         onCancel={() => handleCloseModal(() => {})}
         footer={null}
         width={960}
       >
-        <Editor document={state.document} />
+        <ViewDocument document={state.document} />
       </Modal>
       <Modal
         title="Sửa tài liệu"
@@ -328,22 +424,16 @@ export const DocumentPage = () => {
           })
         }
         width={960}
-        // onOk={async () => {
-        //   await handleUpdateReport(state.selectedIDs[0], state.currentStatus);
-        //   handleCloseModal(() => {
-        //     setState((prev) => ({
-        //       ...prev,
-        //       currentStatus: "",
-        //       selectedIDs: [],
-        //       modal: "",
-        //     }));
-        //   });
-        // }}
         okText="Lưu"
         cancelText="Hủy"
         destroyOnClose
+        onOk={() => updateHandleSubmit(onUpdateSubmit)()}
       >
-        <Editor state="UPDATE" control={control} />
+        <UpdateDocument
+          document={state.document}
+          setValue={updateSetValue}
+          control={updateControl}
+        />
       </Modal>
     </>
   );

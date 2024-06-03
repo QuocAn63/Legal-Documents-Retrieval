@@ -4,6 +4,7 @@ import { TransformInterceptor } from './commons/interceptors/transform.intercept
 import { HttpExceptionFilter } from './commons/filters/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { configSwagger } from './configs/swagger.config';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -17,7 +18,8 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new TransformInterceptor());
-
+  app.use(json({ limit: '1mb' }));
+  app.use(urlencoded({ extended: true, limit: '1mb' }));
   configSwagger(app);
 
   await app.listen(3000);

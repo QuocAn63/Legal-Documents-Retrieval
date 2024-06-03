@@ -69,6 +69,17 @@ export enum ValidateMessages {
   CONFIG_USERID_EMPTY = 'Mã BOT không được để trống',
   CONFIG_PROMPTCONTENT_EMPTY = 'Nội dung lời nhắc không được để trống',
   CONFIG_PROMPTCONTENT_LENGTH = 'Nội dung lời nhắc phải từ 1 đến 500 ký tự',
+  CONFIG_DESCRIPTION_EMPTY = 'Nội dung mô tả không được để trống',
+  CONFIG_DESCRIPTION_LENGTH = 'Nội dung mô tả phải từ 1 đến 500 ký tự',
+  CONFIG_SPLITTED_EMPTY = 'Phân đoạn không được để trống',
+  CONFIG_SPLITTED_INVALID = 'Phân đoạn không hợp lệ',
+  CONFIG_CHUNKSIZE_EMPTY = 'Kích thước đoạn không được để trống',
+  CONFIG_CHUNKSIZE_INVALID = 'Kích thước đoạn không hợp lệ',
+  CONFIG_CHUNKOVERLAP_EMPTY = 'Mật độ trùng không được để trống',
+  CONFIG_CHUNKOVERLAP_INVALID = 'Mật độ trùng không hợp lệ',
+  CONFIG_K_EMPTY = 'Số K không được để trống',
+  CONFIG_K_INVALID = 'Số K không hợp lệ',
+
   // Reasons
   REASON_ID_EMPTY = 'Mã lý do không được để trống',
   REASON_DESCRIPTION_EMPTY = 'Mô tả lý do không được để trống',

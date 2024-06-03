@@ -1,11 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
+  IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Length,
+  Max,
 } from 'class-validator';
 import { ValidateMessages } from 'src/enum/validateMessages';
 
@@ -42,12 +46,12 @@ export class SaveConfigDTO {
 
 export class UpdateConfigDTO {
   @ApiProperty()
-  @IsUUID('4', { message: ValidateMessages.COMMON_UUID_INVALID })
+  @IsUUID('all', { message: ValidateMessages.COMMON_UUID_INVALID })
   @IsNotEmpty({ message: ValidateMessages.CONFIG_ID_EMPTY })
   configID: string;
 
   @ApiProperty()
-  @IsUUID('4', { message: ValidateMessages.COMMON_UUID_INVALID })
+  @IsUUID('all', { message: ValidateMessages.COMMON_UUID_INVALID })
   @IsNotEmpty({ message: ValidateMessages.CONFIG_USERID_EMPTY })
   userID: string;
 
@@ -56,6 +60,35 @@ export class UpdateConfigDTO {
   @IsNotEmpty({ message: ValidateMessages.CONFIG_PROMPTCONTENT_EMPTY })
   @Length(1, 500, { message: ValidateMessages.CONFIG_PROMPTCONTENT_LENGTH })
   promptContent: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({ message: ValidateMessages.CONFIG_DESCRIPTION_EMPTY })
+  @Length(1, 500, { message: ValidateMessages.CONFIG_DESCRIPTION_LENGTH })
+  description: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsNotEmpty({ message: ValidateMessages.CONFIG_SPLITTED_EMPTY })
+  splitted: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty({ message: ValidateMessages.CONFIG_CHUNKSIZE_EMPTY })
+  @Max(4048, { message: ValidateMessages.CONFIG_CHUNKSIZE_INVALID })
+  chunkSize: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty({ message: ValidateMessages.CONFIG_CHUNKOVERLAP_EMPTY })
+  @Max(100, { message: ValidateMessages.CONFIG_CHUNKOVERLAP_INVALID })
+  chunkOverlap: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty({ message: ValidateMessages.CONFIG_K_EMPTY })
+  @Max(50, { message: ValidateMessages.CONFIG_K_INVALID })
+  k: string;
 }
 
 export class DeleteConfigDTO {

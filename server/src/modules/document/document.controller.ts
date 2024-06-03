@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  FileTypeValidator,
   ForbiddenException,
   Get,
   Param,
+  ParseFilePipe,
   Patch,
   Post,
   Query,
@@ -26,6 +28,9 @@ import { RequestWithFileValidation } from 'src/interfaces/request.interface';
 import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { IQueryParams } from 'src/interfaces/query.interface';
+import { diskStorage, memoryStorage } from 'multer';
+import { join } from 'path';
+import { editedFilename, pdfFileFilter } from 'src/configs/multer.config';
 
 @ApiTags('documents')
 @ApiBearerAuth()
@@ -60,5 +65,20 @@ export default class DocumentController {
   @Patch('/')
   async update_documents(@Body() data: UpdateDocumentDTO) {
     return await this.documentService.update(data);
+  }
+
+  @ApiConsumes('multipart/form-data')
+  @Post('/extract')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: pdfFileFilter,
+    }),
+  )
+  async extractText_documents(
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    return await this.documentService.extractText(file);
   }
 }

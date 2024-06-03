@@ -30,6 +30,7 @@ import useMessage from "antd/es/message/useMessage";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { clear, update } from "../redux/slices/user";
+import moment from "moment";
 
 type ModalType = "SEARCH" | "SAVE" | "DELETE" | "";
 
@@ -64,11 +65,6 @@ const searchSchema = z.object({
 const cx = classNames.bind(styles);
 
 const columns = [
-  {
-    title: "Tên tài khoản",
-    key: "username",
-    dataIndex: "username",
-  },
   {
     title: "Email",
     key: "email",
@@ -114,7 +110,6 @@ export const UsersPage = () => {
   const { instance } = useAxios();
   const userService = new UserService(instance);
   const dispatch = useDispatch();
-
   const getDataSource = async () => {
     setState((prev) => ({ ...prev, loading: true }));
     let dataSource = [];
@@ -138,11 +133,8 @@ export const UsersPage = () => {
   };
 
   useEffect(() => {
+    dispatch(update(state.filter));
     getDataSource();
-
-    return () => {
-      dispatch(clear());
-    };
   }, [
     state.filter.email,
     state.filter.pageIndex,
@@ -162,12 +154,8 @@ export const UsersPage = () => {
   };
 
   const onSearchSubmit: SubmitHandler<IUserSearchInput> = async (data) => {
-    const from = data.from
-      ? `${data.from["$D"]}/${data.from["$M"]}/${data.from["$y"]}`
-      : "";
-    const to = data.to
-      ? `${data.to["$D"]}/${data.to["$M"]}/${data.to["$y"]}`
-      : "";
+    const from = data.from ? data.from["$d"].toISOString() : "";
+    const to = data.to ? data.to["$d"].toISOString() : "";
 
     dispatch(
       update({
@@ -236,7 +224,7 @@ export const UsersPage = () => {
                     }))
                   }
                 >
-                  From: {state.filter.from}
+                  Từ ngày: {moment(state.filter.from).format("DD/MM/YYYY")}
                 </Tag>
               ) : null}
               {state.filter.to ? (
@@ -250,7 +238,7 @@ export const UsersPage = () => {
                     }))
                   }
                 >
-                  To: {state.filter.to}
+                  Đến ngày: {moment(state.filter.to).format("DD/MM/YYYY")}
                 </Tag>
               ) : null}
             </Flex>
