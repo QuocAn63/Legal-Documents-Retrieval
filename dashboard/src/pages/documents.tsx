@@ -301,10 +301,21 @@ export const DocumentPage = () => {
     }
   };
 
+  const onDeleteSubmit = async () => {
+    try {
+      const response = await documentService.delete_documents({
+        IDs: state.selectedIDs,
+      });
 
-  const onDeleteSubmit = () => {
-    
-  }
+      if (response.status === 200) {
+        await loadInitialData();
+        setState((prev) => ({ ...prev, modal: "" }));
+        api.success(response.message);
+      }
+    } catch (err) {
+      ShowMessagesFromError(err, api);
+    }
+  };
 
   return (
     <>
@@ -435,6 +446,14 @@ export const DocumentPage = () => {
           control={updateControl}
         />
       </Modal>
+      <Modal
+        open={state.modal === "DELETE"}
+        okText="Xác nhận"
+        title="Xóa tài liệu"
+        cancelText="Hủy"
+        onOk={onDeleteSubmit}
+        onCancel={() => handleCloseModal(() => {})}
+      ></Modal>
     </>
   );
 };

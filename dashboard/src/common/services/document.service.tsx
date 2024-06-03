@@ -1,4 +1,4 @@
-import { IAddDocument } from "../interfaces/document";
+import { IAddDocument, IDeleteDocument } from "../interfaces/document";
 import { IResponseData } from "../types";
 import { AxiosInstance } from "axios";
 
@@ -22,7 +22,9 @@ export class DocumentService {
   }
 
   async delete_documents(data: IDeleteDocument): Promise<IResponseData> {
-    return this.instance.delete("/documents", data);
+    return this.instance.delete("/documents", {
+      data,
+    });
   }
 
   async extract_documents(file: FormData): Promise<IResponseData> {

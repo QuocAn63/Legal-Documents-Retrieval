@@ -80,7 +80,7 @@ export const BotsPage = () => {
             setValue(key, response.data[key] ? true : false);
           }
           if (key === "promptContent") {
-            setValue(key, JSON.parse(response.data[key]));
+            setValue(key, response.data[key]);
           } else {
             setValue(key, response.data[key]);
           }
@@ -234,7 +234,7 @@ export const BotsPage = () => {
                 labelCol={{ style: { width: "120px" } }}
               >
                 <Input
-                  style={{ width: "50px" }}
+                  style={{ width: "80px" }}
                   type="number"
                   onChange={(e) => {
                     console.log(typeof e.target.value);

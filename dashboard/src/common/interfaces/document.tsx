@@ -22,4 +22,6 @@ export interface IUpdateDocument {
   documentID: string;
 }
 
-export interface 
+export interface IDeleteDocument {
+  IDs: string[];
+}

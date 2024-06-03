@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   FileTypeValidator,
   ForbiddenException,
   Get,
@@ -20,6 +21,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard, RolesGuard } from 'src/commons/guards';
 import { Roles } from 'src/commons/decorators/roles.decorator';
 import {
+  DeleteDocumentDTO,
   FilterDocumentDTO,
   SaveDocumentDTO,
   UpdateDocumentDTO,
@@ -65,6 +67,11 @@ export default class DocumentController {
   @Patch('/')
   async update_documents(@Body() data: UpdateDocumentDTO) {
     return await this.documentService.update(data);
+  }
+
+  @Delete('/')
+  async delete_documents(@Body() data: DeleteDocumentDTO) {
+    return await this.documentService.delete(data);
   }
 
   @ApiConsumes('multipart/form-data')
