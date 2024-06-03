@@ -78,12 +78,7 @@ export const BotsPage = () => {
         Object.keys(response.data).forEach((key: any) => {
           if (key === "splitted") {
             setValue(key, response.data[key] ? true : false);
-          }
-          if (key === "promptContent") {
-            setValue(key, response.data[key]);
-          } else {
-            setValue(key, response.data[key]);
-          }
+          } else setValue(key, response.data[key]);
         });
       }
     } catch (err: any) {
@@ -121,7 +116,7 @@ export const BotsPage = () => {
   const onSubmit: SubmitHandler<IConfigUpdateInput> = async (data) => {
     const formattedData: IUpdateConfig = {
       ...data,
-      promptContent: JSON.stringify(data.promptContent),
+      promptContent: data.promptContent,
       userID: "6B2F904D-301C-EF11-B3C2-E0D464DFA281",
       configID: "45C6BE2C-EE1F-EF11-B3C3-E0D464DFA281",
       chunkSize: Number.parseInt(data.chunkSize),

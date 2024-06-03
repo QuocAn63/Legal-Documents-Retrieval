@@ -76,6 +76,8 @@ export default class UserService implements IBaseService<UserEntity> {
       );
     }
 
+    console.log(saveUserResponse);
+
     return saveUserResponse;
   }
 

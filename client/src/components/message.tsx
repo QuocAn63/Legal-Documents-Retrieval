@@ -27,6 +27,7 @@ import Title from "antd/es/typography/Title";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { IMessage } from "../interfaces/chat";
 import useAxios from "../hooks/axios";
+import { ShowMessagesFromError } from "../helpers/showErrorMessage";
 
 const cx = classNames.bind(styles);
 
@@ -276,12 +277,9 @@ export default function MessagesContainer({
 
       if (response.status === 201) {
         messageApi.success(response.data);
-      } else {
-        messageApi.info(response.data);
       }
     } catch (err: any) {
-      const message = err.response.data.message || err.message || err;
-      messageApi.error(message);
+      ShowMessagesFromError(err, messageApi);
     }
 
     handleCloseReasonModal();

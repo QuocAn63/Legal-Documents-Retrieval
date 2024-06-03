@@ -21,7 +21,10 @@ export class ConfigEntity extends BaseEntity {
   @Column({ type: 'nvarchar', nullable: true })
   description: string;
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({
+    type: 'nvarchar',
+    length: 'MAX',
+  })
   promptContent: string;
 
   @Column({ type: 'bit', default: false })

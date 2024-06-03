@@ -52,7 +52,7 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
     entityParams: FindOptionsWhere<DocumentEntity>,
     ...props: any
   ): Promise<DocumentEntity> {
-    let responseData = null;
+    let responseData: DocumentEntity | null = null;
 
     responseData = await this.documentRepo.findOneBy(entityParams);
 
@@ -62,6 +62,8 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
         404,
       );
     }
+
+    responseData.content = JSON.parse(responseData.content);
 
     return responseData;
   }

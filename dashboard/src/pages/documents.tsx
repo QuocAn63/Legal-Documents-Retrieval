@@ -104,13 +104,10 @@ export const DocumentPage = () => {
     selectedIDs: [],
     document: BaseDocument,
   });
-  const {
-    control: searchControl,
-    handleSubmit: searchHandleSubmit,
-    setValue: searchSetValue,
-  } = useForm<ISearchDocumentProps>({
-    resolver: zodResolver(searchSchema),
-  });
+  const { control: searchControl, handleSubmit: searchHandleSubmit } =
+    useForm<ISearchDocumentProps>({
+      resolver: zodResolver(searchSchema),
+    });
   const {
     control: addControl,
     handleSubmit: addHandleSubmit,
@@ -143,12 +140,6 @@ export const DocumentPage = () => {
       key: "label",
       dataIndex: "label",
       width: 250,
-    },
-    {
-      title: "Nội dung",
-      key: "content",
-      dataIndex: "content",
-      ellipsis: true,
       render: (value: string, record: any) => {
         return (
           <Button
@@ -282,16 +273,16 @@ export const DocumentPage = () => {
     }
   };
 
-  const onUpdateSubmit: SubmitHandler<IAddDocumentProps> = async (data) => {
+  const onUpdateSubmit: SubmitHandler<IUpdateDocumentProps> = async (data) => {
     try {
       const response = await documentService.update_documents({
         ...data,
         content: JSON.stringify(data.content),
         rank: Number.parseInt(data.rank),
-        configID: "45C6BE2C-EE1F-EF11-B3C3-E0D464DFA281",
+        documentID: state.document.id,
       });
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         api.success(response.message);
         await loadInitialData();
         setState((prev) => ({ ...prev, modal: "" }));

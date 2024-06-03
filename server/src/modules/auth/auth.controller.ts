@@ -37,7 +37,10 @@ export default class AuthController {
   @Post('/register')
   async register(@Body() data: SaveUserWithPasswordDTO) {
     const newUser = await this.userService.save(data);
-    return newUser.id;
+
+    if (newUser.id) {
+      return 'Đăng ký thành công';
+    }
   }
 
   @Get('/oauth/google')

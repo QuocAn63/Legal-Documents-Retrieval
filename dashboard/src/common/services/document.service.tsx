@@ -1,4 +1,8 @@
-import { IAddDocument, IDeleteDocument } from "../interfaces/document";
+import {
+  IAddDocument,
+  IDeleteDocument,
+  IUpdateDocument,
+} from "../interfaces/document";
 import { IResponseData } from "../types";
 import { AxiosInstance } from "axios";
 
@@ -17,7 +21,7 @@ export class DocumentService {
     return this.instance.post("/documents/", data);
   }
 
-  async update_documents(data: IAddDocument): Promise<IResponseData> {
+  async update_documents(data: IUpdateDocument): Promise<IResponseData> {
     return this.instance.patch("/documents/", data);
   }
 

@@ -12,7 +12,7 @@ export const ViewDocument = ({ document }: ComponentProps) => {
       <div
         style={{ maxHeight: "80vh", overflowY: "scroll", overflowX: "hidden" }}
       >
-        {document.content}
+        <pre>{document.content}</pre>
       </div>
     </div>
   );

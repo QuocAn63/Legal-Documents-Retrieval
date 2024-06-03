@@ -143,7 +143,6 @@ export default class AuthService {
 
       return 'Cập nhật mật khẩu thành công';
     } catch (err) {
-      console.log(err);
       await this.sysMessageService.getSysMessageAndThrowHttpException(
         'SYS_ERROR',
       );
