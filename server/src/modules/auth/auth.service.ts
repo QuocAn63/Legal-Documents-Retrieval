@@ -148,4 +148,24 @@ export default class AuthService {
       );
     }
   }
+
+  async deleteAccount(authToken: IAuthToken) {
+    const { id } = authToken;
+
+    try {
+      const deleteResponse = await this.userRepo.softDelete({ id });
+
+      if (!deleteResponse.affected) {
+        await this.sysMessageService.getSysMessageAndThrowHttpException(
+          'DELETE_ERROR',
+        );
+      }
+
+      return await this.sysMessageService.getSysMessage('DELETE_SUCCESS');
+    } catch (err) {
+      await this.sysMessageService.getSysMessageAndThrowHttpException(
+        'SYS_ERROR',
+      );
+    }
+  }
 }

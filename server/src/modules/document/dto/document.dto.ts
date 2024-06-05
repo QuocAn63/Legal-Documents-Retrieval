@@ -68,6 +68,11 @@ export class UpdateDocumentDTO {
   label: string;
 
   @ApiProperty()
+  @IsString()
+  @IsNotEmpty({ message: ValidateMessages.DOCUMENT_CONTENT_EMPTY })
+  content: string;
+
+  @ApiProperty()
   @IsNumber()
   @IsNotEmpty({ message: ValidateMessages.DOCUMENT_LABEL_EMPTY })
   rank: number;
@@ -78,4 +83,10 @@ export class DeleteDocumentDTO {
   @IsArray()
   @IsNotEmpty({ message: ValidateMessages.COMMON_ID_EMPTY })
   IDs: string[];
+}
+
+export interface IFilterDocument {
+  label: string;
+  content: string;
+  createdAt: string;
 }

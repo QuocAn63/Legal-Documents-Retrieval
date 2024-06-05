@@ -20,6 +20,7 @@ import {
 import {
   DeleteReportDTO,
   FilterReportDTO,
+  IFilterReportDTO,
   SaveReportDTO,
   UpdateReportDTO,
 } from './dto/reports.dto';
@@ -47,15 +48,13 @@ export default class ReportController {
     @Query(QueryTransformPipe) queries: FilterReportDTO,
     @Pagination() pagination: IQueryParams,
   ) {
-    console.log(queries);
-    const filteredQueries = filterKeys<FilterReportDTO>(queries, [
-      'userID',
+    const filteredQueries = filterKeys<IFilterReportDTO>(queries, [
       'description',
       'reasonID',
       'status',
+      'createdAt',
     ]);
 
-    console.log(filteredQueries);
     return await this.reportService.getList(filteredQueries, pagination);
   }
 

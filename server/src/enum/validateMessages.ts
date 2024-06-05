@@ -62,6 +62,7 @@ export enum ValidateMessages {
   DOCUMENT_PATH_CONFLICT = 'Trùng đường dẫn tài liệu',
   DOCUMENT_FILE_SIZE = 'File tài liệu phải nhỏ hơn 3mb',
   DOCUMENT_RANK_EMPTY = 'Thứ tự tài liệu không được để trống',
+  DOCUMENT_CONTENT_EMPTY = 'Nội dung tài liệu không được để trống',
 
   // Configs
   CONFIG_ID_EMPTY = 'Mã cấu hình không được để trống',

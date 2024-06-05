@@ -12,11 +12,11 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    update: (state, action) => {
+    userUpdate: (state, action) => {
       console.log(action.payload);
       state.user = action.payload;
     },
-    clear: (state) => {
+    userClear: (state) => {
       state.user = {
         email: "",
         from: "",
@@ -25,6 +25,6 @@ const userSlice = createSlice({
     },
   },
 });
-export const { update, clear } = userSlice.actions;
+export const { userClear, userUpdate } = userSlice.actions;
 
 export default userSlice.reducer;

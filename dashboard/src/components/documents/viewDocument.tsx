@@ -10,9 +10,14 @@ export const ViewDocument = ({ document }: ComponentProps) => {
     <div>
       <Typography.Title level={4}>{document.label}</Typography.Title>
       <div
-        style={{ maxHeight: "80vh", overflowY: "scroll", overflowX: "hidden" }}
+        style={{
+          maxHeight: "80vh",
+          overflowY: "scroll",
+          overflowX: "hidden",
+          whiteSpace: "pre-line",
+        }}
       >
-        <pre>{document.content}</pre>
+        {document.content}
       </div>
     </div>
   );

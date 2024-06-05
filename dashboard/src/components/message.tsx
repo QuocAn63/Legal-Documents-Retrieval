@@ -15,7 +15,9 @@ export const MessageItem = ({ id, content, userID, isBOT }: IMessage) => {
           </Typography.Text>
         </Space>
         <div className="ml-10">
-          <Typography.Text>{content}</Typography.Text>
+          <Typography.Text className="whitespace-pre-line">
+            {content}
+          </Typography.Text>
         </div>
       </Space>
     </>

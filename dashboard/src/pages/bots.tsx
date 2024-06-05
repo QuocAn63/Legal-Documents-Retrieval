@@ -146,7 +146,7 @@ export const BotsPage = () => {
           </Typography.Title>
         </div>
         <div className={cx("section_content")}>
-          <Form onFinish={handleSubmit(onSubmit)}>
+          <Form onFinish={handleSubmit(onSubmit)} spellCheck={false}>
             <div>
               <FormItem
                 control={control}

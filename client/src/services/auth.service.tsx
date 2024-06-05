@@ -52,4 +52,8 @@ export default class AuthService {
   async googleLogin(code: string): Promise<IResponseData> {
     return this.instance.post("/auth/oauth/google/callback", { code });
   }
+
+  async deleteAccount(): Promise<IResponseData> {
+    return this.instance.delete("/auth/self");
+  }
 }

@@ -29,7 +29,7 @@ import useAxios from "../common/hooks/axios";
 import useMessage from "antd/es/message/useMessage";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { clear, update } from "../redux/slices/user";
+import { userUpdate } from "../redux/slices/user";
 import moment from "moment";
 
 type ModalType = "SEARCH" | "SAVE" | "DELETE" | "";
@@ -133,7 +133,6 @@ export const UsersPage = () => {
   };
 
   useEffect(() => {
-    dispatch(update(state.filter));
     getDataSource();
   }, [
     state.filter.email,
@@ -158,7 +157,7 @@ export const UsersPage = () => {
     const to = data.to ? data.to["$d"].toISOString() : "";
 
     dispatch(
-      update({
+      userUpdate({
         from,
         to,
         email: data.email,
@@ -261,10 +260,7 @@ export const UsersPage = () => {
             dataSource={state?.dataSource}
             rowSelection={{
               type: "checkbox",
-              onChange: (
-                selectedRowKeys: React.Key[],
-                selectedRows: IUser[]
-              ) => {
+              onChange: (_: React.Key[], selectedRows: IUser[]) => {
                 setState((prev) => ({
                   ...prev,
                   selectedIDs: selectedRows.map((item) => item.id),

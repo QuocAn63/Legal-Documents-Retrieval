@@ -12,9 +12,11 @@ import {
   Modal,
   Space,
   Table,
+  Tag,
   Typography,
 } from "antd";
 import {
+  CloseCircleOutlined,
   DeleteOutlined,
   PlusCircleOutlined,
   SearchOutlined,
@@ -39,6 +41,10 @@ import {
 } from "../components/documents/addDocument";
 import useMessage from "antd/es/message/useMessage";
 import { ShowMessagesFromError } from "../common/helpers/GetMessageFromError";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { documentUpdate } from "../redux/slices/document";
+import moment from "moment";
 
 type ModalType = "SEARCH" | "UPDATE" | "VIEW" | "" | "DELETE" | "ADD";
 
@@ -49,9 +55,8 @@ type PageStateType = {
     pageSize: number;
     from: string;
     to: string;
-    reasonID: string;
-    description: string;
-    status: string;
+    label: string;
+    content: string;
   };
   modal: ModalType;
   loading: boolean;
@@ -87,17 +92,19 @@ export const BaseDocument: IDocument = {
 };
 
 export const DocumentPage = () => {
+  const filterRedux = useSelector(
+    (state: RootState) => state.document.document
+  );
   const [api, contextHolder] = useMessage();
   const [state, setState] = useState<PageStateType>({
     dataSource: [],
     filter: {
       pageIndex: 1,
       pageSize: 20,
-      from: "",
-      to: "",
-      description: "",
-      reasonID: "",
-      status: "",
+      from: filterRedux.from,
+      to: filterRedux.to,
+      content: filterRedux.content,
+      label: filterRedux.label,
     },
     loading: false,
     modal: "",
@@ -206,13 +213,16 @@ export const DocumentPage = () => {
 
   const { instance } = useAxios();
   const documentService = new DocumentService(instance);
+  const dispatch = useDispatch();
 
   const loadInitialData = async () => {
     setState((prev) => ({ ...prev, loading: true }));
     let dataSource = [];
 
     try {
-      let response = await documentService.getList_documents();
+      let response = await documentService.getList_documents({
+        ...state.filter,
+      });
 
       dataSource = ToDataSource(response.data);
     } catch (err) {
@@ -223,12 +233,7 @@ export const DocumentPage = () => {
 
   useEffect(() => {
     loadInitialData();
-  }, [
-    state.filter.pageIndex,
-    state.filter.pageSize,
-    state.filter.from,
-    state.filter.to,
-  ]);
+  }, [state.filter]);
 
   const handleOpenModal = (
     type: ModalType,
@@ -247,6 +252,8 @@ export const DocumentPage = () => {
     const from = data.from ? data.from["$d"].toISOString() : "";
     const to = data.to ? data.to["$d"].toISOString() : "";
 
+    dispatch(documentUpdate(data));
+
     setState((prev) => ({
       ...prev,
       filter: { ...prev.filter, ...data, from, to },
@@ -258,7 +265,7 @@ export const DocumentPage = () => {
     try {
       const response = await documentService.add_documents({
         ...data,
-        content: JSON.stringify(data.content),
+        content: data.content,
         rank: Number.parseInt(data.rank),
         configID: "45C6BE2C-EE1F-EF11-B3C3-E0D464DFA281",
       });
@@ -277,7 +284,7 @@ export const DocumentPage = () => {
     try {
       const response = await documentService.update_documents({
         ...data,
-        content: JSON.stringify(data.content),
+        content: data.content,
         rank: Number.parseInt(data.rank),
         documentID: state.document.id,
       });
@@ -324,6 +331,62 @@ export const DocumentPage = () => {
               >
                 Tìm kiếm
               </Button>
+              {state.filter.label ? (
+                <Tag
+                  className="text-sm leading-8"
+                  closeIcon={<CloseCircleOutlined />}
+                  onClose={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      filter: { ...prev.filter, label: "" },
+                    }))
+                  }
+                >
+                  Từ ngày: {state.filter.label}
+                </Tag>
+              ) : null}
+              {state.filter.content ? (
+                <Tag
+                  className="text-sm leading-8"
+                  closeIcon={<CloseCircleOutlined />}
+                  onClose={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      filter: { ...prev.filter, content: "" },
+                    }))
+                  }
+                >
+                  Từ ngày: {state.filter.content}
+                </Tag>
+              ) : null}
+              {state.filter.from ? (
+                <Tag
+                  className="text-sm leading-8"
+                  closeIcon={<CloseCircleOutlined />}
+                  onClose={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      filter: { ...prev.filter, from: "" },
+                    }))
+                  }
+                >
+                  Từ ngày: {moment(state.filter.from).format("DD/MM/YYYY")}
+                </Tag>
+              ) : null}
+              {state.filter.to ? (
+                <Tag
+                  className="text-sm leading-8"
+                  closeIcon={<CloseCircleOutlined />}
+                  onClose={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      filter: { ...prev.filter, to: "" },
+                    }))
+                  }
+                >
+                  Đến ngày: {moment(state.filter.to).format("DD/MM/YYYY")}
+                </Tag>
+              ) : null}
             </Flex>
             <Space>
               <Button

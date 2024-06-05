@@ -7,7 +7,7 @@ export class QueryTransformPipe<T> implements PipeTransform {
   transform<T extends object>(value: T, metadata: ArgumentMetadata) {
     let newValue = {};
 
-    let fieldsNeedLike = ['title', 'description', 'content', 'email'];
+    let fieldsNeedLike = ['title', 'description', 'content', 'email', 'label'];
 
     if (metadata.type === 'query') {
       Object.keys(value).forEach((key) => {

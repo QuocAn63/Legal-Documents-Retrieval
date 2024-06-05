@@ -32,7 +32,7 @@ export default class ReportService {
     });
   }
 
-  async delete(IDs: string[]): Promise<string> {
+  async delete(IDs: string[]): Promise<IResponseData> {
     return this.instance.delete("/reports", {
       data: {
         IDs: JSON.stringify(IDs),
@@ -40,7 +40,7 @@ export default class ReportService {
     });
   }
 
-  async update(reportID: string, status: string): Promise<string> {
+  async update(reportID: string, status: string): Promise<IResponseData> {
     return this.instance.patch("/reports", {
       reportID,
       status: status.toString(),

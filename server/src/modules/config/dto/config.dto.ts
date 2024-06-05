@@ -58,13 +58,11 @@ export class UpdateConfigDTO {
   @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.CONFIG_PROMPTCONTENT_EMPTY })
-  @Length(1, 500, { message: ValidateMessages.CONFIG_PROMPTCONTENT_LENGTH })
   promptContent: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty({ message: ValidateMessages.CONFIG_DESCRIPTION_EMPTY })
-  @Length(1, 500, { message: ValidateMessages.CONFIG_DESCRIPTION_LENGTH })
   description: string;
 
   @ApiProperty()

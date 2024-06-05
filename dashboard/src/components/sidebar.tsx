@@ -1,15 +1,17 @@
 import {
   FileOutlined,
   FlagOutlined,
-  HomeFilled,
   RobotOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Menu, MenuProps } from "antd";
+import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { documentClear } from "../redux/slices/document";
+import { userClear } from "../redux/slices/user";
+import { reportClear } from "../redux/slices/report";
 
 const items: MenuProps["items"] = [
-  { label: "Trang chủ", key: "/", icon: <HomeFilled /> },
   { label: "Người dùng", key: "/users", icon: <UserOutlined /> },
   { label: "Báo cáo", key: "/reports", icon: <FlagOutlined /> },
   {
@@ -27,8 +29,12 @@ const items: MenuProps["items"] = [
 export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const dispatch = useDispatch();
   const onClick: MenuProps["onClick"] = (e) => {
+    dispatch(userClear());
+    dispatch(reportClear());
+    dispatch(documentClear());
+
     navigate(e.key);
   };
   return (

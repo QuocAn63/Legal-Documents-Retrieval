@@ -1,4 +1,4 @@
-import { Dropdown, Flex, Image, Modal, ModalProps, Space } from "antd";
+import { Button, Dropdown, Flex, Image, Modal, ModalProps, Space } from "antd";
 import { memo, ReactNode } from "react";
 import CustomButton from "./button";
 import styles from "../styles/usermenu.module.scss";
@@ -25,6 +25,10 @@ import SharedService from "../services/shared.service.tsx";
 import { ISharedConversation2 } from "../interfaces/shared.tsx";
 import useAxios from "../hooks/axios.tsx";
 import { useNavigate } from "react-router-dom";
+import useMessage from "antd/es/message/useMessage";
+import { ShowMessagesFromError } from "../helpers/showErrorMessage.tsx";
+import AuthService from "../services/auth.service.tsx";
+import Paragraph from "antd/es/typography/Paragraph";
 
 const { Text } = Typography;
 const cx = classNames.bind(styles);
@@ -70,129 +74,211 @@ const SettingModalItem = ({ title, button }: SettingModalItem) => {
   );
 };
 
+type SettingModalState = {
+  selectedItem: number;
+  confirmModal: "USERS" | "CONVERSATIONS" | "";
+};
+
 const SettingModal = ({
   setTypeHandlers,
   settingHandlers,
   manageHandlers,
   ...props
 }: SettingModalProps) => {
+  const [api, contextHolder] = useMessage();
   const { modalManageOpenHandler, getList_Archived, getList_Shared } =
     manageHandlers;
   const { modalCloseHandler } = settingHandlers;
   const { modalType } = setTypeHandlers;
-  const [selectItem, setSelectItem] = useState<number>(0);
+  const [state, setState] = useState<SettingModalState>({
+    confirmModal: "",
+    selectedItem: 0,
+  });
   const { instance } = useAxios();
   const chatService = new ChatService(instance);
+  const authService = new AuthService(instance);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleSelectItem = (index: number) => {
-    setSelectItem(index);
+    setState((prev) => ({ ...prev, selectedItem: index }));
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await authService.deleteAccount();
+
+      if (response.status === 200) {
+        api.success(response.message);
+        dispatch(logOutRedux());
+      }
+    } catch (err) {
+      ShowMessagesFromError(err, api);
+    }
+  };
+
+  const handleDeleteConversations = async () => {
+    try {
+      const response = await chatService.deleteAll_Conversations();
+
+      if (response.status === 200) {
+        navigate("/", { replace: true });
+        api.success(response.message);
+      }
+    } catch (err) {
+      ShowMessagesFromError(err, api);
+    }
+  };
+
+  const handleOk = async () => {
+    if (state.confirmModal === "USERS") {
+      await handleDeleteAccount();
+    } else {
+      await handleDeleteConversations();
+    }
+
+    setState((prev) => ({ ...prev, confirmModal: "" }));
   };
 
   return (
-    <Modal {...props} width={680}>
-      <div className={cx("modalWrapper")}>
-        <Title level={4} className={cx("title")}>
-          Cài đặt
-        </Title>
-        <span className="horizontal"></span>
+    <>
+      <Modal
+        zIndex={999}
+        open={state.confirmModal !== ""}
+        okText="Đồng ý"
+        styles={{
+          content: {
+            backgroundColor: "#2F2F2F",
+          },
+        }}
+        footer={null}
+        closeIcon={<CloseOutlined style={{ color: "#fff" }} />}
+        onCancel={() => setState((prev) => ({ ...prev, confirmModal: "" }))}
+      >
+        <Paragraph style={{ color: "#fff" }}>
+          {state.confirmModal === "USERS"
+            ? "Xóa vĩnh viễn tài khoản?"
+            : "Xóa tất cả cuộc hội thoại?"}
+        </Paragraph>
+        <Flex justify="flex-end" gap={20}>
+          <CustomButton onClick={handleOk} outlined>
+            Đồng ý
+          </CustomButton>
+        </Flex>
+      </Modal>
+      {contextHolder}
+      <Modal {...props} width={680} zIndex={500}>
+        <div className={cx("modalWrapper")}>
+          <Title level={4} className={cx("title")}>
+            Cài đặt
+          </Title>
+          <span className="horizontal"></span>
 
-        <div style={{ display: "flex" }}>
-          <div className={cx("btnContainerLeft")}>
-            <CustomButton
-              selected={selectItem === 0}
-              icon={<SettingOutlined />}
-              className={cx("btn")}
-              onClick={() => handleSelectItem(0)}
-            >
-              Cài đặt chung
-            </CustomButton>
+          <div style={{ display: "flex" }}>
+            <div className={cx("btnContainerLeft")}>
+              <CustomButton
+                selected={state.selectedItem === 0}
+                icon={<SettingOutlined />}
+                className={cx("btn")}
+                onClick={() => handleSelectItem(0)}
+              >
+                Cài đặt chung
+              </CustomButton>
 
-            <CustomButton
-              selected={selectItem === 1}
-              icon={<DatabaseOutlined />}
-              className={cx("btn")}
-              onClick={() => handleSelectItem(1)}
-            >
-              Dữ liệu
-            </CustomButton>
-          </div>
-          <div className={cx("btnContainer")}>
-            {selectItem === 0 && (
-              <>
-                <SettingModalItem
-                  title="Các hội thoại đã lưu"
-                  button={
-                    <CustomButton
-                      outlined
-                      onClick={() => {
-                        modalCloseHandler();
-                        modalManageOpenHandler();
-                        modalType(0);
-                        getList_Archived();
-                      }}
-                    >
-                      Quản lý
-                    </CustomButton>
-                  }
-                />
-                <span className="horizontal"></span>
+              <CustomButton
+                selected={state.selectedItem === 1}
+                icon={<DatabaseOutlined />}
+                className={cx("btn")}
+                onClick={() => handleSelectItem(1)}
+              >
+                Dữ liệu
+              </CustomButton>
+            </div>
+            <div className={cx("btnContainer")}>
+              {state.selectedItem === 0 && (
+                <>
+                  <SettingModalItem
+                    title="Các hội thoại đã lưu"
+                    button={
+                      <CustomButton
+                        outlined
+                        onClick={() => {
+                          modalCloseHandler();
+                          modalManageOpenHandler();
+                          modalType(0);
+                          getList_Archived();
+                        }}
+                      >
+                        Quản lý
+                      </CustomButton>
+                    }
+                  />
+                  <span className="horizontal"></span>
 
-                <SettingModalItem
-                  title="Xóa tất cả hội thoại"
-                  button={
-                    <CustomButton
-                      outlined
-                      status="important"
-                      background
-                      onClick={async () => {
-                        const response =
-                          await chatService.deleteAll_Conversations();
-
-                        if (response.status === 200) {
-                          navigate("/", { replace: true });
+                  <SettingModalItem
+                    title="Xóa tất cả hội thoại"
+                    button={
+                      <CustomButton
+                        outlined
+                        status="important"
+                        background
+                        onClick={() =>
+                          setState((prev) => ({
+                            ...prev,
+                            confirmModal: "CONVERSATIONS",
+                          }))
                         }
-                      }}
-                    >
-                      Xóa tất cả
-                    </CustomButton>
-                  }
-                />
-              </>
-            )}
-            {selectItem === 1 && (
-              <>
-                <SettingModalItem
-                  title="Các liên kết đã chia sẻ"
-                  button={
-                    <CustomButton
-                      outlined
-                      onClick={() => {
-                        modalCloseHandler();
-                        modalManageOpenHandler();
-                        modalType(1);
-                        getList_Shared();
-                      }}
-                    >
-                      Quản lý
-                    </CustomButton>
-                  }
-                />
+                      >
+                        Xóa tất cả
+                      </CustomButton>
+                    }
+                  />
+                </>
+              )}
+              {state.selectedItem === 1 && (
+                <>
+                  <SettingModalItem
+                    title="Các liên kết đã chia sẻ"
+                    button={
+                      <CustomButton
+                        outlined
+                        onClick={() => {
+                          modalCloseHandler();
+                          modalManageOpenHandler();
+                          modalType(1);
+                          getList_Shared();
+                        }}
+                      >
+                        Quản lý
+                      </CustomButton>
+                    }
+                  />
 
-                <span className="horizontal"></span>
-                <SettingModalItem
-                  title="Xóa tài khoản"
-                  button={
-                    <CustomButton outlined status="important" background>
-                      Xóa
-                    </CustomButton>
-                  }
-                />
-              </>
-            )}
+                  <span className="horizontal"></span>
+                  <SettingModalItem
+                    title="Xóa tài khoản"
+                    button={
+                      <CustomButton
+                        outlined
+                        status="important"
+                        background
+                        onClick={() =>
+                          setState((prev) => ({
+                            ...prev,
+                            confirmModal: "USERS",
+                          }))
+                        }
+                      >
+                        Xóa
+                      </CustomButton>
+                    }
+                  />
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+    </>
   );
 };
 

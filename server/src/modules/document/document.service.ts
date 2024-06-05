@@ -63,8 +63,6 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
       );
     }
 
-    responseData.content = JSON.parse(responseData.content);
-
     return responseData;
   }
 
@@ -90,7 +88,7 @@ export default class DocumentService implements IBaseService<DocumentEntity> {
   async update(data: UpdateDocumentDTO): Promise<string> {
     const updateResponse = await this.documentRepo.update(
       { id: data.documentID },
-      { label: data.label, rank: data.rank },
+      { label: data.label, rank: data.rank, content: data.content },
     );
 
     if (!updateResponse.affected) {

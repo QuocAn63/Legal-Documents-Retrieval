@@ -35,6 +35,7 @@ export default class UserService implements IBaseService<UserEntity> {
       where: entityParams,
       skip: OffsetUtil.getOffset(pagination),
       take: pagination.pageSize,
+      withDeleted: true,
     });
 
     return responseData;

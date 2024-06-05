@@ -128,4 +128,20 @@ export default class ConversationService
 
     return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
   }
+
+  async deleteAll(authToken: IAuthToken): Promise<string> {
+    const { id } = authToken;
+
+    const deleteResponse = await this.conversationRepo.softDelete({
+      userID: id,
+    });
+
+    if (!deleteResponse.affected) {
+      await this.sysMsgService.getSysMessageAndThrowHttpException(
+        'DELETE_ERROR',
+      );
+    }
+
+    return await this.sysMsgService.getSysMessage('DELETE_SUCCESS');
+  }
 }

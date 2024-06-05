@@ -2,15 +2,11 @@ import {
   Body,
   Controller,
   Delete,
-  FileTypeValidator,
-  ForbiddenException,
   Get,
   Param,
-  ParseFilePipe,
   Patch,
   Post,
   Query,
-  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -23,16 +19,18 @@ import { Roles } from 'src/commons/decorators/roles.decorator';
 import {
   DeleteDocumentDTO,
   FilterDocumentDTO,
+  IFilterDocument,
   SaveDocumentDTO,
   UpdateDocumentDTO,
 } from './dto/document.dto';
-import { RequestWithFileValidation } from 'src/interfaces/request.interface';
-import { QueryTransformPipe } from 'src/commons/pipes/queryTransform.pipe';
+import {
+  QueryTransformPipe,
+  filterKeys,
+} from 'src/commons/pipes/queryTransform.pipe';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { IQueryParams } from 'src/interfaces/query.interface';
-import { diskStorage, memoryStorage } from 'multer';
-import { join } from 'path';
-import { editedFilename, pdfFileFilter } from 'src/configs/multer.config';
+import { memoryStorage } from 'multer';
+import { pdfFileFilter } from 'src/configs/multer.config';
 
 @ApiTags('documents')
 @ApiBearerAuth()
@@ -47,7 +45,13 @@ export default class DocumentController {
     @Query(QueryTransformPipe) queries: FilterDocumentDTO,
     @Pagination() pagination: IQueryParams,
   ) {
-    return this.documentService.getList(queries, pagination);
+    const filteredQueries = filterKeys<IFilterDocument>(queries, [
+      'content',
+      'label',
+      'createdAt',
+    ]);
+
+    return this.documentService.getList(filteredQueries, pagination);
   }
 
   @Get('/:documentID')

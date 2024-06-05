@@ -40,13 +40,13 @@ export class FilterReportDTO {
 }
 
 export interface IFilterReportDTO {
-  userID: string;
-
   reasonID: string;
 
   description: string;
 
   status: string;
+
+  createdAt: string;
 }
 
 export class UpdateReportDTO {

@@ -23,8 +23,6 @@ import {
 } from './dto/conversation.dto';
 import ConversationService from './conversation.service';
 import { AuthGuard } from 'src/commons/guards';
-import ConversationEntity from './entities/conversations.entity';
-import { FindOptionsWhere } from 'typeorm';
 import {
   QueryTransformPipe,
   filterKeys,
@@ -125,6 +123,11 @@ export default class ConversationController {
     @Body() data: UpdateConversationDTO,
   ) {
     return await this.conversationService.update(authToken, data);
+  }
+
+  @Delete('/all')
+  async deleteAll_conversation(@AuthToken() authToken: IAuthToken) {
+    return await this.conversationService.deleteAll(authToken);
   }
 
   @Delete('/')
