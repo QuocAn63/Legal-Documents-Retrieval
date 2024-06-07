@@ -6,9 +6,8 @@ import Typography from "antd/es/typography";
 import CustomButton from "../button";
 import SharedService from "../../services/shared.service";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
 import useAxios from "../../hooks/axios";
+import { ShowMessagesFromError } from "../../helpers/showErrorMessage";
 
 const { Title, Paragraph } = Typography;
 
@@ -61,8 +60,7 @@ export default function ShareModal({
           }));
         }
       } catch (err: any) {
-        const message = err.response.data.message;
-        messageApi.error(message);
+        ShowMessagesFromError(err, messageApi);
         setState((prev) => ({
           ...prev,
           isLoading: false,

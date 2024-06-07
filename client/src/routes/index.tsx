@@ -1,8 +1,4 @@
-import {
-  RouterProvider,
-  createBrowserRouter,
-  useNavigate,
-} from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { PrivateLayout } from "../components/layout";
 import Login from "../pages/login";
 import Register from "../pages/register";
@@ -12,6 +8,8 @@ import { Outlet } from "react-router-dom";
 
 import ResetPassword from "../pages/resetPwd";
 import { SharedPage } from "../pages/shared";
+import { NotFoundPage } from "../pages/404";
+import { ServerErrorPage } from "../pages/500";
 
 const TestPages = () => {
   return (
@@ -54,6 +52,14 @@ const router = createBrowserRouter([
       {
         path: "s/:sharedCode",
         element: <SharedPage />,
+      },
+      {
+        path: "404",
+        element: <NotFoundPage />,
+      },
+      {
+        path: "500",
+        element: <ServerErrorPage />,
       },
     ],
   },

@@ -32,6 +32,14 @@ const useAxios = () => {
         navigate("/login");
       }
 
+      if (error.response?.status === 404) {
+        navigate("/404");
+      }
+
+      if (error.response?.status === 500) {
+        navigate("/500");
+      }
+
       return Promise.reject(error.response?.data);
     }
   );

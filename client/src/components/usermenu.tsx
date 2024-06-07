@@ -1,4 +1,4 @@
-import { Button, Dropdown, Flex, Image, Modal, ModalProps, Space } from "antd";
+import { Dropdown, Flex, Image, Modal, ModalProps, Space } from "antd";
 import { memo, ReactNode } from "react";
 import CustomButton from "./button";
 import styles from "../styles/usermenu.module.scss";

@@ -85,7 +85,10 @@ export default class SharedConversationService
       userID: id,
     });
 
-    if (await this.sharedRepo.findOneBy({ conversationID: conversation.id })) {
+    const sharedConv = await this.sharedRepo.findOneBy({
+      conversationID: conversation.id,
+    });
+    if (sharedConv !== null) {
       await this.sysMsgService.getSysMessageAndThrowHttpException(
         'SHAREDCONVERSATION_ALREADY_SHARED',
         400,

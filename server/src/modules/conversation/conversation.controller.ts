@@ -89,8 +89,10 @@ export default class ConversationController {
     @Pagination(5) pagination: IQueryParams,
     @Param('conversationID') conversationID: string,
   ) {
+    const { id } = authToken;
     const conversation = await this.conversationService.get({
       id: conversationID,
+      userID: id,
     });
 
     const messages = await this.messageService.getList(

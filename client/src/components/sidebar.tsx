@@ -48,9 +48,9 @@ interface DropdownMenuProps {
 }
 
 interface ModalControlsProps {
-  isOpen: boolean;
   handleOpen: (data: any) => void;
   handleClose: (data: any) => void;
+  selectedID: string;
 }
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
@@ -103,7 +103,7 @@ const SidebarItem = ({
   handleArchive,
   shareModalState,
 }: SidebarItemProps) => {
-  const { handleClose, handleOpen, isOpen } = shareModalState;
+  const { handleOpen } = shareModalState;
 
   return (
     <>
@@ -136,7 +136,6 @@ const SidebarItem = ({
           </Space>
         </>
       </div>
-      <ShareModal open={isOpen} onCancel={handleClose} conversationID={id} />
     </>
   );
 };
@@ -170,9 +169,9 @@ const Sidebar: FC = memo(() => {
   const [state, setState] = useState<SidebarStateProps>({
     conversations: [],
     shareModal: {
-      isOpen: false,
       handleOpen: () => {},
       handleClose: () => {},
+      selectedID: "",
     },
     selectedConversation: undefined,
   });
@@ -205,7 +204,7 @@ const Sidebar: FC = memo(() => {
   const handleClickOpenShareModal = (conversationID: string) => {
     setState((prev) => ({
       ...prev,
-      shareModal: { ...prev.shareModal, isOpen: true },
+      shareModal: { ...prev.shareModal, selectedID: conversationID },
       selectedConversation: state.conversations.find(
         (value) => value.id === conversationID
       ),
@@ -215,7 +214,7 @@ const Sidebar: FC = memo(() => {
   const handleClickCloseShareModal = () => {
     setState((prev) => ({
       ...prev,
-      shareModal: { ...prev.shareModal, isOpen: false },
+      shareModal: { ...prev.shareModal, selectedID: "" },
     }));
   };
 
@@ -243,6 +242,8 @@ const Sidebar: FC = memo(() => {
     }
   };
 
+  console.log(state.shareModal);
+
   return (
     <>
       <div className={cx("wrapper")}>
@@ -255,6 +256,11 @@ const Sidebar: FC = memo(() => {
             shareModalState={state.shareModal}
           />
         </Space>
+        <ShareModal
+          open={state.shareModal.selectedID !== ""}
+          onCancel={handleClickCloseShareModal}
+          conversationID={state.shareModal.selectedID}
+        />
         <UserMenu loadData={getInitialData} />
       </div>
     </>
